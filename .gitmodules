@@ -1,0 +1,11 @@
+[submodule "encoder/javascript-obfuscator"]
+    path = encoder/javascript-obfuscator
+    url = https://github.com/javascript-obfuscator/javascript-obfuscator.git
+
+[submodule "encoder/js-confuser"]
+    path = encoder/js-confuser
+    url = https://github.com/MichaelXF/js-confuser.git
+
+[submodule "decoder/decode-js"]
+    path = decoder/decode-js
+    url = https://github.com/echo094/decode-js.git

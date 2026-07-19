@@ -1,0 +1,44 @@
+# Created for: decode-nexus (AI-Driven Deobfuscation Hub)
+# Strategy: Pure Spec Hub + Multi-LLM API Protection + Sandbox Isolation
+
+# ==========================================
+# 🔑 Security / API Credentials
+# ==========================================
+# Protects all variations of local environment keys
+.env
+.env.*
+.openai*
+.gemini*
+*.pem
+*.key
+
+# ==========================================
+# 🧪 Local Test Sandboxes & Outputs
+# ==========================================
+# Keeps dynamic testing payloads out of the commit history
+input.js
+output.js
+/sandbox-tests/
+*.decrypted.js
+*.clean.js
+
+# ==========================================
+# 🤖 AI Agent Internal State
+# ==========================================
+# Prevents CLI tools from indexing their own operational history
+.claude/
+.anthropic/
+.gemini-agent/
+.openai-agent/
+*.log
+npm-debug.log*
+
+# ==========================================
+# 💻 Operating System Metadata
+# ==========================================
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+ehthumbs.db
+desktop.ini

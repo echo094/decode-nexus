@@ -46,3 +46,6 @@ Signed-off-by: Jane Doe <jane@example.com>
 ```
 
 ## Active Skill Directory
+
+- [js-confuser](skills/js-confuser/js-confuser.md) — Transform-by-transform reference
+  for the `encoder/js-confuser` obfuscator's AST patterns.

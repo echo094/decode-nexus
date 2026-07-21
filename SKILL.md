@@ -45,6 +45,46 @@ docs(js-confuser): document control-flow-flattening transform
 Signed-off-by: Jane Doe <jane@example.com>
 ```
 
+## Studying a New Encoder/Decoder
+
+When building a skill package for a new submodule, follow the process used for
+`js-confuser` (see [js-confuser.md](skills/js-confuser/js-confuser.md) and its
+supporting files as a worked example):
+
+- **Verify against source, always.** Never document a mechanism from memory, naming
+  conventions, or inference — read the actual file before writing a claim about it.
+  If an earlier draft turns out wrong after reading the real source, correct it
+  immediately rather than leaving a stale guess in place.
+- **Go incrementally.** Explore and document one transform/module at a time instead of
+  attempting the whole surface in one pass; let whoever is driving the session direct
+  which piece to tackle next rather than front-running unrequested sections.
+- **Keep the root file about the workflow, not the plumbing.** Name the package's root
+  file after the skill itself (e.g. `js-confuser.md`), not the literal `SKILL.md` — a
+  subfolder full of files all named `SKILL.md` becomes impossible to tell apart. That
+  root file should cover only what's needed to understand the core encode/decode
+  workflow and algorithm: the underlying parser/AST foundation, a verified source-tree
+  layout, the pipeline/stage order, and a runtime execution-flow diagram. Move
+  everything else — option/config surfaces, shared plugin APIs, constants, helper
+  utilities, template/codegen engines, result types — into their own files once they'd
+  otherwise bloat the root file, and index all of it from a "Skill Layout" section.
+- **Mirror the source tree in supporting docs.** One file per source file for large
+  helper folders (e.g. `utils/<name>.md`, `templates/<name>.md`), flat and distinctly
+  named.
+- **Summarize the test suite.** A `tests.md` covering the test framework, project/config
+  structure, and directory breakdown pins down exact before/after behavior in a way
+  prose can't, and gives readers somewhere to go when the docs need more precision than
+  they provide.
+- **Cross-reference upstream docs, but verify them too.** If the submodule ships its own
+  `docs/`, link the matching page from the corresponding skill file — but confirm it
+  still matches the pinned source commit first; note (don't silently drop) any upstream
+  doc that describes a feature absent from the pinned version.
+- **Verify links before every commit.** Skill docs cross-reference each other
+  constantly; a quick broken-link/anchor check before committing catches drift from
+  renames and reorganizations.
+- **Respect Project Independence throughout** (see Universal Non-Negotiables above) — a
+  new skill package should never compare against, assume, or link to another
+  submodule's code or docs.
+
 ## Active Skill Directory
 
 - [js-confuser](skills/js-confuser/js-confuser.md) — Transform-by-transform reference

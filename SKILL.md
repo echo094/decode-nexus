@@ -37,6 +37,7 @@ type(scope): subject
   - `feat` — new decoder capability
   - `chore` — repo/hub maintenance, `.gitmodules`, tooling
   - `refactor` — restructuring without behavior change
+  - `test` — adding or changing tests, fixtures, or the test harness
 - **scope:** the skill/submodule the commit belongs to — e.g. `js-confuser`,
   `decode-js`, `javascript-obfuscator` — or `hub` for changes to this file itself.
   One scope per commit; if a change spans multiple skills, split the commit (this

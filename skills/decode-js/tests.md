@@ -23,7 +23,13 @@ Vitest's `expect(...).toBe(...)`:
 - **`getVisitorResult(visitor, fix, input)`** — parses `<input>.js`, runs
   `traverse(ast, visitor)`, generates, and compares. When `fix` is **true** the output
   must equal `<input>.fix.js` (the visitor changed the code); when **false** it must equal
-  the original source (the visitor must **no-op** — the "invalid"/negative cases).
+  the original source (the visitor must **no-op** — the "invalid"/negative cases). For
+  `fix` cases, it additionally asserts `referenceState(ast)` (a sorted per-scope snapshot
+  of each binding's `references`/`constant`/`constantViolations.length`) equals
+  `referenceState(parse(cmpCode))` — a fresh parse of the golden output. This catches a
+  missing or mis-scoped `scope.crawl()` (stale reference counts) even when the generated
+  text already matches; added after a real bug of this kind in
+  [split-assignment](visitors/split-assignment.md).
 - **`getPluginResult(plugin, fix, input)`** — same contract but calls `plugin(source)`
   directly (full pipeline, not a single visitor).
 

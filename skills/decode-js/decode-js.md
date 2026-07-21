@@ -1,7 +1,8 @@
 # decode-js — Deobfuscator Reference
 
 Reference for the deobfuscator vendored at `decoder/decode-js` (submodule, pinned
-`25b8aa3` "build(deps): bump the babel group", upstream echo094/decode-js). This is a
+`c9d956d` "build(deps-dev): bump brace-expansion from 5.0.6 to 5.0.7 (#208)", upstream
+echo094/decode-js). This is a
 **decoder**: it takes obfuscated JavaScript and reverses it back toward readable source,
 one obfuscator family at a time.
 
@@ -32,8 +33,8 @@ factory returning one) applied with `traverse`:
   fed to the sandbox (see below).
 
 All four `@babel/*` packages are pinned `^8.0.0` runtime `dependencies`; `isolated-vm`
-is pinned `^7.0.0`. Node **>= 22** is required (per README), largely because of
-`isolated-vm`'s native-build requirements.
+is pinned `^7.0.0`. Node **26.x** is required (`engines` in `package.json`, per README) —
+the exact version tracks `isolated-vm`'s native-build compatibility table.
 
 ### Sandbox-assisted partial evaluation (the core decode technique)
 
@@ -118,11 +119,14 @@ no upstream docs to cross-reference here.
 
 ## Dispatch & Plugin Roster (`src/main.js`)
 
-`main.js` reads three argv flags — `-t <type>` (default `common`), `-i <input>`
-(default `input.js`), `-o <output>` (default `output.js`) — reads the input file, calls
-the one matching plugin as `plugin(sourceCode)`, and writes the returned string. There
-is **no shared pipeline order** like an encoder's `order.ts`; each plugin *is* its own
-pipeline, hand-tuned to one obfuscator family.
+`main.js` parses argv via Node's `util.parseArgs` — `-t`/`--type` (default `common`),
+`-i`/`--input` (default `input.js`), `-o`/`--output` (default `output.js`). An
+unrecognized `type` now errors out (`process.exitCode = 1`) instead of silently falling
+back to `common`; missing input files and write failures are also caught and reported
+rather than throwing or failing silently. It then reads the input file, calls the one
+matching plugin as `plugin(sourceCode)`, and writes the returned string. There is **no
+shared pipeline order** like an encoder's `order.ts`; each plugin *is* its own pipeline,
+hand-tuned to one obfuscator family.
 
 | `-t` type            | plugin | target obfuscator |
 |----------------------|--------|-------------------|

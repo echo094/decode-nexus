@@ -12,7 +12,11 @@ kinds on the way to a statement boundary (`BlockStatement`/`Program`):
 these set `needSplit`; if the climb never hits a `needSplit` wrapper (or hits a
 disallowed node) it returns `undefined` and nothing happens. On success it
 `insertBefore`s the full assignment as an `ExpressionStatement`, replaces the original
-with its `left`, and re-crawls scope.
+with its `left`, and re-crawls scope — from the **Program parent** scope
+(`insertPath.scope.getProgramParent().crawl()`), not just `insertPath.scope`, since a
+moved assignment can reference bindings in an enclosing scope and crawling only the
+local scope left those outer bindings with stale reference counts (fixed; previously
+crawled `insertPath.scope` only).
 
 Consumed by the `obfuscator` plugin. Behavior is pinned by
 `test/visitor/split-assignment/` (if-test, member, call, and variable fixtures). Related

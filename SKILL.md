@@ -3,9 +3,17 @@
 All operational expertise, AST transformation rules, and submodule interactions are modularized into skill packages inside `skills/`.
 
 ## Universal Non-Negotiables
-- **Read-Only Reference:** Code inside any git submodule (currently
-  `encoder/javascript-obfuscator`, `encoder/js-confuser`, `decoder/decode-js`) is for
-  reading AST patterns only — never alter it.
+- **Read-Only Encoders:** Code inside encoder submodules (currently
+  `encoder/javascript-obfuscator`, `encoder/js-confuser`) is for reading AST patterns
+  only — never alter it.
+- **Editable Decoders:** Decoder submodules (currently `decoder/decode-js`) may be
+  modified — linting, fixes, and new decode capabilities are allowed — subject to:
+  - **Branch inside the submodule first.** Before any change to a decoder submodule,
+    create a new branch *in that submodule's own repository*. Never create a branch in
+    the hub repo to hold submodule work, and never commit submodule edits from a detached
+    HEAD.
+  - Every change follows the Commit Conventions below and is committed on that branch, in
+    the submodule's own repository — never in the hub.
 - **Project Independence:** Each skill package documents exactly one submodule, in
   isolation. Never cross-reference, assume, or depend on another project's code,
   coverage, or status — a skill file should read the same regardless of which other

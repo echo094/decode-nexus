@@ -60,6 +60,22 @@ docs(js-confuser): document control-flow-flattening transform
 Signed-off-by: Jane Doe <jane@example.com>
 ```
 
+## Updating a Submodule's Commit Pin
+
+- **Diff the as-is pin against the to-be pin before touching anything.** Read the
+  actual upstream changes between the two SHAs — a pin bump is a reviewed
+  decision, not a blind fast-forward.
+- **Check the corresponding skill package for drift.** Anything the diff
+  touches that the docs describe — transform logic, plugin behavior, file/line
+  references — needs re-verifying against the new commit.
+- **When behavior has changed, update the skill doc without erasing the old
+  behavior.** Samples already obfuscated/encoded in the wild were produced by
+  the *previous* version's algorithm, so its description must stay on record —
+  e.g. as a version-tagged section — alongside the new one, never replaced.
+- **Keep the pin bump and any doc updates in separate commits.** The bump lands
+  in the hub repo as `chore(hub)` (stage only the submodule gitlink); doc
+  changes follow as their own `docs(...)` commit scoped to that submodule.
+
 ## Studying a New Encoder/Decoder
 
 When building a skill package for a new submodule, follow the process used for

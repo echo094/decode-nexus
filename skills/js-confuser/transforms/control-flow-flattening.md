@@ -3,6 +3,8 @@
 Source: `transforms/controlFlowFlattening.ts` (~1900 lines, by far the most complex
 transform in the pipeline)
 
+Upstream docs: [`docs/ControlFlowFlattening.md`](../../../encoder/js-confuser/docs/ControlFlowFlattening.md)
+
 Splits a function/program body into "basic blocks" driven by a `while(sum(states) !==
 END) switch(sum(states)) { case N: ... }` state machine. Key details:
 

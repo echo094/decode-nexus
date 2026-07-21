@@ -2,9 +2,11 @@
 
 Source: `transforms/deadCode.ts`
 
-Wraps a randomly-chosen dead-code template (`templates/deadCodeTemplates.ts`) in a
-never-taken `if(FALSE_PREDICATE){ {ph}_dead_N() }`, gated by the same `PredicateGen` used
-by [OpaquePredicates](opaque-predicates.md).
+Wraps a randomly-chosen dead-code template (see
+[dead-code-templates.md](../templates/dead-code-templates.md)) in a never-taken
+`if(FALSE_PREDICATE){ {ph}_dead_N() }`, gated by the same `PredicateGen` used by
+[OpaquePredicates](opaque-predicates.md) (`!("randomProp" in dummyFunctionName)`,
+negated once for the false case).
 
 ## Reversal
 

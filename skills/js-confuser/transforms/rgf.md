@@ -2,6 +2,8 @@
 
 Source: `transforms/rgf.ts`
 
+Upstream docs: [`docs/RGF.md`](../../../encoder/js-confuser/docs/RGF.md)
+
 Eligible functions (no outer-scope references, not async/generator) get their body
 compiled as a **separately-obfuscated** sub-program, serialized to a string, and executed
 via `{ph}_rgf_eval(code)` → `eval(code)` (gated by a tamper-protection integrity check).

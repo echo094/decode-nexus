@@ -2,12 +2,13 @@
 
 Source: `transforms/opaquePredicates.ts` + `utils/PredicateGen.ts`
 
-Wraps `if`/ternary/`switch case`/`return` tests with `PREDICATE() && test`, where
-`PREDICATE()` is an always-true expression built from a shared predicate object
-(numbers/strings/array-length tricks) so it *looks* data-dependent but statically
-evaluates to `true`.
+Wraps `if`/ternary/`switch case`/`return` tests with `PREDICATE && test`, where
+`PREDICATE` is `!("randomProp" in dummyFunctionName)` — always true, from
+[`utils/PredicateGen.ts`](../utils/predicate-gen.md); see that file for exactly how
+it's built.
 
 ## Reversal
 
-Resolve the predicate object's static shape, evaluate `PREDICATE()` to `true`, simplify
-`true && X` → `X`.
+Recognize the `"randomProp" in dummyFunctionName` (or its negation) shape, resolve it
+statically to `true` (the dummy function is always an empty, unmodified function
+declaration — the property never exists), simplify `true && X` → `X`.

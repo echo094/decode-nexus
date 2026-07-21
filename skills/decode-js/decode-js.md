@@ -208,3 +208,19 @@ Lighter plugins collapse this: `common.js` is just four `traverse` passes and a
 generate; `jjencode.js` skips Babel entirely, extracting the payload string and
 `eval`-ing it. Each plugin's exact pass order, fingerprints, and version-specific
 branches belong in its own `plugins/<type>.md` (built incrementally).
+
+## Commit Scope Convention
+
+Per the hub's Commit Conventions (see root [SKILL.md](/SKILL.md)), commits touching
+this submodule use a scope more specific than the bare `decode-js` name whenever the
+change is localized to one unit:
+
+- One `src/plugin/*` file: `plugin/<plugin>` — e.g. `plugin/obfuscator`,
+  `plugin/sojsonv7` (names match the `-t` roster above).
+- One `src/visitor/*` file: `visitor/<visitor>` — e.g. `visitor/split-assignment`
+  (names match the Reusable Visitor Passes tables above).
+- Bare `decode-js` is reserved for genuinely package-wide changes: `main.js`/CLI,
+  manually-edited tooling/dependency files (`package.json`, `README.md`, lint/CI
+  config), or anything spanning multiple plugins/visitors.
+- `build`-type commits from automated dependency bumps (e.g. Dependabot) keep their
+  own generated scope (`deps`, `deps-dev`) rather than being remapped to `decode-js`.

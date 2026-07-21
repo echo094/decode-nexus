@@ -89,3 +89,5 @@ supporting files as a worked example):
 
 - [js-confuser](skills/js-confuser/js-confuser.md) — Transform-by-transform reference
   for the `encoder/js-confuser` obfuscator's AST patterns.
+- [decode-js](skills/decode-js/decode-js.md) — Plugin-by-plugin reference for the
+  `decoder/decode-js` deobfuscator's Babel + isolated-vm decode passes.

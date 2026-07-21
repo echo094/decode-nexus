@@ -38,10 +38,16 @@ type(scope): subject
   - `chore` — repo/hub maintenance, `.gitmodules`, tooling
   - `refactor` — restructuring without behavior change
   - `test` — adding or changing tests, fixtures, or the test harness
+  - `build` — automated dependency bumps (e.g. Dependabot); platform-generated commit
+    style, not for manual use
 - **scope:** the skill/submodule the commit belongs to — e.g. `js-confuser`,
   `decode-js`, `javascript-obfuscator` — or `hub` for changes to this file itself.
-  One scope per commit; if a change spans multiple skills, split the commit (this
-  also keeps commits aligned with the Project Independence rule above).
+  - When the commit is made inside a submodule (not the hub), that submodule's own
+    skill entry file (e.g. `skills/decode-js/decode-js.md`) may define a more
+    detailed, module-level scope convention for that project specifically — check
+    there first if one exists.
+  - One scope per commit; if a change spans multiple skills, split the commit (this
+    also keeps commits aligned with the Project Independence rule above).
 - **subject:** imperative, no trailing period, ~72 cols.
 - Body (optional): explain why, not what.
 - Footer: `Signed-off-by: Name <email>` is **required** (use `git commit -s`); issue

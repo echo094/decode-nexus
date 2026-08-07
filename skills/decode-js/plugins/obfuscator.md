@@ -1,7 +1,7 @@
 # obfuscator.js
 
-Target: **javascript-obfuscator / obfuscator.io**. The largest and fullest plugin (~960
-lines), integrating ideas from `cilame/v_jstools` and `Cqxstevexw/decodeObfuscator`. It
+Target: **javascript-obfuscator / obfuscator.io**. The largest and fullest plugin,
+integrating ideas from `cilame/v_jstools` and `Cqxstevexw/decodeObfuscator`. It
 is the canonical example of the [sandbox-assisted partial
 evaluation](../decode-js.md#babel--isolated-vm-foundation) technique: it extracts the
 obfuscator's own string-array + decoder functions, runs them in an `isolated-vm` isolate

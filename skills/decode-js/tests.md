@@ -1,9 +1,9 @@
 # Test Suite Reference (`decoder/decode-js/test/`)
 
-A small [Vitest](https://vitest.dev/) suite — **5 test files, 13 `test()` cases** at this
-pin — split between one end-to-end plugin fixture and a handful of per-visitor fixtures.
-Every case is fixture-driven: a `.js` input is transformed and its output compared to
-either the input itself (no-op expected) or a `.fix.js` golden file.
+A [Vitest](https://vitest.dev/) suite spanning end-to-end plugin fixtures, per-visitor
+fixtures, and the jsconfuser
+combination fixtures below. Every case is fixture-driven: a `.js` input is transformed and
+its output compared to either the input itself (no-op expected) or a `.fix.js` golden file.
 
 ## Config (`vitest.config.js`)
 
@@ -12,8 +12,24 @@ either the input itself (no-op expected) or a `.fix.js` golden file.
 - **Coverage** — enabled by default (`@vitest/coverage-v8`), scoped to `src`, with
   `text` + `json` + `json-summary` reporters and `reportOnFailure: true`.
 - `passWithNoTests: true`.
+- **`testTimeout`, raised well above Vitest's 5s default.** The jsconfuser combination
+  fixtures below are whole-pipeline decodes of real encoder output, and the largest inputs run
+  to six figures of obfuscated source bytes — one full decode per case, with v8 coverage
+  instrumenting every visitor the decode walks. They are the only cases in the suite whose
+  cost is measured in seconds rather than milliseconds, and the default left the heaviest
+  of them too little margin: it **passed on a dev machine and timed out on a shared CI
+  runner**, whose per-case times run several times slower across the whole file, not just
+  on that one case. Read a timeout here as a host-speed artifact until proven otherwise —
+  a decode regression changes the *output*, and shows up as a `.fix.js` mismatch on a fast
+  machine too. The axis to check if it recurs is the per-case time of the heaviest
+  fixtures against the configured limit (`npx vitest run --reporter=verbose`), never a
+  remembered figure.
 
-Run with `npm test` (`vitest --config vitest.config.js`) or `npx vitest run`.
+Run with `npm test` (`vitest --config vitest.config.js`) or `npx vitest run`. **To read
+the pass/fail tally, run `npx vitest run --coverage.enabled=false`** — with coverage on, a
+stray non-JS file under `src/` (a `.DS_Store` will do it) makes the reporter throw while
+remapping coverage, and the run prints the coverage table but never the counts, exiting 0
+either way.
 
 ## Harness (`test/helper.js`)
 
@@ -69,9 +85,90 @@ Concrete examples of what the fixtures pin down:
   shapes). It must be left untouched, exercising the "incomplete match ⇒ bail"
   [completeness gate](visitors/parse-control-flow-storage.md).
 
-Coverage is uneven by design: `split-assignment`, `split-variable-declarator`, and
-`parse-control-flow-storage` have dedicated fixtures, while most other visitors and
-plugins are only exercised transitively through the `sample_189` end-to-end case.
+Coverage is uneven by design among the shared visitors: `split-assignment`,
+`split-variable-declarator`, and `parse-control-flow-storage` have dedicated fixtures, while
+the rest are exercised transitively through the `sample_189` end-to-end case.
+
+### `test/visitor/jsconfuser/` and `test/jsconfuser/` — the jsconfuser suites
+
+The bulk of the suite: one per-visitor file per
+[plugin/jsconfuser](plugins/jsconfuser.md) visitor, exercising them one at a time, plus the
+files that run whole *combinations* through `getPluginResult`, named for the transforms they
+combine (`control-flow-flattening-minify`, `duplicate-literal-string-concealing`,
+`rename-variables/*`, …). Both are needed and neither substitutes for the other: a
+per-visitor case exercises a matcher in isolation and never the plugin's entry-point wiring,
+which is where the combination bugs live —
+[encoder-decoder-method.md](../encoder-decoder-method.md)'s "unit to combo".
+
+**Fixtures come in triples, not pairs.** Alongside `<name>.js` (obfuscated input) and
+`<name>.fix.js` (expected output), a jsconfuser fixture keeps `<name>.src.js`: the
+pre-obfuscation source it was generated from. `helper.js` does not read it — it is what
+makes a fixture reviewable for decode *quality* (is the output readable, or merely
+self-consistent?) rather than only for equality, and it is what keeps
+[encoder-decoder-method.md](../encoder-decoder-method.md)'s S1 size ratio computable later.
+A fixture frozen while its gap is still open certifies a passthrough as expected output, so
+freeze only once size and structural counts show the decode actually fired.
+
+**Four combination fixtures cover the interactions deliberately, and their configs are chosen
+against cost.** `cff-dispatcher-masking` (CFF + dispatcher + variableMasking), `string-stack`
+(stringConcealing + stringEncoding + stringSplitting), `pack-payload` (four transforms inside
+a Function-constructor payload) and `high-template-regex` (the only sample carrying a template
+or regex literal). Two `high`-preset fixtures predate them, and the gap those left is worth
+recording: **neither of their sources contains a function**, so CFF function flattening,
+dispatcher entries, masking and Flatten had no committed coverage at all until the trio
+fixture landed.
+
+**Prefer an explicit combo to a preset unless the preset is the thing under test.** `high` is
+probability-gated and its output size swings by an order of magnitude across repeat encodes of
+the *same* input, where an explicit trio stays within a narrow band; adding
+`controlFlowFlattening` to the pack fixture likewise cost dozens of times the bytes for the
+same pack coverage.
+A combo also states in its config exactly what it covers, where a preset leaves that to be
+inferred.
+
+**A committed fixture is the only durable coverage.** The corpus these fixtures' sources also
+feed ([probes.md](probes.md)) is untracked and regenerated on demand, so every figure it
+produces is local to one working copy and a fresh clone starts with none of it. "The corpus
+already covers this" is therefore not a reason to skip a fixture — it is a reason to check which
+of the two a regression would actually reach.
+
+**Verify runtime equivalence before freezing, and check the comparison is not vacuous.** The
+builder for a fixture triple encodes, decodes, runs both and compares `TEST_OUTPUT` — and must
+**refuse to write the triple when the source sets no `TEST_OUTPUT` at all**. That guard is not
+optional: the first run of one compared `undefined` against `undefined` and reported a pass.
+Build it per [probes.md](probes.md)'s conventions; it needs the encoder's `dist/`.
+
+## Testing against real encoder output
+
+The fixtures above are frozen samples; the loop that *finds* the bugs they then guard is a
+live one, and it is worth running directly whenever a decode is in question:
+
+1. **Encode with the real encoder** — `encoder/js-confuser`'s built `dist/index.js`
+   `obfuscate`, or its CLI. Its output is randomized per run and many transforms are
+   probability-gated, so repeat any verdict you intend to act on
+   ([encoder-decoder-method.md](../encoder-decoder-method.md) S5).
+2. **Decode with the plugin** — `PluginJsconfuser` imported directly, or `node src/main.js
+   -t jsconfuser`.
+3. **Run the decoded output and compare its runtime result to the original source's.**
+
+Only the full encode → decode → run comparison surfaces combination bugs, and two harness
+details are required for the comparison to be valid at all:
+
+- **capture output by patching the real `console.log`.** GlobalConcealing rewrites `console`
+  into a global lookup, so a `console` injected through `new Function`'s scope is never the
+  one the decoded program reaches, and the capture comes back silently empty.
+- **parse decoded output with `allowReturnOutsideFunction: true`.** The `pack` wrapper
+  leaves a legitimate top-level `return` behind.
+
+## What the suite still does not cover
+
+**`src/main.js`'s CLI wiring.** Every jsconfuser case imports `PluginJsconfuser` and calls it
+directly, never `-t jsconfuser`, so the dispatch path from argv to plugin is exercised by
+nothing. That matters because it is half of a real incident: the whole plugin was once silently
+broken by a stale CJS-interop import shim, invisible to a suite that only drove visitors. The
+plugin half of that gap is closed — `jsconfuser.test.js` runs `PluginJsconfuser` itself over the
+committed fixture triples, so an entry-point break now fails the suite — but a broken `-t`
+mapping would still land green. One CLI smoke run closes it.
 
 ## CI (`.github/workflows/test.yml`)
 

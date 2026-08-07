@@ -142,10 +142,18 @@ Gate) — not a first step that gets reconciled afterward:
    Only once the decoder holds against the new commit is the pin allowed to move — this
    is what makes step 4 a description of already-verified behavior rather than a
    prediction of it.
-4. **When behavior has changed, update the skill doc without erasing the old behavior.**
-   Samples already obfuscated/encoded in the wild were produced by the *previous*
-   version's algorithm, so its description must stay on record — e.g. as a
-   version-tagged section — alongside the new one, never replaced.
+4. **Decide whether the new commit is still the same era, and never erase the old
+   behavior.** Samples already obfuscated/encoded in the wild were produced by the
+   *previous* version's algorithm, so its description must stay on record alongside the
+   new one, never replaced. Which of the two happened decides the work:
+   - **Same era** (emitted shape unchanged) — nothing to add. The era's recorded SHA may
+     advance to the new commit, but only on the strength of step 3's re-verification;
+     absent that it stays where it was, since the SHA names the commit that proved the
+     claims, not the newest one available.
+   - **New era** (emitted shape changed) — open a new registry row and leave the previous
+     row untouched, so both remain describable. The mechanics, and when a registry is
+     required at all, are in [doc-conventions.md](skills/doc-conventions.md)'s
+     "Documenting Multiple Eras."
 5. **Land the pin bump last, in its own commit.** It lands in the hub repo as
    `chore(hub)` (stage only the submodule gitlink); any decoder fixes from step 3 and any
    doc updates from step 4 are their own commits, scoped to their own submodule, and land

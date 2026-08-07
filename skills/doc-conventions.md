@@ -16,9 +16,12 @@ an invented one is not.
 - **2. Algorithm** — the solution-level design, kept high enough to survive a re-read
   without the source open. On the decoder side this is the *only* place a reversal
   strategy is ever asserted — see `SKILL.md`'s "Reversal Lives Only in the Decoder."
+  This is also the level at which an era divergence becomes a **separate doc and file**
+  rather than a section — see "Documenting Multiple Eras."
 - **3. Implementation** — the granular design: which functions, which AST node shapes,
   line citations, data structures. Whatever a doc puts under a heading like "Stage
-  1/2/3" beyond the high-level approach belongs here, not in Algorithm.
+  1/2/3" beyond the high-level approach belongs here, not in Algorithm. Where an era
+  differs only here, it is a tagged row, not a second doc.
 - **4. Downstream Effects (encoder) / Upstream Effects (decoder)** — one slot and one
   principle, mirrored: **what another pass in the same project's pipeline does to the
   shapes this one has to live with.** Each side names the other party by its position in
@@ -29,6 +32,10 @@ an invented one is not.
     (`encoder-decoder-method.md`'s W1) rather than discovered only after a decoder breaks
     on it. Harvest an existing decoder-doc bug writeup first (rename-proofing, minify
     compatibility, moved-declarations spelling, …) before re-deriving one from scratch.
+    **The stage order is itself era-dependent**, so derive it per era rather than once:
+    an order is rarely a flat list to read off, and where it is assembled from per-stage
+    dependencies a reordering leaves no trace in a changelog. One such change rewrites
+    this item for many transforms at once, which is why it is carried as rows.
   - **Decoder — Upstream Effects.** What an *earlier decoder pass* does to this pass's
     input. A decoder pass is not only a consumer of encoder output: it emits shapes of
     its own, and every pass scheduled after it inherits them. Reading the encoder's stage
@@ -47,10 +54,12 @@ an invented one is not.
     is pinned and never coordinates for our benefit.
   - **List the spellings, don't describe the intent.** A matcher reading one construct
     through several spellings records them as a table — spelling, producing pass, ours
-    vs. the encoder's. A sentence like "keyed on the binding, not on the shape" is a claim
+    vs. the encoder's, and **the era it applies to** once a package documents more than
+    one. A sentence like "keyed on the binding, not on the shape" is a claim
     about the accepted set wearing the clothes of a summary, and it hides the only thing
-    worth knowing: which spelling nobody implemented. Write the row when the branch is
-    written. Worked example and its incident:
+    worth knowing: which spelling nobody implemented. The era column answers the same
+    question along the other axis — which era nobody covered. Write the row when the
+    branch is written. Worked example and its incident:
     [decode-js/visitors/jsconfuser/dispatcher.md](decode-js/visitors/jsconfuser/dispatcher.md).
   - **Fixing one is a different decision from documenting it.** An encoder is read-only,
     so a Downstream Effect can only ever be worked around. An Upstream Effect has a
@@ -59,7 +68,11 @@ an invented one is not.
     teaching each affected matcher to tolerate it is the same fix re-paid per consumer
     (`encoder-decoder-method.md`'s T1, "fix it at the pass that produces it").
 - **5. Known Quirks (encoder) / Known Gaps (decoder)** — open items only, different
-  names because they're different in kind. An encoder is pinned and read-only, so its
+  names because they're different in kind. Each entry names the era it applies to once a
+  package documents more than one: an entry scoped to a superseded era can never close,
+  because nothing will be released against that era again, while the same words about a
+  current era describe live work. An unscoped entry silently claims to be both. An
+  encoder is pinned and read-only, so its
   quirks are permanent, descriptive, non-actionable oddities (an upstream-doc
   discrepancy, a dead code path) — never a bug to fix. A decoder's gaps are usually
   fail-closed incompleteness, not wrongness, and are meant to close eventually. Once a
@@ -83,12 +96,55 @@ an invented one is not.
   committed fixture to **the claim it pins**, naming the fixture so the mapping can be
   checked by grep in both directions, as a table once there are more than a few — a bare
   list of names records what exists while hiding the only thing worth knowing, which is
-  which claim nothing tests. Where a pass has no fixtures, say so and say why; an absent
+  which claim nothing tests. A fixture pins a claim **at an era**, so the table carries an
+  era column once a package documents more than one; without it a claim looks covered when
+  only one of its eras is, which is the same omission one axis over. Where a pass has no
+  fixtures, say so and say why; an absent
   section reads as an oversight, and "none, and here is why" does not. Both halves were
   unwritten convention until they drifted: twenty-one docs had bundled the two into
   `## Source`, one had `## Fixtures` and no source path at all, and the fixture lists had
   decayed into name inventories that omitted real fixtures — including ones backing claims
   their own doc already made.
+
+## Documenting Multiple Eras
+
+An encoder changes what it emits over time, and samples in the wild keep being produced by
+older releases — so a package often has to describe more than one shape. An **era** is a
+maximal version range emitting the same shape. Emitted output can never identify an exact
+version, only an era, which is why eras rather than versions are the unit throughout.
+
+- **The era registry is the single definition.** A package documenting more than one era
+  carries a `versions.md` with one row per era: **era ID, version range, verified commit
+  SHA, observable shape signature.** Required only once a second era is documented — a
+  single-era package needs nothing.
+- **Docs cite era IDs, never inline version ranges.** Twenty docs saying `≥ 2.19.0` is
+  twenty edits and some misses the day the boundary turns out to have been 2.18.0; twenty
+  docs saying `E-fn-wrapped` is one edit, in the registry. The registry row is also the
+  only place a range and its SHA are stated together, so a citation can be checked.
+- **An era's SHA is the commit its claims were verified against**, not whatever the pin
+  happens to be. A recorded claim always names the commit that proved it, so the SHA does
+  not drift when the pin moves; it moves when someone re-verifies. This is what lets a
+  package document an era whose shapes the *current* source no longer contains — the row
+  points into submodule history, and a pinned checkout stops being the limit of what can
+  be described.
+- **Where era divergence resolves depends on which numbered item it hits**, and only the
+  first answer is a new file:
+
+  | Item | If it differs by era |
+  |---|---|
+  | 1. Target | never diverges — if the purpose changed it is a different transform |
+  | 2. Algorithm | **split into a separate doc and code file** |
+  | 3. Implementation | era-tagged table rows |
+  | 4. Downstream/Upstream Effects | era column on the spellings table |
+  | 5. Known Quirks / Known Gaps | era-scoped entry |
+  | `## Fixtures` | era column |
+
+  Item 2 is the hinge, and it is the doc-side face of one rule: a **different algorithm**
+  earns its own file, **different parameters** stay in one. Everything below item 2 stays
+  in a single doc as rows.
+- **Rows, never prose duplicated per era.** This is the same principle item 4's spellings
+  table already rests on: prose hides the case nobody covered. A doc that repeats a
+  section per era hides *which era nobody covered*, and drifts per copy besides.
 
 ## Reference Direction and Form
 
@@ -108,12 +164,21 @@ them has one legal direction and one legal shape.
 - **A hub doc referencing *frozen* submodule source uses a commit-pinned permalink, never a
   line number.**
   [`calculator.ts#L26-L58`](https://github.com/MichaelXF/js-confuser/blob/31c5a47a79f97e4b4c2d4b2a8552c11a8b548fb0/src/transforms/calculator.ts#L26-L58)
-  — the form the `js-confuser` package uses throughout. **The pin is the hub's `main`-branch
-  gitlink for that submodule, not whatever the local checkout happens to be at.** A bare
+  — the form the `js-confuser` package uses throughout. **The pin is the SHA of the era the
+  passage describes, never whatever the local checkout happens to be at.** For a
+  single-era package that SHA is the hub's `main`-branch gitlink for the submodule, which
+  is what existing packages already cite; once a package documents more than one era, each
+  era's SHA comes from its registry row. A bare
   `file.js:42` drifts on the next edit to that file and is wrong with no signal; a pinned
   permalink stays true permanently, which is the same reason the encoder is pinned at all.
   Verify each one resolves before committing
   (`curl -s -o /dev/null -w '%{http_code}'` → `200`).
+
+  **There is no "current era" exemption.** Citing the newest era through the live gitlink
+  rather than through its own recorded SHA reads as correct right up to the next pin bump,
+  at which point the doc describes one commit and points at another — with nothing edited
+  and nothing to notice. "Current" is a fact about when a passage was written, not about
+  what it says, so it is never what a reference is keyed on.
 - **While a target is still actively edited, plain relative paths are the correct form** —
   a permalink into a moving tree is a promise the next commit breaks. So a decoder
   documenting its own live source links relatively, and converts to permalinks only once

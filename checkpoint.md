@@ -15,15 +15,19 @@ Nothing committed, no tracked file changed. Full history at the end of this file
 
 ## 1. Next actions
 
-In order. None started.
+In order.
 
-1. **Apply the multi-era convention revision** — §6. Two `docs(hub)` commits:
-   `doc-conventions.md` (items 2–5, reference form, new era-registry section) and `SKILL.md`
-   (pin-bump step 4 becomes an era decision). Compatibility already checked — §6.6.
+1. ~~Apply the multi-era convention revision~~ — **done 2026-08-07**, `1871f23`
+   (`doc-conventions.md`) and `49d0fde` (`SKILL.md`).
 2. **Phase 1** — §4.2. Per-feature *and* combined-option samples across the eight 2.x
-   versions, run against the existing plugin.
+   versions, run against the existing plugin. **Next.**
 3. **Phase 2** — §4.3. The 5.5.0 pin, built via `git archive` out of the submodule.
 4. **Version derivation** — §4.5, then phase 3.
+
+The convention now expects an era registry (`versions.md`) once a package documents a second
+era. `skills/javascript-obfuscator/` does not exist yet, so its registry gets written when
+phase 1 produces the first real shape evidence — not before, since a registry row carries a
+verified SHA and a shape signature, neither of which is known yet.
 
 **Carry forward:** the shape names in §5.5 are provisional — derived from the decoder's
 *description* of those shapes, not from output anyone has looked at. Confirm against phase 1's
@@ -307,7 +311,10 @@ everywhere else. Phase 1 produces the real samples; the names get fixed against 
 
 ## 6. Doc layout — multi-era
 
-Designed 2026-08-07, **pending application** to `doc-conventions.md` and `SKILL.md`.
+Designed and **applied** 2026-08-07 — `doc-conventions.md` in `1871f23` (new "Documenting
+Multiple Eras" section, plus era rules folded into items 2–5, `## Fixtures`, and the
+reference form) and `SKILL.md` in `49d0fde` (pin-bump step 4). The rest of this section is
+the reasoning behind those edits, kept until it graduates into the encoder package.
 
 ### 6.1 Why the existing convention is not enough
 
@@ -670,3 +677,7 @@ All 2026-08-07, oldest first. Kept short — the durable content is above.
     — removed eras cannot be documented from a pinned tree, which per-era SHAs resolve.
 16. This file reorganized: important-first ordering, one doc-layout section instead of three,
     heading levels made consistent, and the 123-line `Last updated` blob replaced by this log.
+    Resolved a contradiction it had been carrying — that encoder docs could only use
+    version-tagged sections because the submodule is pinned — which per-era SHAs supersede.
+17. Convention revision landed: `1871f23` (`doc-conventions.md`), `49d0fde` (`SKILL.md`).
+    Design work is finished; phase 1 is the next thing to run.

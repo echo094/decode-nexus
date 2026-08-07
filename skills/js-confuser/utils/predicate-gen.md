@@ -1,5 +1,7 @@
 # PredicateGen.ts
 
+Source: [`utils/PredicateGen.ts`](https://github.com/MichaelXF/js-confuser/blob/31c5a47a79f97e4b4c2d4b2a8552c11a8b548fb0/src/utils/PredicateGen.ts)
+
 The single primitive behind every "opaque predicate" in this reference. `PredicateGen`
 wraps one `PluginInstance` and lazily inserts one empty dummy function declaration
 (`{ph}_dummyFunction`, via `me.getPlaceholder()` + `me.skip()`) at the top of the

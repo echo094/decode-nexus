@@ -8,42 +8,64 @@ file.
 Scope spans `encoder/javascript-obfuscator` (read-only) and `decoder/decode-js` (editable),
 per the decoder→encoder exception in `SKILL.md`.
 
-**Status: 2026-08-07.** Planning and design complete; hazards retired against real installs.
-Nothing committed, no tracked file changed. Full history at the end of this file.
+**Status: 2026-08-08.** Design complete, hazards retired, phase 1 detailed to executable steps
+(F1–F5, U1–U7, Acc in §1) — **not started; F1 is next**. Three commits on this branch, all
+`hub`-scoped and unpushed: `d58ecf5` and `852b0b9` (the package-layout convention) and `344b148`
+(this file). **No submodule has been touched and no branch cut inside one** — that is F5, and
+it carries the `decode-js` sync decision. Full history at the end of this file.
 
 ---
 
 ## 1. Next actions
 
-In order.
+Each phase is an era-slice taken **end to end**, and the three behaviors — study the encoder,
+verify the existing plugin, write the new decoder — combine **inside each step**, not as
+sequential stages (§4.1). Phases 2 and 3 enlarge coverage the same way.
 
-1. ~~Apply the multi-era convention revision~~ — **done 2026-08-07**, `1871f23`
-   (`doc-conventions.md`) and `49d0fde` (`SKILL.md`).
-2. **Phase 1** — §4.2. Per-feature *and* combined-option samples across the eight 2.x
-   versions, run against the existing plugin. **Next.**
-3. **Phase 2** — §4.3. The 5.5.0 pin, built via `git archive` out of the submodule.
-4. **Version derivation** — §4.5, then phase 3.
+1. **Phase 1** — §4.2. The 2.x eras. **F1 is next.**
+2. **Phase 2** — §4.3. The 5.5.0 pin, built via `git archive` out of the submodule.
+3. **Version derivation** — §4.5, then phase 3.
 
-The convention now expects an era registry (`versions.md`) once a package documents a second
-era. `skills/javascript-obfuscator/` does not exist yet, so its registry gets written when
-phase 1 produces the first real shape evidence — not before, since a registry row carries a
-verified SHA and a shape signature, neither of which is known yet.
+### Phase 1 steps
+
+A small foundation, then vertical units. Each names its exit criterion; nothing proceeds past a
+step whose criterion is unmet.
+
+| # | Step | Exit criterion |
+|---|---|---|
+| **F1** | Encoder package root file — foundation, **stage order**, flow diagram, Skill Layout; plus `source-map.md` (§6.2) | the unit order below is derivable from it, not asserted; every `src/` file is either claimed by a doc or listed as unclaimed |
+| **F2** | Each version's option surface — probe *and* per-tag source (§8.2, §8.5) | every option name the matrix uses confirmed *known* at every version it is used at |
+| **F3** | Three input fixtures; 13 per-feature sets + the 3 shipped preset tiers (§7.5) | tier contents read per version from source, subset semantics not assumed |
+| **F4** | Freeze the corpus — 8 × 16 × 3 = 384 samples | frozen; nothing compares across a re-encode |
+| **F5** | Sync decision, branch **inside** the submodule, run-harness skeleton | one cell end to end; oracles 1–4 and 6 report |
+| **U1** | Normalization — escape sequences, statement/declaration merging, if-simplification | the late-minifier spellings W1 names are handled before any shape matcher runs |
+| **U2** | String array — array, rotate function, era detection, first `versions.md` rows | §5.5's names fixed against real output; each 2.x era decodes |
+| **U3** | String-array wrappers — scope calls wrapper, string-array control flow | the shape §5.5 has no name for is named and decoded |
+| **U4** | Converting — object keys, member expressions, `SplitString`, numerical expressions | and the `decodeObject`-ordering discrepancy is resolved from source |
+| **U5** | Control-flow flattening | its census reads zero on its own cells |
+| **U6** | Dead-code injection | census says what "done" means for a partly irreversible transform |
+| **U7** | Custom code helpers — self-defending, debug protection, console output, domain lock | the strippers, without the interval hang (§8.3) |
+| **Acc** | Integrated preset study — assemble the workflow **from scratch**, then climb the ladder | combined cells pass, not only the per-feature ones; the order is justified from §8.6, not inherited |
+
+Every **U** step runs the same seven-part loop (§4.2): keep-or-fork decision → encoder doc →
+census defined from it → verify the existing plugin on those cells → `obfuscatorx` pass +
+decoder doc → fixtures from the encoder's own test cases → pause, commit, clear context.
 
 **Carry forward:** the shape names in §5.5 are provisional — derived from the decoder's
-*description* of those shapes, not from output anyone has looked at. Confirm against phase 1's
-real samples before anything is named on disk.
+*description* of those shapes, not from output anyone has looked at. U2 fixes them against real
+samples before anything is named on disk.
 
 ## 2. Main target
 
 **Design a version-aware decoder for javascript-obfuscator.** Not a patch and not a survey: a
 new decode-js entry whose architecture is multi-era by construction — it **detects** which
 encoder era produced a sample, then **decodes with that era's strategy**. The doc layout
-carries the same multi-era shape. The verification phases (§4) serve this target: they
-establish what the eras are and where the existing plugin's claims fail.
+carries the same multi-era shape. **The phases (§4) each deliver a slice of this target** —
+verify, document the encoder, build the decoder — rather than auditing ahead of a separate build.
 
 **Downstream requirement (user):** the result feeds a future js-confuser study, so the
 *architecture* must generalize beyond this encoder. That has a Project Independence
-consequence — see §6.5.
+consequence — see §6.1.
 
 ## 3. Settled decisions
 
@@ -144,15 +166,42 @@ as "`stringArrayV0` is not a version," restated at the architecture level.
 
 ## 4. The plan
 
-### 4.1 Phase structure
+### 4.1 Phase structure — each phase is an era-slice taken end to end
 
-Split by **what decode-js claims**, not by version number.
+**A phase is not a verification exercise.** It is one slice of era coverage carried all the way
+through — study the encoder, verify the existing plugin, write the new decoder — and phases 2
+and 3 enlarge coverage the same way, doc and decoder together. The **boundary** between phases is
+what decode-js claims, not the content of a phase. That is what §3.6.1 means by "`obfuscatorx`
+covers the versions verified in phases 1 and 2": each phase *produces* coverage, it does not
+merely audit it.
 
-Ordering rationale: a phase-1 failure is *interpretable* — it means the problem is not version
-drift, and a phase-2 failure afterwards cannot be read as a version finding at all. Starting at
-the pin would lose that.
+**The three behaviors combine inside each step, they are not three sequential stages.** A phase
+is a small foundation plus a series of **vertical unit steps**, each of which studies the encoder
+for its unit, verifies the existing plugin on it, writes the `obfuscatorx` pass, builds fixtures,
+and commits. The unit loop is stated once in §4.2 and not repeated per unit.
 
-### 4.2 Phase 1 — every detector branch decode-js claims
+Three reasons, each of which a stage-split violates:
+
+- **Each behavior alone is unfalsifiable.** An encoder doc written from reading is a hypothesis
+  until something inverts it (T8). A verification verdict rests on the residue census, and S4
+  rules out runtime correctness as a substitute — so oracle 5 *is* the verdict. And a fixture
+  pins **a claim** (`doc-conventions.md`), so fixtures built before the claims exist are a name
+  inventory.
+- **A census written before the encoder study is defined by the thing under test.** §7.6's
+  oracle 5 counts "string-array/wrapper artifacts" — a subject list that, before the encoder is
+  read, can only come from §5.5's provisional names, which are the decoder's own prose. Verifying
+  first makes the verdict circular.
+- **Anything else forces a rewrite backwards.** A stage's output is only provisional until the
+  next stage tests it, so a late finding invalidates a large body of already-written docs. This
+  file has been rewritten wholesale twice for exactly that (§13, entries 5 and 16).
+
+**Ordering rationale across phases** is unchanged: a phase-1 failure is *interpretable* — it
+means the problem is not version drift, and a phase-2 failure afterwards cannot be read as a
+version finding at all. Starting at the pin would lose that.
+
+### 4.2 Phase 1 — the 2.x eras, end to end
+
+Slice boundary: every detector branch decode-js claims below the pin.
 
 decode-js declares **no javascript-obfuscator version anywhere as a dependency**:
 `package.json` has no such dep or devDep, and the README's `obfuscator` section lists covered
@@ -180,7 +229,242 @@ branch):
 - **V3's range is open-ended**, so it also covers 5.5.0 by its own terms. Phase 1 tests its low
   end, phase 2 its high end: one claim, two phases.
 
+**F — Foundation.** The only work that cannot be done per unit, kept deliberately small. It ends
+with a frozen corpus and a branch, and nothing about any single transform.
+
+#### F1 — The package root file and the stage order
+
+`skills/javascript-obfuscator/javascript-obfuscator.md`, per `SKILL.md`'s Root File Scope:
+parser/AST foundation, a **verified** source-tree layout, the pipeline/stage order, and an
+execution-flow diagram. Everything else moves into its own file once it would bloat the root,
+indexed from a "Skill Layout" section.
+
+**The layout is keyed on components — order, options, transforms, templates — not on the
+encoder's directories (§6.2)**, and this package needs a `source-map.md` because it is multi-era
+and at least one concept spans directories — both triggers the convention names.
+
+It is first because T1 orders every later unit from the encoder's stage order — the unit sequence
+below *is* that order, reversed, and cannot be written before it. §8.6's finding is the
+substance: the flat `nodeTransformersList` is **not** the execution order; order comes from the
+`NodeTransformationStage` sequence plus a per-stage topological sort over declared dependencies.
+That currently exists only in this scratch file, which `SKILL.md` says must never hold the only
+copy of a fact. Derive it **per era**, not once — a transformer's declared dependency can change
+with no trace in the CHANGELOG or the list, which is exactly how an ordering drifts unnoticed.
+
+#### F2 — Each version's option surface
+
+Two independent readings, because reading and probing find different classes of thing (T8):
+
+- **Probe** — the wrong-type enumerator in §8.2, over every option name the matrix wants at every
+  one of the eight versions. Answers "does this build accept this name".
+- **Source** — `git show <tag>:src/options/Options.ts`, per version. Answers what the option
+  *means* and what values it takes, which the probe cannot see.
+
+The second reading is available only because the npm↔tag provenance is proven (§8.5): the
+submodule's history is a legitimate source for **every** phase-1 version, not just the pin.
+
+#### F3 — Input fixtures and option sets
+
+Three small self-reporting sources, each printing deterministic lines so runtime equivalence is
+an exact stdout comparison. Between them they cover the five axes §7.5 requires:
+
+| fixture | exercises |
+|---|---|
+| `strings` | string literals, concatenation, member reads — the string-array's own input |
+| `control` | branches, a loop, a `switch` — control-flow flattening and dead-code injection |
+| `objects` | object literals, computed member access, closures — transformer/`SplitString` |
+
+All thresholds forced to `1`, never a probability (T5 step 2); every set pins the same `seed`
+(§7.4). Thirteen per-feature sets — `baseline`, `no-rotate`, `wrappers-variable`,
+`wrappers-function`, `chained-calls`, `encoding-base64`, `encoding-rc4`, `dead-code`, `cff`,
+`self-defending`, `debug-protection`, `debug-protection-interval`, `console-output`.
+
+**The combined sets are the encoder's own shipped presets, not a mix we invent.** The method doc
+is explicit: when an obfuscator ships named complexity tiers, climb *that* hierarchy as the combo
+ladder. javascript-obfuscator ships four — `default`, `low-obfuscation`, `medium-obfuscation`,
+`high-obfuscation` (`src/options/presets/`), all four accepted at 2.9.6 / 2.12.0 / 2.19.0
+(measured 2026-08-08). Smallest first; `high-obfuscation` is reserved for the final integration
+check, since a gap found directly against the largest is far harder to shrink to a minimal repro.
+
+Two things the ladder must not assume:
+
+- **Not subset semantics.** A smaller tier can be a genuinely distinct shape rather than a
+  subset — in js-confuser `low` skips control-flow flattening entirely. Read each tier's contents
+  per version from `git show <tag>:src/options/presets/<Tier>.ts` and verify the relationship.
+- **Not constant across versions.** A preset's *contents* can drift between 2.9.6 and 2.19.0
+  independently of any option rename, silently changing what a tier tests. Whether they do is
+  itself a finding, readable from the same per-tag source.
+
+#### F4 — Freeze the corpus
+
+The encode script — matrix × option sets × fixtures → `sandbox-tests/out/`. Disposable, recipe
+tracked as `skills/javascript-obfuscator/corpus.md` (§7.2). 8 versions × 16 sets × 3 fixtures =
+**384 samples**; expect tens of minutes, so background it.
+
+**Encoding needs no decoder**, which is why the corpus is immune to any defect in the plugin
+under test. **Freeze it before anything compares against it**: the encoder samples randomly (S5),
+so two fresh encodes are not comparable and a re-encode turns every figure measured against the
+old corpus into anecdote. `seed` makes a rebuild reproducible (§8.3); it does not make two
+differently-seeded corpora comparable.
+
+#### F5 — Branch, and the run harness skeleton
+
+The first step that touches the decoder. `decoder/decode-js` is on `main`, one commit behind
+`origin/main`; the sync decision comes before the branch, and the branch is cut **inside the
+submodule's own repository** — never a hub branch, never a detached HEAD. The encoder submodule
+is not touched at all.
+
+The run/score script is disposable, its recipe a section in `skills/decode-js/probes.md`. Built
+from what `probes.md` already solves — subprocess timeout, `.cjs` because decoded output carries
+a top-level `return`, reading a result global as well as stdout, worker-pool shape — plus §7.6's
+two mechanisms (console markers, one subprocess per decode). It ships with oracles 1–4 and 6;
+**oracle 5's subject list is filled in per unit**, which is the whole reason units are vertical.
+
+Exit on **one** cell end to end before any unit runs. A run script that silently drops an oracle
+produces a report that reads complete.
+
+### The unit loop — every unit step does all three
+
+Stated once here; the unit list below does not repeat it. This is
+`encoder-decoder-method.md`'s loop for studying a pair, with the verification stage folded in at
+the point where it is answerable:
+
+1. **Stop first if a decoder file already exists that reuses a *shared* visitor.** Keep-or-fork
+   is a decision for whoever is driving, not a default (§3.3).
+2. **Document the encoder side** for this unit, at the eras in scope, from `src/` at each tag.
+3. **Define this unit's residue census** from step 2 — the construct list is encoder knowledge,
+   never the decoder's description of what it removes. This is oracle 5 for these cells.
+4. **Run the existing plugin** over the corpus cells that exercise this unit, and record the
+   verdict. Now it means something, because step 3 defined the census from source.
+5. **Write the `obfuscatorx` pass**, and its decoder-side doc.
+6. **Build fixtures from the encoder's own test cases** for this unit — 155 `.spec.ts` files
+   under `encoder/javascript-obfuscator/test/` (`functional-tests`, `unit-tests`,
+   `runtime-tests`, `fixtures/`), a free and authoritative case list, not cases we invent.
+7. **Pause for review, then commit, then clear context** before the next unit's research.
+
+**Why all three in one step.** Each of the three alone produces something unfalsifiable. An
+encoder doc written from reading is a hypothesis until something inverts it (T8). A verification
+verdict rests on a census, and a census written before the encoder study is defined by the thing
+under test — S4 rules out runtime correctness as the fallback, so oracle 5 *is* the verdict. And
+a fixture pins **a claim** (`doc-conventions.md`), so fixtures built before the claims exist are
+a name inventory. Folded together, each step ends with an encoder claim, a measured verdict and a
+decoder pass that proves both — and a commit.
+
+**Two artifacts accrete across units** rather than belonging to one: `versions.md` (a row per era
+as its shape gets named) and `test/obfuscator/`, the existing plugin's first regression baseline.
+A cell graduates into the latter only when step 3's census certifies it — pinning a
+buggy-but-plausible decode as `.fix.js`-expected is worse than no fixture, since exact string
+equality makes it look authoritative. Failing cells are the repair worklist.
+
+### The units, in reverse encoder-stage order
+
+**Derived from the encoder, not from the decoder.** An earlier draft of this list was taken from
+`plugin/obfuscator.js`'s own pass order and then described as "corroborated" by it — circular, and
+exactly what W4's corollary forbids: *our own pipeline position never sets priority*. The table
+below comes from `JavaScriptObfuscator.ts`'s stage sequence and each transformer's declared
+`NodeTransformationStage`, read at the pin.
+
+**The sequence is the encoder's stage order, traversed backwards** — T1: fix in reverse encoder
+order, asking of each unit what its matcher needs its input to already look like. A stage the
+encoder ran *late* is the one whose residue hides everything earlier, so it is reversed first.
+The direction matters because units are vertical: a unit cannot be *verified* while a later
+encoder stage's residue is still sitting in its input, so a forward order would make each unit's
+own verdict unreadable — the premature-troubleshooting corollary of T1, one unit at a time.
+
+| # | Unit | Encoder stage (position) | Existing plugin, for reference only |
+|---|---|---|---|
+| U1 | Normalization — escape sequences, statement merging, if-simplification, declaration merging, directive placement | Finalizing (10), Simplifying (9) | `splitVarDeclaration`, `lintIfStatement`, `deleteIllegalReturn`, the `node.extra` strip, `splitSequence`, `splitAssignment` |
+| U2 | String array — the array, the rotate function, era detection | StringArray (8) | `decodeGlobal` → `stringArrayV3`/`V2`/`V0`, `stringArrayLite` |
+| U3 | String-array wrappers — scope calls wrapper, string-array control flow | StringArray (8) | the calls-wrapper branches inside `stringArrayV2`; `parseControlFlowStorage` |
+| U4 | Converting — object-expression keys, member expressions, `SplitString`, numerical expressions, literal transformers | Converting (6) | `decodeObject`, `mergeObject`, `calculateConstantExp` |
+| U5 | Control-flow flattening — block-statement and function control flow | ControlFlowFlattening (4) | `decodeCodeBlock`, `removeControlFlowOb` |
+| U6 | Dead-code injection | DeadCodeInjection (3) | `cleanDeadCode`, `pruneIfBranch`, `deleteUnusedVar` |
+| U7 | Custom code helpers — self-defending, debug protection, console output, domain lock, obfuscating guards | Preparing (2) | `unlockEnv` → `deleteSelfDefendingCode`, `deleteDebugProtectionCode`, `deleteConsoleOutputCode` |
+
+**The last column is a reading aid, not an authority.** It says where to look for prior art on the
+same shape — often the fastest way to find a matcher that is already right (T8's "look for a
+matcher that already does it correctly"). It does **not** set the unit order, does not imply the
+existing pass is correct, and does not imply `obfuscatorx` should be shaped like it. The mapping
+is approximate by construction, since one plugin function can span several encoder stages and one
+transformer declares several.
+
+**Two stages get no unit.** `RenameIdentifiers` (7) and `RenameProperties` (5) are irreversible by
+design — nothing restores an original name. They are a census concern (residue that no decode can
+remove, S1) and a matcher constraint (T2: never key on name text), never a decode unit. Scheduling
+one would be the mistake of treating unremovable residue as a gap.
+
+**A transformer is not confined to one stage**, so the units are not a partition of the
+transformer list. `StringArrayRotateFunctionTransformer` declares five stages (Converting,
+Finalizing, Preparing, RenameIdentifiers, StringArray) and `DeadCodeInjectionTransformer` three.
+A unit is a **shape to reverse**, and one transformer can contribute to several — which is also
+how an ordering drifts unnoticed (F1).
+
+**One discrepancy to resolve in U4, not to assume.** The existing plugin runs `decodeObject`
+*before* `decodeGlobal` — Converting-reversal ahead of string-array-reversal, the opposite of the
+order above. Either `decodeObject` addresses something other than the Converting transformers, or
+the existing plugin's ordering is itself a defect. W4's third corollary says name the stage only
+from its source, so U4 reads `decodeObject` and the Converting transformers before concluding
+either.
+
+**U2 carries the era work** because the eras *are* string-array shapes: §5.5's provisional names
+get fixed against real samples here (named for the AST shape, never the version or the legacy
+`V0/V2/V3` labels, §5.4), and each confirmed shape opens a `versions.md` row. Two rules bind that
+naming — confirm each shape at **both ends** of its claimed range rather than at one version, and
+treat §5.5's two axes as provisional too, since they came from the same prose.
+
+**A registry range between two probed versions is an interpolation and must be marked as one.**
+Phase 1 measures eight versions; if 2.12.0 and 2.15.3 both show one shape, 2.13.x and 2.14.x were
+never built. §3.6.1 forbids the detector interpolating across the 3.0.0–4.2.2 gap; the same rule
+applies at finer grain inside phase 1's own range.
+
+**The detector (§3.4) lands with U2 and is extended by each later unit** — `detect(ast) ->
+{ era, signals, confidence }`, multi-signal so it degrades gracefully rather than falling through
+silently (§3.5). A strategy file never sniffs its own era, it assumes it. Inconclusive detection
+**refuses with a diagnostic** naming which signals matched, the nearest era and why it was
+rejected, via `src/utility/logger.js` (§3.6.3).
+
+
+### Acc — the integrated preset study: build the workflow from scratch
+
+The per-unit fixtures prove each unit in isolation, which W1 says is exactly what a real sample
+does not look like. So phase 1 closes on the **preset ladder**, smallest first: a matcher
+validated only against an isolated single-transform fixture is not proven robust to combined
+output, because that fixture omits precisely the later stages that would break it. A unit that
+passes its own cells and fails under `medium-obfuscation` is a phase-1 finding, not a phase-2 one.
+
+**This step assembles `obfuscatorx`'s pipeline from scratch — it is not required to follow the
+existing plugin's workflow, and should not start from it.** Until here each unit has produced a
+pass in isolation; the integrated study is where they become an *order*. Four reasons the order
+is designed rather than inherited:
+
+- **The existing 12-step sequence is prior art, not a specification.** It predates the era split
+  (§3.4), and one of its orderings already contradicts the encoder's stage order — U4's
+  `decodeObject` discrepancy. Copying it would import that question rather than answer it.
+- **A defect can live in the pipeline ordering rather than in any matcher** (W4). The recorded
+  instance was fixed by scheduling a pass **twice**, not by improving it — so the workflow must
+  be free to schedule a pass more than once, which a copied linear sequence forecloses.
+- **The pipeline stays era-invariant** (§5.2): same slots, same order, for every era; eras differ
+  only in which strategy fills a slot. That is a property of a designed order, and it is what
+  lets Upstream Effects be stated once per slot instead of once per (slot × era).
+- **Our own pipeline position is not the encoder's stage order** (W4's second corollary). The
+  slots come from §8.6, and each slot's placement is justified by what its matcher needs its
+  input to already look like — not by where the equivalent pass sits today.
+
+The preset ladder is the instrument that judges the assembled order: a pass that worked in
+isolation and fails under a preset is usually mis-scheduled rather than wrong, which is T9's case
+2 and is invisible to any per-unit fixture.
+
+Before the phase is called done: verify every link resolves, run `grep -nP '[^\x00-\x7F]'` over
+the changed files, and grep the new encoder package for `decode-js` — Project Independence forbids
+the encoder side naming the decoder, and that link goes in by reflex (§11).
+
+
 ### 4.3 Phase 2 — the pin, 5.5.0
+
+Same structure (§4.1), enlarging coverage to the pin: its own foundation steps (a 5.5.0 corpus
+built from the submodule, its stage order re-derived) and then unit steps that document 5.5.0's
+shapes, verify the open-ended `V3` claim, and extend `obfuscatorx` to decode them. A new era row
+without a strategy behind it is a claim nothing has tried to invert, so they land together.
 
 Its own phase for two independent reasons:
 
@@ -202,6 +486,13 @@ must not be read as a version finding.
 
 No detector claims anything here. Not "leftover versions" but a distinct question: where
 between V3's floor and the pin does its open-ended claim actually stop holding?
+
+Its unit steps therefore have no claim table to verify against — the derivation (§4.5) produces
+this slice's era set instead, and the "verify" third of each unit becomes "verify the derivation
+predicted the shape correctly." Closing the gap is what makes `obfuscatorx`'s coverage
+contiguous; until then the detector treats it as **unknown** and never interpolates across it
+(§3.6.1). Whether the slice is worth taking at all is a prevalence question, not a completeness
+one (§4.6).
 
 ### 4.5 Version derivation from encoder history
 
@@ -309,76 +600,15 @@ Two orthogonal axes: how the array is held, and whether a standalone rotator exi
 encoder output — naming a shape before looking at it is the mistake this plan warns against
 everywhere else. Phase 1 produces the real samples; the names get fixed against them.
 
-## 6. Doc layout — multi-era
+## 6. Doc layout — the two convention revisions
 
-Designed and **applied** 2026-08-07 — `doc-conventions.md` in `1871f23` (new "Documenting
-Multiple Eras" section, plus era rules folded into items 2–5, `## Fixtures`, and the
-reference form) and `SKILL.md` in `49d0fde` (pin-bump step 4). The rest of this section is
-the reasoning behind those edits, kept until it graduates into the encoder package.
+Both **applied**. The era revision landed 2026-08-07 as `1871f23` (`doc-conventions.md`) and
+`49d0fde` (`SKILL.md`); the package-layout revision landed 2026-08-08 as `d4b898e` and
+`ff9de57`. Their rules now live in `doc-conventions.md` and are not restated here — what
+remains is only what has not graduated: the constraint on where the generalizable pattern may
+live, and the measurements the layout revision rests on.
 
-### 6.1 Why the existing convention is not enough
-
-Item 4 of the transform-doc structure (Downstream Effects / Upstream Effects) describes *edges*
-between passes, so a single ordering change rewrites many transforms' item 4 at once — which
-version-tagged prose cannot absorb.
-
-**Verified mechanism:** the encoder's flat `nodeTransformersList`
-(`src/JavaScriptObfuscator.ts:64`) is **not** the execution order. Order comes from the
-`NodeTransformationStage` sequence (Initializing → Preparing → DeadCodeInjection →
-ControlFlowFlattening → RenameProperties → Converting → RenameIdentifiers → StringArray →
-Simplifying → Finalizing), and *within* a stage from a topological sort built by
-`nodeTransformerNamesGroupsBuilder.build()` (`NodeTransformersRunner.ts:80`) out of each
-transformer's declared dependencies. So effective order can drift two ways: the stage enum
-changes, **or one transformer's declared dependency changes — which appears in neither the
-CHANGELOG nor the list.** That is how era-varying downstream effects arise unnoticed.
-
-### 6.2 Where era divergence resolves, per item
-
-| Item | If it differs by era | Why |
-|---|---|---|
-| 1. Target | never diverges | if the purpose changed it is a different transform |
-| 2. Algorithm | **split into a separate doc + code file** | this *is* §5.1; item 2 is where the split is decided |
-| 3. Implementation | era-tagged table rows | node shapes, helper names, thresholds — parameter-level |
-| 4. Downstream/Upstream Effects | **era column on the spelling table** | edges change wholesale when order changes |
-| 5. Known Quirks / Gaps | era-scoped entry | a quirk can exist in only some eras |
-| `## Fixtures` | era column | a fixture pins a claim *at an era* |
-
-Item 2 is the hinge: an algorithm-level divergence never becomes a tagged section, it becomes a
-new file; everything below it stays in one doc as rows.
-
-**Tables, never duplicated prose** — not a new principle, the existing one generalized.
-`doc-conventions.md` already requires spellings as a table because prose "hides the only thing
-worth knowing: which spelling nobody implemented." Era-tagged prose hides *which era nobody
-covered*. Same failure, same fix.
-
-### 6.3 New artifact: the era registry
-
-`versions.md` in the encoder package. One row per era: **era ID, version range, verified commit
-SHA, observable shape signature.**
-
-- **Docs cite era IDs, never inline version ranges.** Twenty docs saying "≥ 2.19.0" means twenty
-  edits and some misses when the boundary turns out to be 2.18.0; twenty docs saying
-  `E-fn-wrapped` means one edit. Same reasoning as §5.4, applied to prose.
-- **Required only once a package documents more than one era**, so existing single-era packages
-  are not retroactively non-compliant.
-
-### 6.4 Permalinks: every era uses its own SHA, including the newest
-
-The current rule pins hub→submodule citations to the hub's `main` gitlink. That special-cases
-"current" — and *"current" is a property of when a doc was written, not of what it describes* —
-so such a doc goes wrong at the next pin bump without anyone editing it. Uniform rule: every
-era, newest included, is cited by the SHA in its registry row.
-
-- That SHA is **the commit the era's claims were verified against**, not whatever the pin
-  happens to be — consistent with the Pin Gate, where a recorded claim always names the commit
-  that proved it. It does not drift on a pin bump by default; it moves only on re-verification.
-- The old rule's real guard — *don't cite whatever your local checkout happens to be at* —
-  survives, restated as "the SHA comes from the registry."
-- **This supersedes** the earlier note in this file that encoder docs could only ever use
-  version-tagged sections "because the submodule is pinned to one commit." Era rows with their
-  own SHAs reach into submodule *history*, so a pinned checkout is no longer the limit.
-
-### 6.5 Where the generalizable pattern lives
+### 6.1 Where the generalizable pattern lives
 
 `SKILL.md`'s Project Independence rule forbids a skill package from referencing another project
 but states that **cross-project observations belong in a separate note**. The reusable parts —
@@ -388,70 +618,84 @@ never inside `skills/javascript-obfuscator/` or `skills/decode-js/`. The future 
 study then reads the hub doc and neither package references the other. **The convention revision
 is itself the cross-project note** for the doc half.
 
-### 6.6 Compatibility check against js-confuser (read-only, 2026-08-07)
+### 6.2 The structure-drift measurements
 
-- The encoder package holds **153 permalinks, all pinned to `31c5a47…` — exactly the hub's
-  gitlink**. Under this design that SHA simply becomes the era's registry SHA: same value,
-  different reason. **Zero URL edits**, and essentially no version-range prose to convert.
-- The **decoder** side already does era handling ad hoc across at least four files with informal
-  vocabulary (`pre-2.0`, `1.x`, `legacy`): `anti-tooling.js` targets legacy 1.x output,
-  `control-flow.md` carries a pre-2.0 legacy path, `plugins/jsconfuser.md` runs
-  pre-2.0-vs-current naming throughout. The revision formalizes practice rather than adding
-  work.
-- Independent corroboration for §5.4: `plugins/jsconfuser.md` already keeps legacy visitors
-  because each "names the *shape* the encoder replaced, which is what a legacy sample still"
-  needs.
+The evidence the package-layout revision rests on; the rules it produced live in
+`doc-conventions.md` and `SKILL.md` and are not restated here. Measured 2026-08-08 over adjacent
+tags in `encoder/javascript-obfuscator`.
 
-**Design gap found by that check, and closed.** The registry was specified as *encoder-package*
-content since eras are encoder knowledge — but js-confuser's encoder package has **no** era
-content precisely because those shapes were **removed** from the encoder; the knowledge survives
-only decoder-side, attached to samples still met in the wild. A package pinned at current source
-cannot describe a shape that no longer exists in it. **Resolution:** era rows carry their own
-SHA (§6.4), so a removed era is documented by pointing into submodule history. The per-era-SHA
-rule earns its keep twice — future-proofing was the stated reason; enabling removed-era
-documentation at all is the larger one.
+**Structural drift and shape drift are independent axes** — the finding that decided it:
 
-### 6.7 Scope
+- **`2.15.3 → 2.15.4` changes zero files under `src/`**, yet the claim table has an era boundary
+  exactly there, distinguishing two wrapper shapes. An era boundary can have **no structural
+  footprint at all**.
+- **`2.18.1 → 2.19.0` changes three files, none of them string-array** —
+  `SelfDefendingUnicodeCodeHelper.ts` and `SelfDefendingNoEvalTemplate.ts` consolidate into
+  `SelfDefendingCodeHelper.ts`. The `stringArrayV3` shape change that names this boundary happened
+  entirely *inside* existing files.
 
-Applying this touches `SKILL.md` as well as `doc-conventions.md`: pin-bump step 4 becomes
-"decide whether the new pin is still the same era — if yes, optionally re-verify and advance
-that era's SHA; if no, open a new era row." Both are `docs(hub)` commits, separate from the
-study's own scope.
+**Consequences specific to this encoder**, which the convention now covers generically:
+
+- **The rotate function relocates and splits.** Only a code helper at 2.9.6
+  (`custom-code-helpers/string-array/StringArrayRotateFunctionCodeHelper.ts`); from 2.19.0 that
+  **plus** `node-transformers/string-array-transformers/StringArrayRotateFunctionTransformer.ts`,
+  in a different directory.
+- **Five files exist in 2.x and are gone at the pin** — `SelfDefendingUnicodeCodeHelper.ts`,
+  `SelfDefendingNoEvalTemplate.ts`, `string-array-rotate-function/SelfDefendingTemplate.ts`,
+  `CryptUtilsSwappedAlphabet.ts`, `StringLiteralNode.ts`. All inside phase 1's scope, so the
+  removed-era mechanism (an era row citing its own SHA) is exercised immediately.
+- **This package needs a `source-map.md`**: it is multi-era *and* a concept spans directories,
+  both of the triggers the convention names.
+
+**Where the churn is, and it is not where you would guess.** Across eleven sampled tags the major
+bumps are near structural no-ops — 2.19.0 → 3.0.0 is +1/−1, 3.2.0 → 4.0.0 is +2/−1 — though
+3.0.0 is the breaking-rename release (§8.2). The concentration is *inside* phase 1's own range
+and at 3.2.0.
+
 
 ## 7. Sandbox & harness
 
 Designed 2026-08-07; hazards retired (§8.3). Not yet built beyond the encoder installs.
 
-### 7.1 Governing principle: the harness is tracked, the artifacts are disposable
+### 7.1 Governing principle: the recipe is tracked, the harness and its artifacts are not
 
 `/sandbox-tests/` is gitignored, so anything living only there evaporates on a clean checkout.
-Split by *durability*: **tracked** — harness code, input fixtures, option-set definitions, the
-version matrix, graduated fixtures. **Disposable** — `node_modules`, encoder builds,
-encoded/decoded samples, run reports.
+Split by *durability*: **tracked** — the two recipe pages (§7.2), which carry the version matrix,
+the option-set definitions and the input-fixture specs as their own content, plus the graduated
+fixtures (§7.7). **Disposable** — the encode and run scripts themselves, `node_modules`, encoder
+builds, encoded/decoded samples, run reports.
 
-### 7.2 Where each piece lives
+**Why the scripts are on the disposable side**, per `probes.md`: "a stale probe that still runs
+is worse than no probe, because it answers confidently." The test that keeps a recipe honest is
+regenerating its script from it cold.
 
-- **decode-js (tracked, branch inside the submodule)** — the **generic runner**: takes encoded
-  samples, runs a named plugin, applies the oracles, emits a report. Encoder-agnostic, so
-  js-confuser can reuse it unchanged. Plus `test/obfuscatorx/` for graduated fixtures.
-- **hub (tracked)** — the **recipe**: version matrix, per-version option keys *and values*,
-  plaintext input fixtures, and the script that materializes encoders into the sandbox.
-- **`sandbox-tests/` (gitignored)** — everything generated.
+### 7.2 Where each piece lives — scripts are disposable, recipes are tracked
+
+Both scripts live in the gitignored sandbox; the hub tracks *how to rebuild them*, following
+`skills/decode-js/probes.md`'s rule — "this page is a recipe, not an inventory… no script file
+belongs in the hub."
+
+This is also the only arrangement that stays legal. Any tracked runner that reads a matrix out of
+the hub is a submodule referencing the hub, which `doc-conventions.md` forbids outright; with no
+code in the hub there is nothing to reference.
+
+| piece | script (disposable, `sandbox-tests/`) | recipe (tracked) |
+|---|---|---|
+| encode | matrix × option sets × fixtures → samples | `skills/javascript-obfuscator/corpus.md` |
+| run + score | subprocess per decode, six oracles → JSON report | a section in `skills/decode-js/probes.md` |
+
+The split is the Project Independence line: the encode recipe is pure encoder knowledge and
+**never names decode-js**; the run recipe is decoder knowledge and *may* name the encoder, under
+the one-directional decoder→encoder exception. Durable output is the two recipe pages plus the
+graduated fixtures (§7.7) — nothing else survives a clean checkout, by design.
 
 ```
-sandbox-tests/
-  encoders/
-    package.json        # npm aliases, one install for all phase-1 versions
-    node_modules/
-    5.5.0-pin/          # git archive of the pin, built in place
+sandbox-tests/            # gitignored, everything here regenerable from the two recipes
+  encoders/               # npm-alias install, the 5.5.0 archive, encode script
   out/<version>/<fixture>__<optionset>.js       # encoded
   decoded/<version>/<fixture>__<optionset>.js   # decoded
   report/<timestamp>.json
 ```
-
-**Open:** the hub's `.gitignore` header calls it a "Pure Spec Hub," which argues against
-executable recipe code living there. If that reading wins, the recipe moves into decode-js
-beside the runner and the hub keeps only the matrix as data.
 
 ### 7.3 Version materialization
 
@@ -472,27 +716,41 @@ correctness requirement of the fixture format, not a nicety. Verified — §8.3.
 
 ### 7.5 Input fixtures and option sets
 
-Fixtures are small, deterministic and **self-reporting** — each prints a deterministic result so
-runtime equivalence is checkable by comparing stdout. Between them they must exercise string
-literals (string array), branching (control-flow flattening), object literals and member access
-(transformer/`SplitString`), dead code, and functions/closures.
+The requirements they must meet, independent of any one phase — the phase-1 instances are F3
+and F4 in §4.2 and are not restated here.
 
-Option sets are keyed **per version**, because names *and types* drift (§8.2): `baseline`,
-`no-rotate` (reaches the V0 shape), `wrappers`, `chained-calls`, `dead-code`, `cff`,
-`self-defending`, `debug-protection`, `console-output`.
-
-**Plus combined-option sets, per era** — a `high-obfuscation`-preset-style mix.
-`encoder-decoder-method.md`'s W1 is explicit that a later stage invalidates an earlier matcher
-*silently and totally*, and that "a matcher validated only against an isolated single-transform
-fixture is not proven robust to real combined output." If pipeline order varies by era (§6.1), a
-matcher validated at one era fails closed at another for reasons unrelated to its own transform.
-Per-feature sets structurally cannot detect that.
+- **Fixtures are small, deterministic and self-reporting**, so runtime equivalence is a stdout
+  comparison. Between them they must exercise string literals (string array), branching
+  (control-flow flattening), object literals and member access (transformer/`SplitString`), dead
+  code, and functions/closures.
+- **Option sets are keyed per version**, because names *and types* drift (§8.2). Keying is the
+  check that produces the finding, whether or not the surface turns out to vary.
+- **A combined ladder is mandatory, and it is the encoder's own presets.** W1 is explicit that a
+  later stage invalidates an earlier matcher *silently and totally*, and that "a matcher
+  validated only against an isolated single-transform fixture is not proven robust to real
+  combined output." If pipeline order varies by era (§8.6), a matcher validated at one era fails
+  closed at another for reasons unrelated to its own transform. Per-feature sets structurally
+  cannot detect that.
 
 ### 7.6 Oracles, recorded separately per (version × option set × fixture)
 
+**Read entirely from captured stdout/stderr — the plugin is never edited.** Verified 2026-08-08:
+`src/plugin/obfuscator.js` does **not** route through `utility/logger.js`; it prints
+unconditionally. That gives oracle 1 and `encoder-decoder-method.md` T6's per-stage instrument
+for free, which matters because §3.3 forbids touching that file and instrumentation was the one
+thing that looked like it might force a violation.
+
+| marker | reports |
+|---|---|
+| `Try v3 mode...` / `Try v2 mode...` / `Try v0 mode...` | which detector was attempted |
+| `String List Name: <name>` | which one committed, and to what |
+| `Cannot find string list!` | all three missed — the whole plugin aborts |
+| `Essential code missing!` (V2) / `Unexpected reference` (V0, V3) | a detector matched partly and gave up |
+| the seven stage markers, `还原数值...` … `净化完成` | how far the pipeline got before aborting |
+
 1. **Detection** — which era/detector fired, or none. For the existing plugin: which of
-   V3/V2/V0 matched, or `false`. Recorded even when later stages fail, since this is the
-   diagnostic the current design cannot produce.
+   V3/V2/V0 matched, or `false`, read from the markers above. Recorded even when later stages
+   fail, since this is the diagnostic the current design cannot produce.
 2. **Completion** — plugin returned non-falsy.
 3. **Parse** — decoded output parses.
 4. **Runtime equivalence** — original vs decoded stdout, in a subprocess **with a timeout**.
@@ -504,6 +762,14 @@ Per-feature sets structurally cannot detect that.
    version-inappropriate option yields a sample that quietly tests the default. Acceptance by
    the encoder proves nothing.
 
+**One subprocess per decode is a correctness requirement, not a timeout guard.** Verified
+2026-08-08: `src/plugin/obfuscator.js` creates its isolated-vm `isolate` and `globalContext` at
+**module scope**, so every `virtualGlobalEval` in a process shares one global object. Decode two
+samples in one process and the second evaluates its string-array code into a context still
+holding the first's bindings — a name that should be missing resolves, the `ReferenceError`
+recovery path never fires, and the cell passes for the wrong reason. Process isolation is what
+makes the oracles mean anything; the timeout below is a separate, additional requirement.
+
 **Execution rule (measured, not assumed — §8.3):** only `debugProtectionInterval` samples are
 excluded from execution in encoded form. Plain `debugProtection` and `selfDefending` run
 normally as emitted. The subprocess timeout is mandatory for every run regardless, and this rule
@@ -514,10 +780,13 @@ is re-measured per era rather than generalized from 2.19.0.
 Convention verified from `test/jsconfuser/`: a case is the triple `<name>.src.js` (plaintext),
 `<name>.js` (encoded input), `<name>.fix.js` (expected decode), driven by
 `getPluginResult(plugin, fix, input)` in `test/helper.js` with **exact string equality**.
-Graduated cases land in `test/obfuscatorx/` following that triple, named `<era>-<optionset>`.
 
-Since the plugin has **no existing fixtures at all** (§8.4), graduation is not optional polish —
-it is the first regression baseline this target has ever had.
+**Decided 2026-08-08 (user): phase 1's passing cells graduate into a new `test/obfuscator/`,
+now** — not held back for `test/obfuscatorx/`. Since the plugin has **no existing fixtures at
+all** (§8.4), graduation is not optional polish; it is the first regression baseline this target
+has ever had, and it exists before `obfuscatorx` is written rather than after. Adding tests is
+additive and changes no plugin behavior, so §3.1's concern is untouched. Cases are named
+`<version>-<optionset>-<fixture>`; the same samples are reusable for `obfuscatorx` later.
 
 ## 8. Verified findings
 
@@ -552,11 +821,20 @@ it is the first regression baseline this target has ever had.
   2.19.0: a bogus name produced output identical to baseline with no error; a *known* name with
   the wrong type throws a validation `ReferenceError`).
 
-  **This corrected an earlier note in this file that claimed the opposite.** The conclusion — a
-  shared options file cannot span the matrix — holds, but the reason inverts and is worse than a
-  loud failure: `stringArrayRotate` on a 2.x build does not error, it silently encodes with
+  **Silent acceptance is worse than a loud failure**, and it is why a shared options file cannot
+  span the matrix: `stringArrayRotate` on a 2.x build does not error, it silently encodes with
   rotate at its default, yielding a sample that does not test what the matrix says it tests.
   Forces oracle 6 (§7.6).
+
+  **That asymmetry is also an enumerator, which is how F2 derives the matrix rather than
+  guessing it.** Pass a *known* name an object value and validation throws; pass an unknown name
+  anything and it is silently accepted. So "is this option name valid at this version" is a
+  mechanical probe. Measured 2026-08-08 across 2.9.6 / 2.12.0 / 2.19.0: `rotateStringArray`,
+  `stringArrayWrappersCount`/`Type`/`ChainedCalls` and `debugProtectionInterval` are known at all
+  three; `stringArrayRotate` and `stringArrayCallsTransform` at none — both post-date 2.x, as
+  above. So the wrappers axis exists as far back as 2.9.6, not from 2.12.0, and the phase-1
+  option surface is expected to come back **uniform** across the eight. Per-version keying stays
+  in the design as the *check* that produces that finding, not as an assumption of drift.
 - **3.2.0 added `stringArrayCallsTransform`**, post-dating every fingerprint the decoder holds —
   the main reason phase 3's range is a candidate blind spot rather than a safe interpolation.
 
@@ -570,7 +848,7 @@ disposable, rerunnable after `npm install` there.
 npm-alias tree and encoded successfully under Node v26.5.0. No pinned older runtime needed; the
 npm-alias approach works as designed.
 
-**2. Execution hazard — retired, and it had been recorded too broadly.** Measured at 2.19.0:
+**2. Execution hazard — retired, and it is narrower than it sounds.** Measured at 2.19.0:
 
 | Option set | Result |
 |---|---|
@@ -580,11 +858,11 @@ npm-alias approach works as designed.
 | `debugProtection` + `debugProtectionInterval` | **timed out (~5 s bound)** |
 | `disableConsoleOutput` | ran, stdout matches |
 
-Corrections: plain `debugProtection` does **not** hang — a `debugger` statement is a no-op
-without an inspector attached; only the **interval** variant hangs, via a `setInterval` holding
-the event loop open. `selfDefending` is safe to execute as emitted; it only misbehaves when the
-code is reformatted. `disableConsoleOutput` did **not** suppress stdout, so the
-runtime-equivalence oracle survives for it. The timeout mechanism caught the runaway cleanly.
+Plain `debugProtection` does **not** hang — a `debugger` statement is a no-op without an
+inspector attached; only the **interval** variant hangs, via a `setInterval` holding the event
+loop open. `selfDefending` is safe to execute as emitted; it only misbehaves when the code is
+reformatted. `disableConsoleOutput` did **not** suppress stdout, so the runtime-equivalence
+oracle survives for it. The timeout mechanism caught the runaway cleanly.
 
 **3. `seed` reproducibility — confirmed.** Same seed gives byte-identical output, different
 seeds differ, on 2.9.6 / 2.12.0 / 2.15.4 / 2.19.0 — including with `deadCodeInjection` and
@@ -596,6 +874,70 @@ seeds differ, on 2.9.6 / 2.12.0 / 2.15.4 / 2.19.0 — including with `deadCodeIn
 `helper.js` — and **nothing for `obfuscator`**, despite it being the largest plugin. There are
 no regression fixtures for it.
 
+### 8.5 npm provenance — each phase-1 build is proven against a submodule commit
+
+Measured 2026-08-08. `npm view javascript-obfuscator@<v> gitHead` returns the commit the tarball
+was published from, and for all eight phase-1 versions it is **byte-identical to the encoder
+submodule's own tag for that version**:
+
+| version | gitHead = tag |
+|---|---|
+| 2.9.6 | `0afcf7a5b2f56ba7c31246928f8f1b485a0a030a` |
+| 2.10.0 | `86fe1df40c8a391f909375cb7ebec552fea781fa` |
+| 2.11.1 | `99194f145698a378b14114cbb4bec89d3cdc34f2` |
+| 2.12.0 | `36ea9c08f3244533b466b3031824da6493aa2d4e` |
+| 2.15.3 | `993cf7a2a850365baf105e54a09a761724d47da9` |
+| 2.15.4 | `08aad1b7069e9f8b510765dcbf01c88aa741378d` |
+| 2.18.1 | `18f5210871a6574f256938d4ad56e2ac19ac8884` |
+| 2.19.0 | `314855eb8bb65653b8c292e7a65ffcdc6c39761b` |
+
+Two consequences beyond the registry:
+
+- **Submodule history is a legitimate source for every phase-1 version**, not just the pin. Each
+  version's option definitions, preset contents and transformer sources are readable at
+  `git show <tag>:<path>` without building anything — which is what F2 and F3 use.
+- **The 5.5.0 pin stops being special for provenance reasons.** §4.3 keeps phase 2 separate for
+  its other reason (a different toolchain, so a build failure cannot be confused with a decode
+  failure), but "the only version traceable to a commit" is no longer one of them.
+
+### 8.6 Stage order and transformer-to-stage mapping (read at the pin)
+
+Read 2026-08-08 from `src/JavaScriptObfuscator.ts` (the stage sequence),
+`src/enums/node-transformers/NodeTransformationStage.ts`, and each transformer's declared stages.
+It is the input to the unit order in §4.2, and its durable home is F1's root file — recorded here
+only until that exists.
+
+The sequence, in encoder order: Initializing → Preparing → DeadCodeInjection →
+ControlFlowFlattening → RenameProperties → Converting → RenameIdentifiers → StringArray →
+Simplifying → Finalizing.
+
+**But the flat `nodeTransformersList` (`src/JavaScriptObfuscator.ts:64`) is *not* the execution
+order** — a trap worth stating first, since it is the list a reader finds. Order comes from that
+stage sequence, and *within* a stage from a topological sort built by
+`nodeTransformerNamesGroupsBuilder.build()` (`NodeTransformersRunner.ts:80`) out of each
+transformer's declared dependencies. So the effective order drifts two ways: the stage sequence
+changes, **or one transformer's declared dependency changes — which appears in neither the
+CHANGELOG nor the list.** That is how an era-varying order arises with nothing to notice, and it
+is why item 4 (Downstream Effects) is carried as era rows: it describes *edges* between passes, so
+one reordering rewrites it for many transforms at once.
+
+Three facts the mapping produced, none of them readable from the stage list alone:
+
+- **The anti-tamper trio is injected at `Preparing`**, the second-earliest stage, via
+  `CustomCodeHelpersTransformer` — `SelfDefending`, `DebugProtectionFunction`(`Call`/`Interval`),
+  `ConsoleOutputDisable`, plus domain-lock and the string-array helpers, all under
+  `src/custom-code-helpers/`. So every later stage obfuscates the helpers themselves, and their
+  strings live in the string array. That is *why* they are reversed last, rather than because a
+  decoder happens to run `unlockEnv` at the end.
+- **`Converting` (6) precedes `StringArray` (8).** `ObjectExpressionKeysTransformer`,
+  `MemberExpressionTransformer`, `SplitStringTransformer`, `NumberToNumericalExpressionTransformer`
+  and the literal transformers are all Converting — so they reverse *after* the array, not last.
+- **A transformer can declare several stages.** `StringArrayRotateFunctionTransformer` declares
+  five (Converting, Finalizing, Preparing, RenameIdentifiers, StringArray);
+  `DeadCodeInjectionTransformer` three. So units cannot be a partition of the transformer list,
+  and a per-stage reading of "what runs here" must be taken from the declarations, not from where
+  a file sits in the tree.
+
 ## 9. Open items
 
 - **Phase 2's core question**, unanswerable by reading: does 5.5.0 still emit a string array
@@ -605,18 +947,26 @@ no regression fixtures for it.
   Forks the work the same way at every phase: **detector matches** → documentation job on a
   working decoder; **detector misses** → repair job, and doc work follows the fix rather than
   describing something broken.
-- **Recipe placement** — hub vs. decode-js, given the "Pure Spec Hub" framing (§7.2).
 - **Shape names** are provisional until phase 1 (§5.5).
+- **The `decodeObject` ordering discrepancy** — the existing plugin reverses Converting before
+  StringArray, the opposite of the encoder's stage order. Resolved in U4 by reading both, not by
+  assuming either is wrong (§4.2).
+- **Which unit runs next** is still whoever is driving to pick; U1–U7 is a dependency order, not
+  a mandate to run them back to back.
 
 ## 10. Required reads
 
 From `SKILL.md`'s Standing Rules — **not from memory of a previous session**:
 
-- [skills/doc-conventions.md](skills/doc-conventions.md) — **read in full, 2026-08-07**, before
-  the doc-layout design.
-- [skills/encoder-decoder-method.md](skills/encoder-decoder-method.md) — **partially read**
-  2026-08-07: section index and T1·W1·W4 in full. The rest is unread and must be read before
-  touching a submodule or its skill docs.
+- [skills/doc-conventions.md](skills/doc-conventions.md) — **read in full, 2026-08-07**, and
+  **revised 2026-08-08** (`d58ecf5`). A new session reads the current file, not this summary of
+  it: its "Package Layout" section is what F1 writes against.
+- [skills/encoder-decoder-method.md](skills/encoder-decoder-method.md) — **read in full,
+  2026-08-08**, before detailing phase 1.
+- [skills/decode-js/probes.md](skills/decode-js/probes.md) — **read in full, 2026-08-08**. It is
+  the precedent §7.2 now follows, and its plumbing conventions (subprocess timeout, `.cjs` for
+  top-level `return`, reading a result global as well as stdout, worker-pool shape) are what
+  F5's run script is built from rather than reinvented.
 
 ## 11. Standing constraints that bite on this branch
 
@@ -646,7 +996,7 @@ From `SKILL.md`'s Standing Rules — **not from memory of a previous session**:
 
 ## 13. History
 
-All 2026-08-07, oldest first. Kept short — the durable content is above.
+Oldest first; 1–17 are 2026-08-07. Kept short — the durable content is above.
 
 1. Branch created; prior art surveyed. Found the decoder already targets this encoder and that
    upstream ships its own `CLAUDE.md`.
@@ -681,3 +1031,64 @@ All 2026-08-07, oldest first. Kept short — the durable content is above.
     version-tagged sections because the submodule is pinned — which per-era SHAs supersede.
 17. Convention revision landed: `1871f23` (`doc-conventions.md`), `49d0fde` (`SKILL.md`).
     Design work is finished; phase 1 is the next thing to run.
+18. **2026-08-08.** Phase 1 first detailed into ordered steps. Read `encoder-decoder-method.md` in full,
+    closing §10's partial read. Four findings from grounding the plan against the tree: the
+    plugin's unconditional console trace supplies the detection *and* per-stage instruments with
+    no source edit (§7.6); its module-scope isolated-vm context makes one-subprocess-per-decode a
+    correctness requirement (§7.6); the known/unknown option asymmetry is an enumerator, and the
+    2.x option surface looks uniform (§8.2); every phase-1 version has a submodule tag, exposing
+    an era-SHA provenance question. Two decisions (user): scripts disposable with tracked
+    recipes, which also removes a submodule→hub reference the old §7.2 design required; and
+    passing cells graduate to `test/obfuscator/` now rather than waiting for `obfuscatorx`.
+19. **2026-08-08.** Provenance question closed by measurement — npm's published `gitHead` equals
+    the submodule tag for all eight versions (§8.5), so submodule history is readable per
+    version and era rows carry real SHAs. Two plan corrections followed: the combined-option sets
+    become the encoder's own shipped presets rather than mixes we invent, and every phase-1 step
+    got the detail the middle ones already had. Superseded bookkeeping pruned throughout — this
+    log is where a change belongs, not an annotation beside the rule.
+20. **2026-08-08. Structural correction (user).** A phase is **not** a verification exercise: it
+    is one era-slice carried end to end — study the encoder, verify, write the decoder — and
+    phases 2 and 3 enlarge coverage the same way. §3.6.1 had said this all along ("`obfuscatorx`
+    covers the versions verified in phases 1 and 2"); §4.1's "split by what decode-js claims" was
+    misread as phase *content* when it describes the phase *boundary*.
+21. **2026-08-08. Second structural correction (user), on the same section.** The three behaviors
+    combine **inside each step** rather than as sequential stages, so each step's outcome is
+    solid and a late finding cannot force a backwards rewrite. Two defects in the stage-split it
+    replaced, both caught by the user's challenge rather than by review: oracle 5's subject list
+    is encoder knowledge, so verifying before studying defines the census from the thing under
+    test; and a fixture pins a *claim*, so graduating fixtures before the encoder study yields a
+    name inventory. The encoder's own 155 `.spec.ts` files — the method doc's "free and
+    authoritative case list" — were unused by the plan until this pass. Phase 1 is now a small
+    foundation (F1–F5) plus vertical units on one seven-part loop, closing on the preset ladder.
+22. **2026-08-08. Unit order corrected (user).** The unit list had been taken from
+    `plugin/obfuscator.js`'s own pass order and then cited the same plugin as corroboration —
+    circular, and the exact mistake W4's corollary names. Re-derived from
+    `JavaScriptObfuscator.ts` and each transformer's declared stage (§8.6): a normalization unit
+    for `Simplifying`/`Finalizing` was missing entirely though it reverses first and is W1's own
+    failure class; `Converting` sits *before* `StringArray`, so object/member decoding is fourth
+    rather than last; the anti-tamper trio is injected at `Preparing`, which is the real reason
+    it reverses last. Also found: a transformer declares several stages, so units are not a
+    partition, and the existing plugin's `decodeObject`-before-`decodeGlobal` ordering
+    contradicts the stage order — logged for U4 to resolve from source rather than assumed.
+    Two clarifications landed with it: the existing plugin's decode functions are a **reading
+    aid** per unit, never the source of order; and the integrated preset step builds
+    `obfuscatorx`'s workflow **from scratch** rather than following the existing 12-step
+    sequence, since a defect can sit in the ordering itself and a copied linear order forecloses
+    scheduling a pass twice.
+23. **2026-08-08.** Repo-structure drift raised (user) and measured across eleven tags. The doc
+    tree mirrors **the pin only**, docs are keyed on shape, and per-era file paths are item-3
+    rows — §6.2, landed as `d4b898e`/`ff9de57`. The measurement that decided it: `2.15.3 → 2.15.4`
+    changes **zero** files yet is an era boundary, and `2.18.1 → 2.19.0` changes three files none
+    of which are string-array, though it is the `stringArrayV3` boundary. Structural drift and
+    shape drift are independent axes, so a file-keyed doc tree tracks the wrong one. Also found:
+    major bumps are near no-ops structurally (3.0.0 is +1/−1), and the churn concentrates inside
+    phase 1's own range. **Correction:** an earlier reading of this drift compared only 2.9.6
+    against the pin and reported per-version deltas that were cumulative over sampled gaps.
+24. **2026-08-08.** Generalized (user): a package's layout is keyed on the components every
+    encoder has — order, options, transforms, templates — not on any encoder's directory habit,
+    with an optional `source-map.md` crossing between them. `skills/js-confuser/` had already
+    converged on exactly that, and its Skill Layout section already justified departing from its
+    source tree, so the revision writes down settled practice. Landed as `d4b898e`
+    (`doc-conventions.md`) and `ff9de57` (`SKILL.md`), which also fixed the ambiguity that caused
+    the question: Source-Tree Mirroring opened with a broad clause and narrowed afterwards, and
+    Root File Scope's "verified source-tree layout" read as the submodule's tree.

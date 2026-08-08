@@ -1,9 +1,69 @@
 # Doc Conventions
 
-The two specifications `SKILL.md`'s Standing Rules point at: how a transform doc is
-structured, and how a reference crossing between the hub and a submodule is written. Read
-this before writing or editing any transform doc. Standing Rules keeps the invariants that
-apply to *every* change; this file keeps the detail you only need while writing one.
+The specifications `SKILL.md`'s Standing Rules point at: how a package is laid out, how a
+transform doc inside it is structured, and how a reference crossing between the hub and a
+submodule is written. Read this before writing or editing any transform doc. Standing Rules
+keeps the invariants that apply to *every* change; this file keeps the detail you only need
+while writing one.
+
+## Package Layout
+
+**Every encoder has its own file-layout habit; they have the same components.** Order,
+options, transforms, templates. So a package's layout is designed around *those*, and it is
+**ours** — never a mirror of whichever directory tree the submodule happens to ship. Where the
+two need relating, that is a mapping (below), not a naming convention.
+
+This is settled practice rather than a new idea: `skills/js-confuser/` converged on it with no
+rule telling it to — the root file carries the pipeline order, `options.md` and
+`validate-options.md` the option surface, `transforms/<name>.md` one per transform,
+`templates/<name>.md` plus `template-engine.md` the templates. Its own Skill Layout section
+already justifies *departing* from the source tree, noting that `options.md` is "cross-cutting,
+not scoped to a single transform, so it isn't under transforms/" and that `validate-options.md`
+"runs once, so it isn't under utils/ alongside the per-file helper docs."
+
+- **Docs are named for the transform or shape, never for a source file.** Same rule as naming
+  a strategy by shape rather than version, and citing era IDs rather than ranges: never key a
+  doc on something that drifts. A doc named after a source file has to be renamed, split or
+  duplicated the first time the encoder moves the concept — one obfuscator's rotate function is
+  *only* a code helper at 2.9.6 and becomes a code helper **plus** a transformer in a different
+  directory by 2.19.0. One concept, one file at one era and two at another.
+- **Source-tree mirroring applies only inside large helper folders** — `utils/<name>.md`,
+  `templates/<name>.md`, one file per source file, flat and distinctly named, against the
+  pinned commit. That is a navigability rule for bulk, and it was never a mandate that the
+  package's top level follow the submodule's directories.
+- **Structural drift and shape drift are independent axes**, which is what makes a file-keyed
+  layout actively wrong rather than merely inconvenient. Measured on one obfuscator: `2.15.3 →
+  2.15.4` changes **zero** files under `src/`, yet a decoder distinguishes two wrapper shapes
+  across exactly that boundary — an era boundary can have no structural footprint at all. And
+  `2.18.1 → 2.19.0` changes three files, **none** of them string-array (two self-defending
+  helpers consolidating into one), though the string-array shape change is what names that
+  boundary; it happened entirely inside existing files. A file-keyed doc tree would have
+  churned on the rename and missed the shape change.
+- **A file moving is never a reason to split a doc.** A relocation is implementation-level, so
+  it is an era-tagged row; what earns a new file is an algorithm divergence, decided by reading
+  the shape rather than the path. Both are specified under "Documenting Multiple Eras."
+
+### The source map, where one is necessary
+
+`source-map.md` in the package: one row per submodule source file, the doc that claims it, and
+the era where those differ. **Required only when the reverse lookup is otherwise hard** — a
+package documenting more than one era, or one where a concept spans directories. A single-era
+package whose layout tracks its source closely needs none.
+
+It is not a duplicate of the per-doc `## Source` sections, because it answers what they
+structurally cannot:
+
+- **The reverse direction.** "Which doc covers this source file?" is unanswerable from docs
+  keyed the other way without grepping the whole package.
+- **The coverage gap** — which source files *no* doc claims. This is the same question the
+  fixture table is required to answer ("which claim nothing tests") and the spellings table
+  ("which spelling nobody implemented"), one axis over. A map that lists only what is
+  documented reproduces exactly the failure those two rules exist to prevent.
+
+**Anti-drift discipline:** each doc keeps its own `## Source` exactly as specified below, and
+the map is **verified by grep against those sections in both directions**, never maintained
+independently. A map that can drift silently is worse than no map, for the same reason a stale
+probe is worse than no probe.
 
 ## Transform Doc Layout
 

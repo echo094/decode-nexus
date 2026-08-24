@@ -11,8 +11,9 @@ reverses it, written to be read by an AI coding agent and a human alike.
 - **Recovering source you no longer have.** When the original is gone and only the
   obfuscated build survives, decoding gets you back to readable, maintainable code.
   Expect an *equivalent*, not the original: identifier names and comments are destroyed
-  by obfuscation rather than encoded, so no decoder can return them. Everything
-  else — control flow, string literals, program structure — is recoverable.
+  by obfuscation rather than encoded, so no decoder can return them. Supported
+  shapes can recover control flow, string literals, and program structure; unsupported
+  or ambiguous shapes remain explicit decoder gaps.
 - **Getting a shippable baseline back.** Obfuscation multiplies code size, and the
   multiple is large. If the obfuscated bundle is the only artifact you have, decoding
   recovers a baseline you can minify normally instead of shipping the obfuscated one.

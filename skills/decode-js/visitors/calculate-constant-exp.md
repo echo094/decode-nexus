@@ -34,3 +34,33 @@ Negative numbers matter here: they are `UnaryExpression` nodes, not literals, wh
 why `checkLiteral` treats them as a distinct `'negative'` class. Pairs naturally with
 [prune-if-branch.js](prune-if-branch.md), which folds the branches this pass makes
 constant.
+
+## Source
+
+- [`src/visitor/calculate-constant-exp.js`](https://github.com/echo094/decode-js/blob/6cacb633ceedf0812fe31f951ba8f41ffb431ca1/src/visitor/calculate-constant-exp.js)
+- Consumed by five plugins. In `obfuscatorx` it occupies **three** slots per round: one inside
+  [normalize-converting](obfuscator/normalize-converting.md), and two in the plugin's fixpoint
+  group either side of
+  [obfuscator/inline-control-flow-storage](obfuscator/inline-control-flow-storage.md) — because
+  inlining a wrapper body produces `a + b` over operands that only just became constant.
+- **The plugin-level slots are measurably redundant against this encoder** and are kept anyway;
+  normalize-converting's item 4 has the measurement and the reason.
+
+## Fixtures
+
+[`test/visitor/calculate-constant-exp/`](https://github.com/echo094/decode-js/tree/6cacb633ceedf0812fe31f951ba8f41ffb431ca1/test/visitor/calculate-constant-exp),
+driven by `calculate-constant-exp.test.js`. **All hand-built, so none carries an era.**
+
+| Fixture | Claim it pins |
+|---|---|
+| `and-true`, `and-false` | `&&` short-circuits on a literal left side in both directions — and the falsy case yields **the literal itself**, not a coerced `false` |
+| `or-true`, `or-false` | the same for `\|\|` |
+| `non-literal-left` | a non-literal left side is left alone: this fold proves only half the expression by design |
+
+**Five cases for three visitors, and the two uncovered ones are the older and heavier.** Every
+committed case is a `LogicalExpression`, added with that visitor in 2026-07. The
+`BinaryExpression` and `UnaryExpression` folds — which is where the `checkLiteral` classes, the
+host-`eval` call, and the `t.stringLiteral` special case that stops `"ab"` re-parsing as an
+identifier all live — have **no case at all**. They are exercised transitively by every plugin's
+end-to-end fixtures, so a regression would surface somewhere; it would not surface *here*, and the
+`'negative'` class in particular is the kind of distinction that reads as removable.

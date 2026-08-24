@@ -1,13 +1,12 @@
 # decode-js — Deobfuscator Reference
 
 Reference for the deobfuscator vendored at `decoder/decode-js` (submodule, upstream
-echo094/decode-js). **Every source permalink in this package targets
-[`6c974fb`](https://github.com/echo094/decode-js/commit/6c974fb5720518fac9c6b3d4cf558ba90ef9f8e7)**,
-the commit that merged the jsconfuser decode target to `main`, which is also what this
-repository's submodule pin names — the two are kept in step deliberately, so a permalink and
-a `git submodule update` always show the same tree. This is a
-**decoder**: it takes obfuscated JavaScript and reverses it back toward readable source,
-one obfuscator family at a time.
+echo094/decode-js). Source permalinks name the commit that verified the passage: the jsconfuser
+work targets [`6c974fb`](https://github.com/echo094/decode-js/commit/6c974fb5720518fac9c6b3d4cf558ba90ef9f8e7),
+which merged that target, while the obfuscatorx work and its touched shared visitors target
+[`6cacb63`](https://github.com/echo094/decode-js/commit/6cacb633ceedf0812fe31f951ba8f41ffb431ca1),
+which merged obfuscatorx to `main`. This is a **decoder**: it takes obfuscated JavaScript and
+reverses it back toward readable source, one obfuscator family at a time.
 
 When a pass needs more detail than this reference provides, the [test suite](tests.md)
 (`decoder/decode-js/test/`) pins down exact before/after behavior with concrete
@@ -85,7 +84,7 @@ and the isolate would only add a failure mode.
 ## Skill Layout
 
 This package is built incrementally (per
-[Studying a new encoder/decoder pair](../encoder-decoder-method.md#studying-a-new-encoderdecoder-pair)).
+[Studying a new encoder/decoder pair](../encoder-decoder-newpair.md)).
 The root file below is complete; supporting files are added one plugin/visitor
 at a time as each is studied against source.
 
@@ -99,13 +98,19 @@ skills/decode-js/
 │                     name-is-not-identity, duplicate referencePaths, dead positions
 ├── plugins/          one file per dispatch target (obfuscator family) — the pass
 │                     pipeline it runs and the AST patterns it matches/reverses;
-│   └── <type>.md     common, obfuscator, sojson, sojsonv7, jjencode, awsc, jsconfuser,
-│                     plus eval (shared pack/unpack helper). See the roster below
+│   └── <type>.md     common, obfuscator, obfuscatorx, sojson, sojsonv7, jjencode, awsc,
+│                     jsconfuser, plus eval (shared pack/unpack helper). See the roster below
 ├── visitors/         one file per reusable src/visitor/*.js pass — see the
 │   ├── <name>.md     Reusable Visitor Passes index below
-│   └── jsconfuser/   one file per src/visitor/jsconfuser/*.js pass (plugin-specific,
-│       └── <name>.md not reusable across obfuscator families) — added incrementally
-│                     alongside decode-nexus's per-transform worklist
+│   ├── atomic/       one file per src/visitor/atomic/*.js pass — single-rewrite,
+│   │   └── <name>.md plugin-agnostic visitors composed by a pipeline rather than
+│   │                 run alone. Same kind as the flat files above; the folder is a
+│   │                 grouping for new ones, not a different category
+│   ├── jsconfuser/   one file per src/visitor/jsconfuser/*.js pass (plugin-specific,
+│   │   └── <name>.md not reusable across obfuscator families) — added incrementally
+│   │                 alongside decode-nexus's per-transform worklist
+│   └── obfuscator/   same, for src/visitor/obfuscator/*.js (the obfuscatorx entry)
+│       └── <name>.md
 ├── tests.md          summary of test/ — Vitest config, harness, and fixture layout
 └── probes.md         how to build a throwaway probe against this decoder — the two
                       datasets and their regeneration recipe, plumbing skeletons, the
@@ -136,6 +141,8 @@ src/
     ├── lint-if-statement.js          normalize if bodies to BlockStatements
     ├── merge-object.js               re-merge split object definitions
     ├── parse-control-flow-storage.js decode control-flow "storage" object dispatch
+    ├── obfuscator/
+    │   └── parse-control-flow-storage.js obfuscatorx fork with numeric entries
     ├── prune-if-branch.js            fold if() on constant tests
     ├── remove-control-flow-ob.js     unflatten switch-based control flow
     ├── split-assignment.js           split compound/sequence assignments
@@ -187,7 +194,8 @@ hand-tuned to one obfuscator family.
 | `-t` type            | plugin | target obfuscator |
 |----------------------|--------|-------------------|
 | `common` *(default)* | [common](plugins/common.md) | high-frequency local obfuscation (no specific vendor) |
-| `obfuscator`         | [obfuscator](plugins/obfuscator.md) | javascript-obfuscator / obfuscator.io |
+| `obfuscator`         | [obfuscator](plugins/obfuscator.md) | javascript-obfuscator / obfuscator.io — **frozen**, see below |
+| `obfuscatorx`        | [obfuscatorx](plugins/obfuscatorx.md) | the same obfuscator, era-aware — the additive second entry, and where fixes for this target now go |
 | `sojson`             | [sojson](plugins/sojson.md) | sojson (jsjiami), older |
 | `sojsonv7`           | [sojsonv7](plugins/sojsonv7.md) | jsjiami.com.v7 |
 | `jjencode`           | [jjencode](plugins/jjencode.md) | jjencode (utf-8.jp) |
@@ -197,6 +205,24 @@ hand-tuned to one obfuscator family.
 [eval](plugins/eval.md) (`plugin/eval.js`) is not a dispatch target: it exports
 `unpack`/`pack` used by `obfuscator`, `sojson`, and `sojsonv7` to peel an
 `eval(function(){...}())` wrapper before decoding and re-wrap it afterward.
+
+### `obfuscator` is frozen; `obfuscatorx` is where its target is worked on
+
+**A decision, not a description of current activity** (user). The `obfuscator` entry is left
+exactly as it stands: no bug fixes, no new coverage, no refactors. Every further change for the
+javascript-obfuscator target lands in `obfuscatorx` instead. Three consequences that are easy to
+get wrong in the other direction:
+
+- **Its documented defects stay documented and stay open.** [plugins/obfuscator.md](plugins/obfuscator.md)
+  records several — a hang under any non-`none` string-array encoding, an era-wide detector hole,
+  an unguarded key un-computing — and each is now a **permanent description of that entry**, not a
+  worklist. Do not "fix them while you are in there."
+- **It needs no regression baseline, because nothing will regress it.** `test/obfuscator/` was
+  opened to build one and has been removed; its single certified cell moved to `test/obfuscatorx/`,
+  where it covers something that suite lacked ([tests.md](tests.md)).
+- **The two entries are expected to disagree**, and that is the point of the split rather than a
+  problem to reconcile. `obfuscator` stays available for anyone depending on its behaviour;
+  `obfuscatorx` is free to refuse where the old one silently half-decodes.
 
 ## Reusable Visitor Passes (`src/visitor/`)
 
@@ -212,7 +238,7 @@ plugins import it (verified against source at this pin).
 | [delete-nested-blocks](visitors/delete-nested-blocks.md) | flatten redundant nested blocks | common |
 | [delete-unreachable-code](visitors/delete-unreachable-code.md) | drop code after an unconditional return | common |
 | [delete-unused-var](visitors/delete-unused-var.md) | prune unreferenced literal/empty declarators | sojson, obfuscator, sojsonv7 |
-| [delete-extra](visitors/delete-extra.md) | strip `node.extra` (canonicalize literals) | jsconfuser |
+| [delete-extra](visitors/delete-extra.md) | strip `node.extra` (canonicalize literals) | jsconfuser, obfuscatorx |
 
 **Literal folding**
 
@@ -230,14 +256,60 @@ plugins import it (verified against source at this pin).
 | [split-sequence](visitors/split-sequence.md) | split `a, b, c` into statements | sojson, obfuscator, sojsonv7 |
 | [split-variable-declaration](visitors/split-variable-declaration.md) | split `var a, b, c` | obfuscator |
 | [split-variable-declarator](visitors/split-variable-declarator.md) | split `var a = (b, c)` | *(test-only — not wired in)* |
+| [atomic/split-if-test-sequence](visitors/atomic/split-if-test-sequence.md) | split `if ((a, b))` — the position `split-sequence` does not cover | obfuscatorx |
+
+**Operator-to-statement reversal** — putting control flow that was packed into an operator back
+into a statement. Each gates on the node being the *whole* statement, so a value-position operator
+is declined; the gate is the safety argument and each doc states its own.
+
+| pass | does | used by |
+|------|------|---------|
+| [atomic/lint-logical-if](visitors/atomic/lint-logical-if.md) | `c && f();` → `if (c) f();` | obfuscatorx |
+| [atomic/lint-conditional-if](visitors/atomic/lint-conditional-if.md) | `c ? a : b;` / `return c ? a : b;` → `if`/`else` | obfuscatorx |
+| [atomic/convert-conditional-assign](visitors/atomic/convert-conditional-assign.md) | `r = c ? a : b` → `c ? r = a : r = b`, moving a conditional into statement position | obfuscatorx |
 
 **Control-flow / object reversal**
 
 | pass | does | used by |
 |------|------|---------|
-| [merge-object](visitors/merge-object.md) | fold `obj.k = v` sequence back into a literal | obfuscator |
+| [merge-object](visitors/merge-object.md) | fold Identifier-bound `obj.k = v` sequences back into a literal; safely refuse non-Identifier declarators | obfuscator, obfuscatorx |
 | [parse-control-flow-storage](visitors/parse-control-flow-storage.md) | inline controlFlowStorage wrapper calls | obfuscator, sojson, sojsonv7 |
+| [obfuscator/inline-control-flow-storage](visitors/obfuscator/inline-control-flow-storage.md) | the obfuscatorx-local fork, including numeric string-array indexes | obfuscatorx |
 | [remove-control-flow-ob](visitors/remove-control-flow-ob.md) | unflatten `while(true){switch(order[i++])}` | sojson, sojsonv7, obfuscator |
+
+### Reuse means importing unchanged — fork rather than modify
+
+**A shared visitor's behaviour change reaches every plugin that imports it**, so the moment one
+plugin needs a shared pass to behave differently, it gets **forked into that plugin's own folder**,
+never modified in place. The fork is documented against the shared original, so a reader meeting
+two similar passes can see which behaviours diverged and why.
+
+**Extracting logic *out of* an existing plugin into a shared file is the same hazard wearing
+different clothes** and is likewise avoided: it modifies a widely-depended-on plugin in order to
+help a new one. Encoder-specific logic is rewritten in the new plugin, not lifted from the old.
+
+The corollary is that a shared visitor cannot be judged by one encoder's corpus — see
+[encoder-decoder-method.md](../encoder-decoder-method.md)'s W7 — so a fork decided on
+field evidence is a legitimate outcome even when the corpus is green for both.
+
+**There is exactly one fork in this package**:
+[obfuscator/inline-control-flow-storage](visitors/obfuscator/inline-control-flow-storage.md), off
+[parse-control-flow-storage](visitors/parse-control-flow-storage.md). What it owes is recorded here
+rather than as a general rule, because no second fork is expected — repeat these only if one
+appears:
+
+- **A distinct basename, never the original's.** A shared basename makes the name stop identifying
+  one thing: a filename search returns two implementations, a *relative* cross-reference resolves
+  from either folder — so a link can name the wrong one with nothing able to detect it — and commit
+  scopes cannot separate the two histories (Commit Scope Convention, below).
+- **Its own copies of the original's fixtures.** A fork claims to accept everything the original
+  accepts, and that claim is not pinned by fixtures the other implementation is run against.
+- **The divergence enumerated on both sides.** A fork is almost never "the original plus one
+  branch" — the reason for forking arrives with repairs and narrowings attached, and this one
+  *declines more* than the original as the price of what it fixes. A comment claiming the two
+  matchers are identical invites a merge back, re-widening every consumer the fork protected.
+- **Defects the fork repairs stay on the original as descriptions, not a worklist** — the evidence
+  that would license fixing them there is precisely what this section says you do not have.
 
 ## Matching Encoder-Emitted Structure: Never by Name
 
@@ -345,8 +417,13 @@ change is localized to one unit:
 
 - One `src/plugin/*` file: `plugin/<plugin>` — e.g. `plugin/obfuscator`,
   `plugin/sojsonv7` (names match the `-t` roster above).
-- One `src/visitor/*` file: `visitor/<visitor>` — e.g. `visitor/split-assignment`
-  (names match the Reusable Visitor Passes tables above).
+- One `src/visitor/*` file: `visitor/<basename>` — e.g. `visitor/split-assignment`, and
+  `visitor/unflatten-switch-dispatch` for a file that lives in `src/visitor/obfuscator/`.
+  **The scope is the file's basename, never its folder path**, even though the Reusable
+  Visitor Passes tables above key subfolder entries as `obfuscator/<name>`: the table's
+  prefix separates two *docs*, the scope separates two *commits*, and a basename does that
+  alone. **So a forked pass must not reuse the basename it forked from**, or its commits are
+  indistinguishable from the original's under `git log --grep`.
 - Bare `decode-js` is reserved for genuinely package-wide changes: `main.js`/CLI,
   manually-edited tooling/dependency files (`package.json`, `README.md`, lint/CI
   config), or anything spanning multiple plugins/visitors.

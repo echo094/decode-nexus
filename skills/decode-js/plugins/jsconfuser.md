@@ -13,7 +13,7 @@ Built originally against **pre-2.0 js-confuser**; the inline `// StageName` comm
 next to each `traverse` call are historical labels from that era and are not reliable at
 face value against the current pinned encoder source — each stage's actual target gets
 re-verified independently as it's documented (per
-[Studying a new encoder/decoder pair](../../encoder-decoder-method.md#studying-a-new-encoderdecoder-pair)).
+[Studying a new encoder/decoder pair](../../encoder-decoder-newpair.md)).
 Confirmed correct-but-renamed so far: decode-js's old `Stack` file name was this project's
 pre-2.0 name for what the encoder now calls `VariableMasking` (the
 [VariableMasking](../visitors/jsconfuser/variable-masking.md) entry below); decode-js's own

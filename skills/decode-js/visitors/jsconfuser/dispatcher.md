@@ -437,8 +437,8 @@ assignment-held dispatchers, a batch of them declined at the three role reads â€
 rewritten to `!("s" in fn) && flagArg === "key"`, or its branch body padded with a dead helper
 and its guarded call. DeadCode is encoder Order 8 and OpaquePredicates Order 13, both *later*
 than Dispatcher's Order 6, so [encoder-decoder-method.md](../../../encoder-decoder-method.md)
-W1 said to remove that residue before tuning anything here, and warned the symptom might not
-survive it. It did not: teaching [opaque-predicates.js](opaque-predicates.md) and
+W1 said a later stage invalidates this matcher's assumptions and W4's first corollary said to
+remove that residue before tuning anything here, warning the symptom might not survive it. It did not: teaching [opaque-predicates.js](opaque-predicates.md) and
 [dead-code.js](dead-code.md) to recognise their own anchor again raised the match count
 substantially with **no change to this file at all**. That is the durable shape of the
 dependency â€” the fix for a decline in this pass belongs in the pass that leaves the residue,

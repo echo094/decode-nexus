@@ -75,6 +75,13 @@ anecdote — re-measure rather than compare. This is also why **a measured figur
 recording in a doc**: it dies with the corpus it was taken against. Record the axis and the
 probe that reads it.
 
+**The exception, because the rule is otherwise applied too widely: a figure recording a past
+*event* does not decay.** "This directory held 159 decodes for a 117-sample corpus" is a fact about
+something that happened, not a claim about current state, so a re-freeze cannot falsify it — it is
+history, and history is what makes the hazard legible. What the rule targets is a figure that stops
+being *checkable*: a byte total or a residue count someone would later read as describing the tree
+in front of them. Ask which of the two a number is before deleting it.
+
 The A/B loop that works, for regression-checking a landed fix:
 
 ```sh
@@ -154,6 +161,45 @@ allowlist.** Babel's `scope.globals` reports every unresolved reference, so with
 on clean output. The reverse error is the dangerous one — a name *missing* from the allowlist is
 the finding, so keep the list generous and let the control run discriminate.
 
+### A reach probe: scope, not residue
+
+A census answers "what residue is present". A **reach** probe answers a different question — "how
+much of it is inside this unit's scope" — and it is what turns a worklist into an attribution.
+It classifies every reference to a matched construct as one of three:
+
+| class | meaning |
+|---|---|
+| evaluable | the pass can resolve it now |
+| **internal** | lexically inside the machinery this unit deletes, so it vanishes with it |
+| blocked | genuinely out of reach, and the only class that belongs in the next unit's inbox |
+
+**The internal class is what makes it work at all.** Without it every set reads *blocked*, on shapes
+that are all machinery — a self-replacing wrapper's own tail call, a memo cache hung off the wrapper
+object, wrappers the encoder injects into the rotator's own scope. A later unit's census is usually
+a new axis list over the same shape, and **failing to carry the internal class forward is exactly
+what a first draft gets wrong**: it hands the next unit a set the previous one already completes.
+
+**A control run on the function-form sets is largely machinery-internal calls, not use sites.** It
+still goes to zero when the machinery is deleted, so the axis is not wrong — but its non-zero
+control there must not be read as a count of program use sites, which is the number a reader
+assumes it is looking at.
+
+### A refusing builder, for goldens
+
+A generated golden that nothing checked is worse than no fixture, because exact string equality
+makes it look authoritative. So a builder writes nothing until the case clears every gate it can:
+the decode's **status** is what the case claims, its **runtime output equals the pre-obfuscation
+source's**, and for every non-decoding case the tree is **provably untouched**.
+
+**The refusals are the point, not the writes.** One such builder found five real problems on its
+first run, and later caught a fixture whose reporter threw on *both* sides — invisible for as long
+as that case was expected not to decode, because the runtime oracle only ran for decoding ones.
+**An oracle skipped for some statuses hides defects in exactly those cases**, so gate on what the
+status permits rather than switching the oracle off.
+
+Run it in verify-only mode by default and write under an explicit flag: after any change that moves
+decoded output, re-verifying is the cheap operation and rewriting is the one that needs intent.
+
 ### A corpus-wide run: the worker-pool shape
 
 When a probe has to *decode*, it is worth a pool: the work is embarrassingly parallel, and the
@@ -201,8 +247,18 @@ The env contract every probe here honours, so they are interchangeable at the co
 | `JOBS=n` | worker count; default is core count, `JOBS=1` runs in-process |
 | `DUMP=<n>` / `DUMP=1` | print candidates instead of (or as well as) tallying them |
 
+**A pool built from synchronous calls is not a pool, and it lies in the most flattering
+direction.** `Promise.all` over N `async` workers gives **zero** concurrency if the work inside is
+`spawnSync`/`execFileSync`: nothing ever yields, so the corpus runs one cell at a time while the
+`JOBS` knob reads as though it were doing something. The tell is in the timing rather than the
+results — the tallies are correct, and the cost surfaces as runs of *consecutive* per-cell timeouts
+that look like one long stall, which is easy to misattribute to several workers blocking at once.
+Either `await` a real async `spawn`, as the skeleton above does, or drop the knob and say the run
+is sequential; a knob that does nothing is worse than no knob.
+
 **Verify a new pool against `JOBS=1` once** — every pooled probe here was confirmed tally- or
-byte-identical to its sequential result before being trusted. **And use `JOBS=1` for a *dump*
+byte-identical to its sequential result before being trusted. That check catches a wrong *result*
+and is blind to this defect, which is why the two are listed separately. **And use `JOBS=1` for a *dump*
 instrument:** dumps cap their output with a per-process counter, so N workers means up to N
 times the cap, in no particular order, with interleaved stderr.
 
@@ -214,6 +270,39 @@ question, not an iteration one.
 shell's own command line contains that string, so `pgrep` matches the waiter itself and the loop
 never exits — reporting "still running" long after the job finished. Match on `node .*<script>`,
 or wait on the output file.
+
+### A long sweep, written so it can be read while it runs
+
+**Applies to any measurement long enough that someone will ask how it is going** — a whole-corpus
+attribution run is twenty-plus minutes. The rule is one sentence: **write results into their final
+location as each unit finishes, never into a staging directory copied over at the end.** Batching
+the write means nothing is reviewable until all of it is done, and a reviewer sent to look at the
+folder finds the *previous* run's numbers sitting there — which is worse than finding it empty,
+because stale numbers read as current.
+
+Four rules follow, and the third is the one that gets got wrong:
+
+- **Write per unit, atomically.** One file per unit, written to `<name>.part` and renamed on
+  success, so a file that exists is complete and a file that is missing is honestly missing. Append
+  to a `_PROGRESS.txt` as well, so "running since" is answerable without digging through a task log.
+- **Regenerate the derived files in the same script.** A comparison built from a half-written sweep
+  is worse than no comparison; making the sweep own its own derived outputs means the folder is
+  never half-updated.
+- **Never block the foreground waiting on it.** Background the run and hand control back
+  immediately — the whole point of writing results live is that they can be read and discussed
+  *while* the sweep continues, and a foreground wait throws that away and freezes the session for
+  the full duration. Poll when asked, or when the next step genuinely depends on the result.
+- **Keep the decoded output, not just the verdict.** A table saying *which* cells differ cannot say
+  *how*, so every later question re-runs the pipeline to re-derive text the sweep already produced
+  and threw away. Persisting it turned five bespoke probes' worth of work into a diff of two files.
+  The cost is tens of megabytes in an ignored sandbox, against whole sessions of re-derivation.
+
+**And when a method rule lands, re-read the probes that feed it.** The recorded instance:
+[encoder-decoder-method.md](../encoder-decoder-method.md)'s `V1` says work the era axis outward one
+boundary at a time, while the comparison script was still diffing every column against the distant
+spine. The rule and its instrument contradicted each other for as long as nobody looked, and the
+neighbour view collapses the same data to far fewer differing cells — each attributable to one era
+step, which is the whole point of the rule.
 
 ### Running decoded output
 
@@ -262,6 +351,69 @@ timeout above turns a merely-slow sample into a failure indistinguishable from a
 a kill arrives with no error message in the line where a thrown error would carry one. Re-run
 that one sample on its own, with a generous ceiling, and read the actual error before believing
 the corpus-wide verdict.
+
+**Set the ceiling from the measured slowest *success*, not from caution.** The two failure modes
+are asymmetric and both are real: a ceiling below the slowest success misrecords correct work as
+broken, while a ceiling far above it is paid in full by every hung sample, once per run. A ceiling
+chosen without that distribution is a guess in one direction or the other. Measuring it is one
+pass over the samples that already succeeded — they are by definition the fast ones — and the ratio
+is routinely startling: one harness here ran at **52×** the slowest success it had ever produced,
+which is most of a half-hour run spent waiting on samples that were never going to return.
+
+### Scoring the `obfuscator` plugin against an external corpus
+
+A second dataset shape, different from the two above in where it comes from: a corpus of
+javascript-obfuscator output built **outside this repository**, one sample per (encoder version ×
+option set × input fixture). The decoder→encoder direction makes naming that encoder legal here;
+what the corpus contains and how it is rebuilt is the encoder side's business, not this page's.
+
+**One process per decode is a correctness requirement, not a timeout guard, and it is specific to
+this plugin.** `src/plugin/obfuscator.js` creates its isolated-vm `isolate` and `globalContext` at
+**module scope**, so every `virtualGlobalEval` in a process shares one global object. Decode two
+samples in one process and the second evaluates its string-array code into a context still holding
+the first's bindings — a name that should be missing resolves, the `ReferenceError` recovery path
+never fires, and the cell passes for the wrong reason.
+
+**So the worker-pool shape above does not apply unchanged.** The slice-per-worker pattern batches
+many samples into one process, which is exactly what must not happen. Keep the pool for
+concurrency and make the unit of work one cell: a worker decodes a single sample and exits. Write
+the per-cell result to a **file**, for the same reason the pool does — the plugin logs to stdout
+unconditionally and that stream is not a return channel.
+
+**That unconditional logging is also the instrument**, and it costs no source edit, which matters
+because this plugin is widely depended on and is not to be modified. Read both streams — the
+detector attempts arrive on stdout via `console.info`, the failure markers on stderr via
+`console.error`:
+
+| marker | stream | reports |
+|---|---|---|
+| `Try v3 mode...` / `Try v2 mode...` / `Try v0 mode...` | stdout | which detector was attempted |
+| `String List Name: <name>` | stdout | which one committed, and to what |
+| `Cannot find string list!` | stderr | all three missed — the whole plugin aborts |
+| `Essential code missing!`, `Unexpected reference` | stderr | a detector matched partly and gave up |
+| the seven stage lines, `还原数值…` … `净化完成` | stdout | how far the pipeline got before aborting |
+
+**Score every oracle every run, including the ones that are all-clear.** An oracle that quietly
+drops out of the report produces something that reads complete — the same failure as a probe that
+prints a clean zero from a missed input. What such a runner can carry:
+
+| oracle | reads |
+|---|---|
+| detection | the markers above; recorded even when later stages fail, since it is the diagnostic the plugin's fused design cannot otherwise produce |
+| completion | the plugin returned non-falsy |
+| parse | decoded output parses, with `allowReturnOutsideFunction` |
+| runtime equivalence | decoded output vs the fixture's own reported lines, in a child process with a hard timeout |
+| option efficacy | the sample differs from that version's baseline sample — an **encode-time** property, read off the corpus and never off the decode |
+
+**The residue census is deliberately not in that list.** Its subject list is *encoder* knowledge —
+what constructs a given transform emits — so it is defined per transform from the encoder's source
+at the eras in scope, and a runner that invented one would be defining the census from the thing
+under test. It is filled in as each transform is taken, not shipped with the harness.
+
+**A whole-corpus verdict from this runner is not a decode-quality verdict.** With the residue
+census absent, a cell that "passes" has only shown it did not fail closed —
+[encoder-decoder-method.md](../encoder-decoder-method.md) S4 is the reason that is not the same
+thing. Read the size ratios (S1) alongside it and treat the pass column as a floor.
 
 ## Instrumenting a fail-closed matcher
 
@@ -347,6 +499,17 @@ committed by accident.
   then inherited the same trap from a *different* gate. **Key the census on the payload, then
   report which gate each survivor fails** — that keeps the decline detail a mirror buys without
   the blind spot. A zero from a mirror probe is evidence about the accepted shape only.
+- **A probe's resolution bounds its verdict, and its finest unit gets read as a leaf.** A probe
+  that reports per *pass* can only ever accuse a pass, so when the pipeline's units are
+  compositions it will name a file that performs no mutation at all — and the answer looks
+  located rather than truncated, because something did change at that boundary. This is not the
+  probe being wrong; every reading it gave was correct at the granularity it measured. It is the
+  reader treating "the smallest thing my instrument distinguishes" as "the smallest thing there
+  is". **Before attributing, ask what the unit you are about to blame actually does**: a per-pass
+  census pointed at a scheduling file with seven `traverse` calls and no rewrite of its own, and
+  re-running the same measurement per composed visitor found four distinct producers, three of
+  them shared with other plugins. Re-instrument one level down before writing a cause down —
+  [encoder-decoder-method.md](../encoder-decoder-method.md)'s S6 owns what to do with the answer.
 - **A static read of a `high` corpus `.obf.js` sees one `Function(…)` call and nothing else.**
   `Pack` puts the whole program inside a string literal, so a shape census over the obfuscated
   *input* reports a clean zero for every shape — indistinguishable from "the encoder didn't emit
@@ -357,16 +520,84 @@ committed by accident.
   failure print `0` when handed a wrong or empty glob, which reads exactly like a clean census.
   Prefer reading the directory in the script; when a probe does report zero, sanity-check it
   against something known non-zero in the same pass — the cheapest check there is.
+  - **A swept parameter that never varied is the same class, and it reads as a finding rather
+    than as a zero.** A bisect looped over `'0 label' '1 label' …` and unpacked each with
+    `set -- $pair`, which **does not word-split under zsh**: the level variable took the whole
+    string, the numeric gate read `NaN`, and all six rows ran at level 0. They agreed perfectly,
+    and six agreeing rows read as "none of these operations matters" — a conclusion, not an error.
+    It was caught only because one row contradicted an earlier run of the same configuration.
+    **Uniform rows across a swept parameter are not evidence the parameter is irrelevant until the
+    sweep is shown to have varied it**: print the parameter as the instrument saw it, never as it
+    was passed, and prefer explicit values or an array over anything relying on word-splitting.
+  - **The filename parse is a second way in, and a greedy character class is the usual cause.**
+    `/^(\d[\w.]*)__/` against `2.19.0__control__cff.dec.cjs` matches through to the **last**
+    `__`, so the version reads as `2.19.0__control`, every key misses, and the census prints a
+    clean zero over hundreds of cells. Narrow the class to what the field can actually contain
+    (`[\d.]` for a version), and **print the denominator** — a census that reports how many files
+    it read cannot fail this way unnoticed, which is what caught it here.
+- **A probe chain that prints and re-parses between stages is not the pipeline it models, and it
+  lies in the safe-looking direction.** Staging a composition as `probe-a | probe-b | probe-c`,
+  each reading the previous one's *written output*, is the natural way to build it and the cheapest
+  to debug — but a reparse rebuilds every scope and every path from text, so it silently repairs
+  exactly the state a real pipeline carries forward. Cached scope information is stale after any
+  rewriting pass, and that is the one class a staged chain is guaranteed not to reproduce. **Verify
+  a composition on one AST per sample, with no serialization boundary**, before believing a staged
+  reading of it; keep the staged version for attributing a finding to a stage, which is what it is
+  actually good at.
+  - **This has now been paid for, and the staged reading was wrong by 108 cells.** A unit closed on
+    a staged chain — census zero on every axis, runtime equivalence on the whole corpus — and the
+    same pipeline rebuilt on one AST left the anti-tamper strip declining on every cell combining
+    debug protection with control-flow flattening, emitting output that threw. **The defect was in
+    the pass all along; only the measurement had been hiding it.** So a green reading taken across
+    a reparse boundary is not weak evidence, it is evidence about a different program.
+  - **What a reparse actually repairs is the PATH CACHE, not the scope**, and the distinction is
+    the fix. Babel caches a NodePath per AST node and re-uses it across traversals, so
+    `scope.crawl()` rebuilds bindings while handing back paths that still point into subtrees an
+    earlier pass detached. A pass reading `binding.referencePaths` then sees references that are no
+    longer in the tree. Clearing the cache is what the reparse was silently doing — so when a
+    matcher accepts a freshly parsed tree and rejects every tree a pipeline has touched, reach for
+    the cache before the crawl.
 - **A copy-pasted pipeline list drifts.** Several probes replay the plugin's stage list to
   attribute a shape to a stage, and each keeps its own copy — so one renamed pass breaks all of
   them at once, and an *added* stage drifts just as silently as a renamed one. Both have
   happened repeatedly, and once the stage whose behaviour was in question was the one the probe
   omitted. **Diff the list against `src/plugin/jsconfuser.js` before quoting any per-stage
   reading** — extract the stage names and `diff`; positionally, not by eye.
+- **A truncated listing is not a listing.** A `ps` output piped through `head -5` was read as proof
+  a background run had died; it had not, the rows were simply below the cut. Any command whose
+  output you are about to draw a conclusion from must either be unbounded or report how much it
+  dropped.
 - **An orphaned child outlives its parent.** The run timeout above is enforced by the parent, so
   an interrupted probe leaves the child running and nothing reaps it. Check before trusting any
   timing: `ps -eo pid,ppid,etime,pcpu,command | grep '[d]ec.cjs'`, and kill anything with
   `PPID 1`. Tallies are deterministic and unaffected; wall-clock is not.
+- **A census keyed only on the ENCODER's spellings goes blind exactly where your own passes have
+  half-finished.** This is the sharpest form of the blind-axis class and it has now been paid for
+  twice. Constant folding turned an injected test into `false`, so no axis keyed on a comparison
+  could see the `if` at all — removing the prune from the pipeline left every axis reading zero,
+  indistinguishable from a clean decode. Later, a stripper left an empty `(function(){})();` behind
+  on every cell of one option set while ten encoder-keyed axes all read zero, because the encoder
+  never emits that shape — **we** did. So: **carry at least one axis for the intermediate state and
+  one for your own leavings**, and force the issue with the check below.
+  - **The check that makes it real: run the pipeline with one pass removed and require the census
+    to notice.** A census that cannot detect its own pipeline being sabotaged is measuring nothing.
+- **Axes are not independent, so only the fixpoint reading means anything.** On one option set the
+  un-computable-member count read 33 before folding and 365 after, because a sibling pass exposed
+  new population. An axis can read low because a sibling has not run and can *rise* as one does —
+  so exit criteria belong to the unit, never to a pass.
+- **Before filing an axis as uncovered, check whether its shape can exist at all.** Two axes here
+  were recorded as corpus gaps and were in fact unreachable by construction — one because the
+  encoder expands shorthand and renaming then separates key from value, one because both spellings
+  parse to the same AST. Unreachable and untested need different words, because only one of them is
+  ever going to be closed.
+- **An exclusion list must be read off the thing, not off prose describing it.** A runtime pass
+  reported 36 failures that were not failures, because its exclusion list was built from a
+  checkpoint's wording rather than from the preset definitions it described.
+- **The instrument that catches a blind axis is a zero that disagrees with a source-derived
+  expectation**, never a re-read of the probe. Every census defect found here was found that way:
+  the option table said four sets enable a transform while the axis read zero corpus-wide, and the
+  matcher turned out to reject one spelling. A blind axis and a clean one look identical from
+  inside.
 - **A bail tally measures the pipeline's interior, not its output.** Read the residue in the
   output before treating a decline count as a gap — a gate that declines can be load-bearing.
   This one is general enough to live in
@@ -421,8 +652,15 @@ Two habits follow from that:
 
 ## Answering "is this residue actually dead?"
 
-The S3 question ([encoder-decoder-method.md](../encoder-decoder-method.md)) needs a liveness
-oracle, and the naive one gives the wrong answer for Program-level scaffolding: seeding a
+**First ask whether a differential would do instead, because it needs no liveness oracle at all.**
+When the question is "did reversing this transform leave cleanup work", count the suspect
+declarations on the cell that enables the option and on the cell that does not — **same version,
+same fixture** — and report only the difference. The absolute number is meaningless and should not
+be printed; the excess is attributable to that one option by construction. Prove the count *can* be
+non-zero somewhere first, or an excess of zero is a blind axis rather than a result.
+
+Where a differential is unavailable, the direct form needs a liveness oracle, and the naive one
+gives the wrong answer for Program-level scaffolding: seeding a
 fixpoint from *every* Program-level statement marks the whole cluster live by construction,
 because the cluster is held up by Program-level assignments of its own. Build the top-level
 binding dependency graph, then **seed only from observable statements** — writes to undeclared
@@ -445,3 +683,16 @@ reporting a handful of affected files to reporting dozens.
   against it".
 - **[tests.md](tests.md):** anything that becomes committed coverage. A probe finds a bug; a
   fixture is what keeps it fixed, and it is the only coverage a fresh clone inherits.
+
+**The graduation rule, because this page's "no probe is in git" default is right for probes and
+wrong for oracles.** A probe answers *one question about one moment* and is correctly disposable.
+An **oracle** answers "is this invariant holding" and is not: it applies to every case, including
+ones written later, so it belongs in the shared test helper where every case inherits it — not in
+`sandbox-tests/`, where it dies with the session that wrote it. Two tells that what you have is an
+oracle rather than a probe: it takes an AST or a pass rather than a directory of samples, and
+running it on unrelated cases is meaningful rather than nonsense. Move it, and the audit T7 asks
+for stops being a grep you have to remember to run.
+
+**And it goes in *before* the fix when the defect is invisible to output**
+([encoder-decoder-method.md](../encoder-decoder-method.md)'s S6 and T7) — there, the oracle is not
+a regression guard but the only thing that makes the defect observable at all.

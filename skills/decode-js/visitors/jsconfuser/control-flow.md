@@ -38,7 +38,7 @@ At the plugin level, every helper this transform's own output depends on (the su
 xor functions, the packed sequence/strings blobs) is resolved from its own use site,
 never from a Program-level name-keyed pre-pass — see Implementation for why, and
 `encoder-decoder-method.md`'s
-[W1](../../../encoder-decoder-method.md#t1--w1--w4-order-the-work-from-the-stage-order--not-by-byte-share-and-not-by-probing)
+[W1](../../../encoder-decoder-method.md#w1-a-later-stage-invalidates-an-earlier-matchers-assumptions)
 for the general form. An outlined nested function is recognized as a re-entrant call into
 the *same* shared switch/case table (not a separate function to decode independently) and
 decoded by the identical recursive process. A dispatcher-nested inline interpreter (see

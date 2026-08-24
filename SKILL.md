@@ -9,11 +9,24 @@ All operational expertise, AST transformation rules, and submodule interactions 
   and not from memory of a previous session. It carries both halves of this work in one place
   (how to study a new encoder/decoder pair, how to diagnose an existing decoder) precisely so
   a fix isn't rediscovered from scratch. Skipping it once cost two runs of probing to confirm
-  an ordering fact its own T1 already stated.
-- **Doc Conventions:** Transform-doc structure (the numbered items, `## Source`, `## Fixtures`)
-  and the form of any reference crossing between hub and submodule live in
-  [doc-conventions.md](skills/doc-conventions.md). Read it before writing or editing a
-  transform doc; the rules below apply to every change regardless.
+  an ordering fact its own T1 already stated. Its rules are the required read; the incidents
+  behind them live in [encoder-decoder-incidents.md](skills/encoder-decoder-incidents.md), read
+  when a rule is being questioned or extended rather than every session.
+- **Doc Conventions:** Package layout, transform-doc structure (the numbered items,
+  `## Source`, `## Fixtures`), and the form of any reference crossing between hub and
+  submodule live in [doc-conventions.md](skills/doc-conventions.md). Read it before writing
+  or editing a transform doc; the rules below apply to every change regardless.
+- **Orchestration Gate:** Your bootloader decides the session's shape — its default, and the
+  test for departing from it. Whenever a session will delegate to subagents, read
+  [orchestration.md](skills/orchestration.md) before the first packet; a session working
+  directly never opens it.
+- **Checkpoint Is Scratch, and Its Layout Is Specified:** `checkpoint.md` at the hub root is the
+  restart interface between sessions and agents, ordered important-first with history last, and
+  updated after each step rather than at each milestone. Its required sections, its exclusions
+  (no rebuildable-history SHAs, no fact that has a durable home, no bare measured figure) and the
+  handoff it owes are in [checkpoint-format.md](skills/checkpoint-format.md). Read it before
+  writing to the file; a fact settled there graduates into a skill doc and is pruned in the same
+  change.
 - **Read-Only Encoders:** Code inside encoder submodules (currently
   `encoder/javascript-obfuscator`, `encoder/js-confuser`) is for reading AST patterns
   only — never alter it.
@@ -40,14 +53,23 @@ All operational expertise, AST transformation rules, and submodule interactions 
     name-only text.
 - **Root File Scope:** Keep a skill package's root file about the workflow, not the plumbing,
   and name it after the skill (e.g. `js-confuser.md`) — a subfolder of files all named
-  `SKILL.md` is unnavigable. It covers the parser/AST foundation, a verified source-tree
-  layout, the pipeline/stage order, and an execution-flow diagram. Everything else — option
+  `SKILL.md` is unnavigable. It covers the parser/AST foundation, the package's own verified
+  layout (a "Skill Layout" section, not the submodule's directory tree — see the next rule),
+  the pipeline/stage order, and an execution-flow diagram. Everything else — option
   surfaces, plugin APIs, constants, helpers, templates, result types — moves into its own file
   once it would bloat the root, indexed from a "Skill Layout" section. **This file is subject
-  to the same rule**, which is why the two doc specifications sit in `doc-conventions.md`.
-- **Source-Tree Mirroring:** Mirror the source tree in supporting docs — one file per
-  source file for large helper folders (e.g. `utils/<name>.md`, `templates/<name>.md`),
-  flat and distinctly named.
+  to the same rule**, which is why the doc specifications sit in `doc-conventions.md`.
+- **The Package Layout Is Ours:** A package is laid out around the components every
+  encoder/decoder has — order, options, transforms, templates — never around the
+  submodule's own directory habit, and a doc is named for the transform or shape it
+  describes, never for a source file. Structural drift and shape drift are independent
+  axes: one obfuscator has an era boundary across which *no* source file changes at all,
+  and another boundary whose only file changes are in an unrelated subsystem. So a
+  file-keyed layout churns where nothing moved and stays silent where the shape did.
+  Source-tree mirroring survives only *inside* large helper folders (`utils/<name>.md`,
+  `templates/<name>.md`), one file per source file, flat and distinctly named. Full
+  specification, and when a `source-map.md` is required to cross between the two:
+  [doc-conventions.md](skills/doc-conventions.md).
 - **Reversal Lives Only in the Decoder:** An encoder transform doc never asserts how to
   reverse itself. Project Independence forbids it from ever correcting that claim later — it
   can't cite the decoder that would prove it wrong — and two already needed correcting, one
@@ -61,14 +83,22 @@ All operational expertise, AST transformation rules, and submodule interactions 
   zero" survives; a byte total decays into a claim nobody can check. Same for counts of the
   tree itself — test files, cases, lint errors — which drift with every edit and have been
   wrong here more than once. Where a figure genuinely matters, cite the run that produced it.
+  **A corrected figure carries the live caveat, not the story of its correction.** When a value is
+  recomputed under a better definition, replace it and keep only what a reader would act on — that
+  a column is not comparable with the one beside it, say. When it was corrected, what the old
+  extraction did, and that the row was re-verified are all diary: they have no reader, since anyone
+  who wants them has git, and the re-verification is worth stating in the commit message instead.
 - **Revise by Evolution, Not Addition:** A new incident changes an existing item — across
   files, not just within one — rather than earning a new entry: sharpen it, merge two, or
   supersede one outright. State a point once and cite it from elsewhere; drop an entry once
   its incident teaches nothing the survivors don't. A doc that grows by one entry per incident
   stops being read, the few items that decide a plan diluted by near-duplicates — the fate
-  `encoder-decoder-method.md` has twice avoided, once merging fourteen tips to eight, once
-  folding five defect-source entries into the tips that act on them, both times losing no
-  fact. **Never park the only copy of a fact in a commit message or `checkpoint.md`** — a
+  `encoder-decoder-method.md` has three times avoided, once merging fourteen tips to eight, once
+  folding five defect-source entries into the tips that act on them, and once splitting its
+  incident narratives into a companion file so the rules stay scannable, every time losing no
+  fact. **The third is the move to reach for when a doc is long but nothing in it is
+  redundant:** separate what is read every session from what is read only when a rule is
+  challenged, and keep the two keyed on the same labels. **Never park the only copy of a fact in a commit message or `checkpoint.md`** — a
   release rebuild rewrites history, and `checkpoint.md` is scratch. The durable copy is a
   skill doc's own text.
 - **Commit Compliance:** Every commit must follow the Commit Conventions section below
@@ -115,9 +145,17 @@ type(scope): subject
 - **subject:** imperative, no trailing period, ~72 cols.
 - **One concern per commit.** Don't bundle an unrelated pre-existing fix discovered in passing
   into a feature's own commit — give it its own, so neither can be reverted without the other.
+- **Don't fix what a planned rewrite redoes.** Where a history rebuild is already scheduled over a
+  range, a defect inside it — a missing sign-off, a non-conventional subject — is recorded for the
+  rebuild to absorb rather than patched in place: the patch is work the rebuild repeats, and it
+  adds a commit the rebuild then has to destroy.
 - Body (optional): explain why, not what.
 - Footer: `Signed-off-by: Name <email>` is **required** (use `git commit -s`); issue
   refs are optional.
+- **Commit identity.** The agent **must sign every commit it authors** (`git commit -s`).
+  The author and any `Signed-off-by` trailer come only from the `user.name` /
+  `user.email` set in the `git config` active in the repository being committed to —
+  never from the agent's session or environment context.
 
 Example:
 ```
@@ -142,10 +180,18 @@ Gate) — not a first step that gets reconciled afterward:
    Only once the decoder holds against the new commit is the pin allowed to move — this
    is what makes step 4 a description of already-verified behavior rather than a
    prediction of it.
-4. **When behavior has changed, update the skill doc without erasing the old behavior.**
-   Samples already obfuscated/encoded in the wild were produced by the *previous*
-   version's algorithm, so its description must stay on record — e.g. as a
-   version-tagged section — alongside the new one, never replaced.
+4. **Decide whether the new commit is still the same era, and never erase the old
+   behavior.** Samples already obfuscated/encoded in the wild were produced by the
+   *previous* version's algorithm, so its description must stay on record alongside the
+   new one, never replaced. Which of the two happened decides the work:
+   - **Same era** (emitted shape unchanged) — nothing to add. The era's recorded SHA may
+     advance to the new commit, but only on the strength of step 3's re-verification;
+     absent that it stays where it was, since the SHA names the commit that proved the
+     claims, not the newest one available.
+   - **New era** (emitted shape changed) — open a new registry row and leave the previous
+     row untouched, so both remain describable. The mechanics, and when a registry is
+     required at all, are in [doc-conventions.md](skills/doc-conventions.md)'s
+     "Documenting Multiple Eras."
 5. **Land the pin bump last, in its own commit.** It lands in the hub repo as
    `chore(hub)` (stage only the submodule gitlink); any decoder fixes from step 3 and any
    doc updates from step 4 are their own commits, scoped to their own submodule, and land
@@ -153,10 +199,25 @@ Gate) — not a first step that gets reconciled afterward:
 
 ## Active Skill Directory
 
-- [doc-conventions](skills/doc-conventions.md) — Transform-doc structure and the form of a
-  hub↔submodule reference. The two specifications Standing Rules points at.
-- [encoder-decoder-method](skills/encoder-decoder-method.md) — How to study a new
-  encoder/decoder pair, and how to diagnose an existing decoder.
+- [doc-conventions](skills/doc-conventions.md) — Package layout, transform-doc structure, and
+  the form of a hub↔submodule reference. The specifications Standing Rules points at.
+- [checkpoint-format](skills/checkpoint-format.md) — The layout `checkpoint.md` must hold, what
+  never goes in it, and what a handoff owes. Read before writing to that file, in any session.
+- [orchestration](skills/orchestration.md) — Roles, write ownership, the task packet, and wave
+  integration for multi-agent work. Read **only** when the Orchestration Gate says the mode
+  applies.
+- [orchestration-log](skills/orchestration-log.md) — One row per dispatched task: model, effort,
+  peak context against the window, and what the run cost. The calibration data behind
+  orchestration's sizing rules; read when setting or challenging one.
+- [encoder-decoder-method](skills/encoder-decoder-method.md) — How to diagnose an existing
+  decoder: the labelled rules, tiered by how often a session needs them. The required read.
+- [encoder-decoder-incidents](skills/encoder-decoder-incidents.md) — The bug or wrong plan
+  behind each of those rules, keyed on the same labels. Read when a rule is questioned.
+- [encoder-decoder-newpair](skills/encoder-decoder-newpair.md) — The workflow for taking on an
+  encoder/decoder pair with no package here yet. Read once per pair, not per session.
+- [javascript-obfuscator](skills/javascript-obfuscator/javascript-obfuscator.md) — Reference
+  for the `encoder/javascript-obfuscator` obfuscator: parser/generator foundation, the
+  per-era transformer execution order, and the era registry the package's docs cite.
 - [js-confuser](skills/js-confuser/js-confuser.md) — Transform-by-transform reference
   for the `encoder/js-confuser` obfuscator's AST patterns.
 - [decode-js](skills/decode-js/decode-js.md) — Plugin-by-plugin reference for the

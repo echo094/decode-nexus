@@ -58,6 +58,15 @@ to be a stale fossil from a previous encoder version; a helper identified by nam
 proved structurally unreliable. Each surfaced only when a decode attempt was made against real
 combined output.
 
+**A self-created decoder defect was about to reject prior art.** An architecture memo treated
+source-inspection-only pages as lower priority because no transfer population had yet been
+qualified, and treated the current decoder's behavior as evidence against opening those studies.
+The user caught the inversion: missing transfer work is not a negative result, and a decoder
+success, decline, or gap cannot settle the encoder mechanism while a defect introduced by our own
+work could explain it. The correction was to call the pages **unqualified**, quarantine the
+baseline comparison until it is audited, and retain the best candidate only as sequencing—not as
+a finding that the remaining knowledge should be rejected.
+
 ## T6 — instrument the failure
 
 **Two reading-based hypotheses about a minifier-interaction bug were both wrong**; breadcrumbs
@@ -481,6 +490,28 @@ short runs were never going to bound.
 transform at a time could not have reached it.
 
 ## Studying a new encoder/decoder pair
+
+**An existing encoder was mistaken for an existing pair.** A new read-only decoder corpus targeted
+encoders whose packages already existed here, so the work initially looked like an extension of
+those studies rather than a new pair. The relationship had never been studied: the decoder's
+architecture, evidence model, transfer boundary and comparison contract were all new. Treating
+component identity as pair identity would have skipped the new-pair workflow exactly where the new
+decoder made it necessary.
+
+**Qualification-first documentation nearly discarded useful VM prior art.** Several experiment
+folders held source-backed algorithms and notes, but some were incomplete, could not run in the
+available environment, or had no qualified same-configuration transfer. A plan that used one
+`unqualified/uncovered` label for all three facts left the material outside durable mechanism docs
+and deferred preservation to a late aggregation stage. The user reversed that decision: preserve
+the pinned source and its useful deductions once provenance and limits are clear, while recording
+documentation, transfer qualification and reproduction separately. The implementation gate stayed
+closed; documentary value did not become decoder coverage. The first graduation then exposed the
+opposite failure: pages could satisfy the section, evidence-label, permalink, and reverse-source-map
+contracts while compressing large algorithms into paragraph summaries that a reader could not
+reconstruct. At the next architecture gate the user rejected that explanatory depth. Provenance
+answers where a claim came from; it does not teach the mechanism. The reusable acceptance test now
+requires cold reconstruction of the algorithm, representations, dependencies, and failure paths
+before source citations are opened for verification.
 
 **This project's closed bugs are almost entirely combo bugs**, none of which a single-transform
 fixture could have caught: a renaming stage invalidating a name-keyed matcher, a

@@ -62,7 +62,7 @@ responsible for; the other half is S6.
 | **a fix that works and you cannot say why**, or that only works in one position | **T9** — an unexplained fix is a defect report; it is probably at the wrong level |
 | **you are about to change a pass shared by several decoders** | **W7**, then T4 · W3 — count the consumers *and* their existing workarounds before deciding where the fix goes |
 | **a comment telling the caller to do something afterwards** | **T8** — count the callers who honour it; the ones who don't are the finding |
-| a brand-new encoder/decoder submodule pair | [encoder-decoder-newpair.md](encoder-decoder-newpair.md) |
+| an encoder/decoder relationship not yet studied here | [encoder-decoder-newpair.md](encoder-decoder-newpair.md) |
 
 ## Tier 1 — every session
 
@@ -91,6 +91,13 @@ or inference.
   from reading is a hypothesis; inverting it against real, adversarially-stacked output is what
   proves it complete. Don't mark an encoder-side transform doc settled before something has tried.
   `SKILL.md`'s Encoder Pin Gate is this rule applied to a pin.
+- **Do not turn an evidence gap or our own defect into a verdict about the encoder's mechanism.**
+  A source-inspection observation with no transfer cell is unqualified, not disproven. If a current
+  decoder or harness success, decline, or apparent gap may be caused by a defect introduced on our
+  side—including a producer/decoder configuration mismatch—quarantine that comparison until the
+  defect is localized and the baseline is re-verified.
+  Preserve the source-backed knowledge and make the next task a bounded baseline audit or
+  qualification; only that evidence can support an adopt, defer, or reject decision.
 
 Then validate the plan, in this order: **look for a matcher that already does it correctly**
 (free, stronger than a probe, and it also answers T9's "who already owns this reversal"); **then a

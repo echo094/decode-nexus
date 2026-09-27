@@ -8,6 +8,13 @@ while writing one.
 
 ## Package Layout
 
+**Name files and folders for the behavior or content they own, never for the task that created
+them.** Task IDs, phase numbers, worklist positions, and chronology do not describe what a
+reader will find and become misleading when work moves between tasks. Use a number in a name
+only when it is part of the subject itself, such as a protocol version or an opcode, and state
+that meaning in the file or folder's documentation. When renaming either, update executable
+references, documentation links, and any integrity records that bind its path or bytes.
+
 **Every encoder has its own file-layout habit; they have the same components.** Order,
 options, transforms, templates. So a package's layout is designed around *those*, and it is
 **ours** — never a mirror of whichever directory tree the submodule happens to ship. Where the

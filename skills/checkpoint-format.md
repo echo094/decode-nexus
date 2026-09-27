@@ -115,6 +115,11 @@ asserting the opposite ([doc-conventions.md](doc-conventions.md), "Marking somet
 - **A measured figure without its date and command.** Figures belong here rather than in a skill doc
   (`SKILL.md`'s Measured Figures Are Diary), but a bare value here is just as unusable — a corpus
   regenerates and voids it with nothing to notice.
+- **Ignored evidence paths and moved archive locations.** Ignored generated/probe/task trees are
+  not resumable assets, and an archive's former local or external-storage path is not a durable
+  locator. Record only the stable bundle name or Main session ID, manifest digest, verification
+  time, and limitations; future access requires the user to supply the archive or move it into the
+  current environment.
 - **An answered question.** It reads exactly like an unanswered one and gets re-opened at full
   price. The same applies to completed narratives, superseded plans and obsolete alternatives:
   keep only enough finished state to explain what the remaining work depends on.

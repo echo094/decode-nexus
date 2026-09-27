@@ -1,4 +1,7 @@
-# Probe Reference (`decoder/decode-js/sandbox-tests/`)
+# Probe Reference (external ephemeral probe workspace)
+
+In this page, `<probe-root>` is a caller-supplied ephemeral workspace. It is disposable staging,
+not a repository contract, and must never be a durable dependency or link target.
 
 A **probe** is a throwaway script that answers one question about the decoder — how many
 samples still carry a shape, which guard rejected them, what a stage emits — by reading real
@@ -15,8 +18,8 @@ belongs in the hub.**
 
 ## Where probes live
 
-Under `decoder/decode-js/sandbox-tests/`, untracked, and excluded through the submodule's own
-`info/exclude` (`sandbox-tests/`). A submodule's `.git` is a *file* pointing at the real gitdir,
+Under `<probe-root>`, untracked, and excluded through the submodule's own local `info/exclude`.
+A submodule's `.git` is a *file* pointing at the real gitdir,
 so that path is `<hub>/.git/modules/decode-js/info/exclude`, not
 `decoder/decode-js/.git/info/exclude` — `git rev-parse --git-dir` from the submodule prints it.
 That exclusion is **local to one working copy** — a fresh clone has neither the probes nor the
@@ -32,7 +35,7 @@ it.
 Every probe reads one of two things: the frozen corpus, or the decodes of it. Neither is
 committed, and neither needs to be — both rebuild from committed test-case sources.
 
-1. **`sandbox-tests/high-size/corpus/` — the frozen corpus.**
+1. **`<probe-root>/high-size/corpus/` — the frozen corpus.**
    Read every `.src.js` under `test/jsconfuser/` **and** `test/jsconfuser/rename-variables/`,
    encode each `RUNS` times (default 3) at `{ target: 'node', preset: 'high' }`, and write an
    `.obf.js`/`.src.js` pair per sample as `<name>.<i>.obf.js`.
@@ -46,14 +49,14 @@ committed, and neither needs to be — both rebuild from committed test-case sou
    **It needs `encoder/js-confuser/dist/` built** (`npm run build` there) — with the encode-side
    probes it is the only kind that requires the encoder at all. This is the long step; run it
    in the background. The encoder ships **CommonJS**, so an ESM probe reaches it through
-   `createRequire`, four levels up from `sandbox-tests/<group>/`:
+   `createRequire`, four levels up from `<probe-root>/<group>/`:
 
    ```js
    import { createRequire } from 'module'
    const require = createRequire(import.meta.url)
    const { obfuscate } = require('../../../../encoder/js-confuser/dist/index.js')
    ```
-2. **`sandbox-tests/mask/dec-cache/` — the decodes.**
+2. **`<probe-root>/mask/dec-cache/` — the decodes.**
    Run every corpus `.obf.js` through the current `PluginJsconfuser` and write
    **`<base>.dec.js`** — that suffix is the contract every static reader filters on, and the
    base name must match the corpus sample so a reader can pair a decode with its `.src.js`.
@@ -85,9 +88,9 @@ in front of them. Ask which of the two a number is before deleting it.
 The A/B loop that works, for regression-checking a landed fix:
 
 ```sh
-node sandbox-tests/high-size/score.mjs > after.txt
+node <probe-root>/high-size/score.mjs > after.txt
 git stash push -- src test
-node sandbox-tests/high-size/score.mjs > before.txt
+node <probe-root>/high-size/score.mjs > before.txt
 git stash pop
 ```
 
@@ -99,8 +102,8 @@ The default shape, and the one to reach for first: no decode run, so it costs se
 answers "what survived, and in what spelling".
 
 ```js
-// node sandbox-tests/mask/<name>.mjs            # tallies
-// DUMP=<n> node sandbox-tests/mask/<name>.mjs   # print n full candidates
+// node <probe-root>/mask/<name>.mjs            # tallies
+// DUMP=<n> node <probe-root>/mask/<name>.mjs   # print n full candidates
 import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -428,7 +431,7 @@ success counters in the same patch, so the declines have a denominator.
 ```py
 import re
 p = 'src/visitor/jsconfuser/<pass>.js'
-orig = open('sandbox-tests/mask/<pass>.orig.js').read().split('\n')
+orig = open('<probe-root>/mask/<pass>.orig.js').read().split('\n')
 
 # Anchor on syntactic forms, never on a line number: a hand-written line anchor is what
 # made one of these assert and refuse to patch after an unrelated edit.
@@ -465,10 +468,10 @@ a `trap`, because a timeout kills the run before any trailing restore line:
 ```sh
 #!/bin/sh
 cd "$(dirname "$0")/../.."
-trap 'cp sandbox-tests/mask/<pass>.orig.js src/visitor/jsconfuser/<pass>.js' EXIT INT TERM
-cp src/visitor/jsconfuser/<pass>.js sandbox-tests/mask/<pass>.orig.js
-python3 sandbox-tests/mask/<pass>-instrument.py >/dev/null || exit 1
-node sandbox-tests/mask/bc.mjs
+trap 'cp <probe-root>/mask/<pass>.orig.js src/visitor/jsconfuser/<pass>.js' EXIT INT TERM
+cp src/visitor/jsconfuser/<pass>.js <probe-root>/mask/<pass>.orig.js
+python3 <probe-root>/mask/<pass>-instrument.py >/dev/null || exit 1
+node <probe-root>/mask/bc.mjs
 ```
 
 Four rules this pattern exists to enforce, each bought by an incident:
@@ -688,7 +691,7 @@ reporting a handful of affected files to reporting dozens.
 wrong for oracles.** A probe answers *one question about one moment* and is correctly disposable.
 An **oracle** answers "is this invariant holding" and is not: it applies to every case, including
 ones written later, so it belongs in the shared test helper where every case inherits it — not in
-`sandbox-tests/`, where it dies with the session that wrote it. Two tells that what you have is an
+`<probe-root>/`, where it dies with the session that wrote it. Two tells that what you have is an
 oracle rather than a probe: it takes an AST or a pass rather than a directory of samples, and
 running it on unrelated cases is meaningful rather than nonsense. Move it, and the audit T7 asks
 for stops being a grep you have to remember to run.

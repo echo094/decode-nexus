@@ -28,3 +28,11 @@ Parse (plain `parse`, no `errorRecovery`), then traverse in this order, generate
 Everything here is structural; the decoded control flow is exposed by de-sequencing and
 by turning short-circuit/ternary idioms into real branches. No env-unlock or global
 decode stage exists in this plugin.
+
+These rewrites are shape hints, not semantic proof for VM recovery. In particular,
+`RemoveVoid` replaces `void x` with `x`, changing the value of expressions such as `void 0`.
+Conditional-assignment distribution, sequence/block flattening, and any future case deletion
+must separately preserve evaluation order, abrupt completion, and lexical scope. The historical
+AWSC branch's `eval`-based predicate reduction is not a safe static reachability rule for
+mutable state variables. Use a definition- and state-aware analysis before
+removing a branch or case; an unknown predicate keeps both successors.

@@ -70,6 +70,14 @@ flag encodes whether a transformation is expected.
 
 ## Directory breakdown
 
+### `test/scripts/` — command-line script tests
+
+`render-vm-switch.test.js` exercises the saved-model and source-input forms of
+[`scripts/render-vm-switch.mjs`](vm-switch-boundary.md#inspecting-the-switch-handoff).
+It checks the generated switch text, compares the encoded and step-one arithmetic programs
+under the same host bindings, and refuses to overwrite an existing artifact. Tests for
+`src/utility/` remain in `test/utility/`.
+
 ### `test/sojsonv7/` — end-to-end plugin test
 
 `sojsonv7.test.js` → one case `sample_189`, run through `getPluginResult(PluginSojsonV7,
@@ -245,6 +253,58 @@ builder for a fixture triple encodes, decodes, runs both and compares `TEST_OUTP
 **refuse to write the triple when the source sets no `TEST_OUTPUT` at all**. That guard is not
 optional: the first run of one compared `undefined` against `undefined` and reported a pass.
 Build it per [probes.md](probes.md)'s conventions; it needs the encoder's `dist/`.
+
+### `test/vm/` — VM recovery
+
+Focused component tests mirror the source modules under `test/vm/jsconfuser-vm/` and
+`test/vm/switch/`. Behavior tests spanning the plugin, CLI, corpus harness, readability,
+and sequential coordination live in `test/vm/jsconfuser-vm/integration/`. Their inputs
+are in the adjacent `fixtures/` tree. The removed private VM-2 trial has no tests or
+implementation here. A future independent VM-2 benchmark needs a generated fixture
+with provenance alongside its decoder test.
+
+```text
+test/vm/
+├── jsconfuser-vm/
+│   ├── *.test.js       numeric frontend and standalone component contracts
+│   ├── integration/    adapter, CLI, corpus, readability and sequential checks
+│   └── fixtures/       reference, generated corpus, readability and sequential inputs
+└── switch/             shared typed model and source emission
+```
+
+Name files and folders for the behavior they test, never for a task ID, sequence number,
+or trial attempt. A fixture may include source, encoded input, oracle and expected result;
+Git records tracked bytes, so no separate SHA-256 sidecar is needed. Generated attempts
+and temporary review outputs belong outside the tracked test tree. The current corpus
+manifest records a historical generation run; its named generator is absent, so fresh
+coverage work must supply a maintained generator rather than claiming reproducibility.
+
+| Test file | Scope |
+|---|---|
+| [`vm/jsconfuser-vm/analyze-closure-lifetimes.test.js`](../../decoder/decode-js/test/vm/jsconfuser-vm/analyze-closure-lifetimes.test.js) | Component |
+| [`vm/jsconfuser-vm/analyze-exception-finally.test.js`](../../decoder/decode-js/test/vm/jsconfuser-vm/analyze-exception-finally.test.js) | Component |
+| [`vm/jsconfuser-vm/analyze-property-collections.test.js`](../../decoder/decode-js/test/vm/jsconfuser-vm/analyze-property-collections.test.js) | Component |
+| [`vm/jsconfuser-vm/analyze-scalar-values.test.js`](../../decoder/decode-js/test/vm/jsconfuser-vm/analyze-scalar-values.test.js) | Component |
+| [`vm/jsconfuser-vm/build-call-frames.test.js`](../../decoder/decode-js/test/vm/jsconfuser-vm/build-call-frames.test.js) | Component |
+| [`vm/jsconfuser-vm/build-cfg.test.js`](../../decoder/decode-js/test/vm/jsconfuser-vm/build-cfg.test.js) | Component |
+| [`vm/jsconfuser-vm/decode-standalone.test.js`](../../decoder/decode-js/test/vm/jsconfuser-vm/decode-standalone.test.js) | Component |
+| [`vm/jsconfuser-vm/diagnose-standalone.test.js`](../../decoder/decode-js/test/vm/jsconfuser-vm/diagnose-standalone.test.js) | Component |
+| [`vm/jsconfuser-vm/emit-call-completion.test.js`](../../decoder/decode-js/test/vm/jsconfuser-vm/emit-call-completion.test.js) | Component |
+| [`vm/jsconfuser-vm/emit-closure-exception.test.js`](../../decoder/decode-js/test/vm/jsconfuser-vm/emit-closure-exception.test.js) | Component |
+| [`vm/jsconfuser-vm/emit-structured-control.test.js`](../../decoder/decode-js/test/vm/jsconfuser-vm/emit-structured-control.test.js) | Component |
+| [`vm/jsconfuser-vm/extract-container.test.js`](../../decoder/decode-js/test/vm/jsconfuser-vm/extract-container.test.js) | Component |
+| [`vm/jsconfuser-vm/numeric-to-vm-switch.test.js`](../../decoder/decode-js/test/vm/jsconfuser-vm/numeric-to-vm-switch.test.js) | Component |
+| [`vm/jsconfuser-vm/partition-functions.test.js`](../../decoder/decode-js/test/vm/jsconfuser-vm/partition-functions.test.js) | Component |
+| [`vm/jsconfuser-vm/read-wordcode.test.js`](../../decoder/decode-js/test/vm/jsconfuser-vm/read-wordcode.test.js) | Component |
+| [`vm/jsconfuser-vm/validate-references.test.js`](../../decoder/decode-js/test/vm/jsconfuser-vm/validate-references.test.js) | Component |
+| [`vm/jsconfuser-vm/vm-copy-simplification.test.js`](../../decoder/decode-js/test/vm/jsconfuser-vm/vm-copy-simplification.test.js) | Component |
+| [`vm/jsconfuser-vm/integration/cli.test.js`](../../decoder/decode-js/test/vm/jsconfuser-vm/integration/cli.test.js) | Integration |
+| [`vm/jsconfuser-vm/integration/harness.test.js`](../../decoder/decode-js/test/vm/jsconfuser-vm/integration/harness.test.js) | Integration |
+| [`vm/jsconfuser-vm/integration/integration.test.js`](../../decoder/decode-js/test/vm/jsconfuser-vm/integration/integration.test.js) | Integration |
+| [`vm/jsconfuser-vm/integration/plugin.test.js`](../../decoder/decode-js/test/vm/jsconfuser-vm/integration/plugin.test.js) | Integration |
+| [`vm/jsconfuser-vm/integration/readability.test.js`](../../decoder/decode-js/test/vm/jsconfuser-vm/integration/readability.test.js) | Integration |
+| [`vm/jsconfuser-vm/integration/sequential.test.js`](../../decoder/decode-js/test/vm/jsconfuser-vm/integration/sequential.test.js) | Integration |
+| [`vm/switch/vm-switch-to-source.test.js`](../../decoder/decode-js/test/vm/switch/vm-switch-to-source.test.js) | Component |
 
 ## Testing against real encoder output
 

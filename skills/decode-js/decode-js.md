@@ -15,10 +15,12 @@ upstream obfuscator versions and issue numbers the pass was written against.
 
 ## Babel + isolated-vm Foundation
 
-decode-js is built on [Babel](https://babeljs.io/) for AST work and
-[isolated-vm](https://github.com/laverdet/isolated-vm) for safe evaluation — it has no
-custom parser or IR of its own. Every pass is a Babel-visitor-shaped object (or a
-factory returning one) applied with `traverse`:
+decode-js uses [Babel](https://babeljs.io/) for AST work and
+[isolated-vm](https://github.com/laverdet/isolated-vm) for safe evaluation. Its ordinary
+source-rewrite passes are Babel visitor objects applied with `traverse`. The target-local
+VM decoder is a separate pipeline: its stages accept source or analysis records and return
+new records or source. Some stages call Babel traversal internally, but none is registered
+as a traversal visitor. That pipeline has typed VM switch and machine IR contracts.
 
 - **`@babel/parser`** (`parse`) parses obfuscated source into a standard Babel AST.
   Almost every entry point passes `{ errorRecovery: true }` because obfuscated input is
@@ -85,7 +87,7 @@ and the isolate would only add a failure mode.
 
 This package is built incrementally (per
 [Studying a new encoder/decoder pair](../encoder-decoder-newpair.md)).
-The root file below is complete; supporting files are added one plugin/visitor
+The root file below is complete; supporting files are added one plugin, visitor, or VM stage
 at a time as each is studied against source.
 
 ```
@@ -96,10 +98,13 @@ skills/decode-js/
 ├── babel.md          Babel's Scope/Binding/NodePath semantics that several passes
 │                     depend on — parent-scope lookup, the three definition spellings,
 │                     name-is-not-identity, duplicate referencePaths, dead positions
+├── vm-switch-boundary.md  typed VM switch intermediate, numeric frontend adapter,
+│                     shared source backend, and future frontend requirements
 ├── plugins/          one file per dispatch target (obfuscator family) — the pass
 │                     pipeline it runs and the AST patterns it matches/reverses;
 │   └── <type>.md     common, obfuscator, obfuscatorx, sojson, sojsonv7, jjencode, awsc,
-│                     jsconfuser, plus eval (shared pack/unpack helper). See the roster below
+│                     jsconfuser, jsconfuser-vm, jsconfuser-vm-sequential, plus eval
+│                     (shared pack/unpack helper). See the roster below
 ├── visitors/         one file per reusable src/visitor/*.js pass — see the
 │   ├── <name>.md     Reusable Visitor Passes index below
 │   ├── atomic/       one file per src/visitor/atomic/*.js pass — single-rewrite,
@@ -111,6 +116,9 @@ skills/decode-js/
 │   │                 alongside decode-nexus's per-transform worklist
 │   └── obfuscator/   same, for src/visitor/obfuscator/*.js (the obfuscatorx entry)
 │       └── <name>.md
+├── transforms/
+│   └── jsconfuser-vm/ target-local frontend stages, ordered by information dependency;
+│       └── <shape>.md each shape has its own source and fixture boundary
 ├── tests.md          summary of test/ — Vitest config, harness, and fixture layout
 └── probes.md         how to build a throwaway probe against this decoder — the two
                       datasets and their regeneration recipe, plumbing skeletons, the
@@ -129,32 +137,43 @@ src/
 │   ├── sojsonv7.js           jsjiami.com.v7
 │   ├── jjencode.js           jjencode (utf-8.jp) — string-extraction + eval, not AST
 │   ├── awsc.js               fireyejs / bx-ua (225 algorithm)
+│   ├── jsconfuser-vm.js      target-local numeric VM recovery adapter
+│   ├── jsconfuser-vm-sequential.js  outer-to-VM source coordinator
 │   └── eval.js               pack/unpack helper for eval-wrapped payloads (not a -t type)
-└── visitor/                  reusable Babel visitor passes shared across plugins
-    ├── calculate-constant-exp.js     constant folding
-    ├── calculate-rstring.js          resolve r-string / .repeat-style constructions
-    ├── delete-extra.js               strip node .extra (raw literal formatting)
-    ├── delete-illegal-return.js      remove top-level IllegalReturn
-    ├── delete-nested-blocks.js       flatten redundant nested BlockStatements
-    ├── delete-unreachable-code.js    drop code after return/throw/break/continue
-    ├── delete-unused-var.js          prune unreferenced bindings
-    ├── lint-if-statement.js          normalize if bodies to BlockStatements
-    ├── merge-object.js               re-merge split object definitions
-    ├── parse-control-flow-storage.js decode control-flow "storage" object dispatch
-    ├── obfuscator/
-    │   └── parse-control-flow-storage.js obfuscatorx fork with numeric entries
-    ├── prune-if-branch.js            fold if() on constant tests
-    ├── remove-control-flow-ob.js     unflatten switch-based control flow
-    ├── split-assignment.js           split compound/sequence assignments
-    ├── split-sequence.js             split SequenceExpressions into statements
-    ├── split-variable-declaration.js split multi-declarator `var a,b,c`
-    └── split-variable-declarator.js  split a single declarator's chained init
+├── visitor/                  Babel visitor passes applied by plugin traversals
+│   ├── calculate-constant-exp.js     constant folding
+│   ├── calculate-rstring.js          resolve r-string / .repeat-style constructions
+│   ├── delete-extra.js               strip node .extra (raw literal formatting)
+│   ├── delete-illegal-return.js      remove top-level IllegalReturn
+│   ├── delete-nested-blocks.js       flatten redundant nested BlockStatements
+│   ├── delete-unreachable-code.js    drop code after return/throw/break/continue
+│   ├── delete-unused-var.js          prune unreferenced bindings
+│   ├── lint-if-statement.js          normalize if bodies to BlockStatements
+│   ├── merge-object.js               re-merge split object definitions
+│   ├── parse-control-flow-storage.js decode control-flow "storage" object dispatch
+│   ├── obfuscator/
+│   │   └── parse-control-flow-storage.js obfuscatorx fork with numeric entries
+│   ├── prune-if-branch.js            fold if() on constant tests
+│   ├── remove-control-flow-ob.js     unflatten switch-based control flow
+│   ├── split-assignment.js           split compound/sequence assignments
+│   ├── split-sequence.js             split SequenceExpressions into statements
+│   ├── split-variable-declaration.js split multi-declarator `var a,b,c`
+│   ├── split-variable-declarator.js  split a single declarator's chained init
+├── vm/
+│   ├── jsconfuser-vm/         numeric frontend and standalone coordinator
+│   └── switch/               source-independent VM switch model, control, and emitter
 └── utility/                  small shared helpers, imported by visitors and plugins alike
     ├── binding-def.js        resolve a binding to what it actually *defines*
     ├── check-func.js         `checkPattern` — subsequence "fingerprint" matching
     ├── logger.js             gated per-pass progress logging (off by default)
     └── safe-func.js          reference-count-gated deletion, literal/name reads, replace
 ```
+
+`vm/` is a top-level decoder subsystem because this repository already represents the
+decoder. Its `jsconfuser-vm/` frontend interprets that encoder's numeric VM, while
+`switch/` accepts the generalized VM switch model and emits JavaScript for any
+frontend that satisfies its contract. The corresponding focused tests mirror this split
+under `test/vm/`.
 
 `src/utility/` holds the four helpers every plugin family may draw on. `safe-func.js` is
 the one to reach for by default: `safeDeleteNode` is the reference-count-gated deletion
@@ -201,6 +220,8 @@ hand-tuned to one obfuscator family.
 | `jjencode`           | [jjencode](plugins/jjencode.md) | jjencode (utf-8.jp) |
 | `awsc`               | [awsc](plugins/awsc.md) | fireyejs / bx-ua (225) — not listed in README |
 | `jsconfuser`         | [jsconfuser](plugins/jsconfuser.md) | [js-confuser](../js-confuser/js-confuser.md) — flat sequence of shape-based passes, not the sandbox-assisted technique below; built incrementally, see the plugin doc for per-visitor status |
+| `jsconfuser-vm`       | [jsconfuser-vm](plugins/jsconfuser-vm.md) | [jsconfuser-vm](../js-confuser-vm/js-confuser-vm.md) — target-local numeric VM recovery with a result-aware CLI boundary |
+| `jsconfuser-vm-sequential` | [jsconfuser-vm-sequential](plugins/jsconfuser-vm-sequential.md) | [jsconfuser-vm](../js-confuser-vm/js-confuser-vm.md) — outer decode, strict parse, then numeric VM recovery |
 
 [eval](plugins/eval.md) (`plugin/eval.js`) is not a dispatch target: it exports
 `unpack`/`pack` used by `obfuscator`, `sojson`, and `sojsonv7` to peel an
@@ -223,6 +244,26 @@ get wrong in the other direction:
 - **The two entries are expected to disagree**, and that is the point of the split rather than a
   problem to reconcile. `obfuscator` stays available for anyone depending on its behaviour;
   `obfuscatorx` is free to refuse where the old one silently half-decodes.
+
+## Target-local `jsconfuser-vm` recovery
+
+This target is not another pass in the existing `jsconfuser` pipeline. Its decoder is a static,
+dependency-ordered composition that accepts one pinned numeric baseline and declines unsupported
+or incomplete containers atomically. The [plugin boundary](plugins/jsconfuser-vm.md) exposes the
+standalone result through `-t jsconfuser-vm`. The
+[sequential coordinator](plugins/jsconfuser-vm-sequential.md) accepts an outer decoder
+source result, parses it, and applies that VM boundary with exact-input rollback.
+
+The [decoder stage dependency map](plugins/jsconfuser-vm.md#decoder-stage-dependency-map) names every
+target-local transform document and its direct inputs. Each transform document's `## Source`
+section identifies its implementation modules. A future independent VM-2 benchmark has a
+[future transform contract](transforms/jsconfuser-vm/exact-inner-recovery.md), not an active
+decoder implementation.
+
+The predecessor stages are parse-only and return immutable records. Standalone diagnosis builds
+internal lookup maps from those records before final fresh-source emission; the public success or
+decline remains a single frozen transaction. The package's test and corpus boundary is
+summarized in the target-local VM section of [tests.md](tests.md).
 
 ## Reusable Visitor Passes (`src/visitor/`)
 
@@ -424,8 +465,14 @@ change is localized to one unit:
   prefix separates two *docs*, the scope separates two *commits*, and a basename does that
   alone. **So a forked pass must not reuse the basename it forked from**, or its commits are
   indistinguishable from the original's under `git log --grep`.
+- One `src/vm/<part>/<name>.js` module or its matching focused test:
+  `vm/<part>/<name>` — for example, `vm/jsconfuser-vm/read-wordcode` or
+  `vm/switch/vm-switch-model`. The part distinguishes the encoder-specific frontend from
+  the reusable switch backend. A change spanning several modules within one part uses
+  `vm/jsconfuser-vm` or `vm/switch`; a test or fixture change confined to that part
+  follows the same scope. Use a behavior name for the subject, not a task identifier.
 - Bare `decode-js` is reserved for genuinely package-wide changes: `main.js`/CLI,
   manually-edited tooling/dependency files (`package.json`, `README.md`, lint/CI
-  config), or anything spanning multiple plugins/visitors.
+  config), or anything spanning plugins, visitors, the VM frontend, and the shared backend.
 - `build`-type commits from automated dependency bumps (e.g. Dependabot) keep their
   own generated scope (`deps`, `deps-dev`) rather than being remapped to `decode-js`.

@@ -83,10 +83,16 @@ a per-transform or per-visitor file gets pulled in only when the work actually r
 | --- | --- | --- |
 | `encoder/javascript-obfuscator` | [javascript-obfuscator/javascript-obfuscator](https://github.com/javascript-obfuscator/javascript-obfuscator) | Obfuscator — read-only |
 | `encoder/js-confuser` | [MichaelXF/js-confuser](https://github.com/MichaelXF/js-confuser) | Obfuscator — read-only |
+| `encoder/js-confuser-vm` | [MichaelXF/js-confuser-vm](https://github.com/MichaelXF/js-confuser-vm) | VM obfuscator — read-only |
 | `decoder/decode-js` | [echo094/decode-js](https://github.com/echo094/decode-js) | Deobfuscator — editable |
+| `decoder/claude-vs-js-confuser` | [MichaelXF/claude-vs-js-confuser](https://github.com/MichaelXF/claude-vs-js-confuser) | Decoder corpus — read-only |
 
 Each submodule keeps its own license; this repository's terms cover the hub's own
 documentation only.
+
+`decoder/claude-vs-js-confuser` is a corpus of agent-generated, experiment-specific
+deobfuscators for JS-Confuser and JS-Confuser-VM; useful algorithms are re-derived into the
+editable `decode-js` engine rather than treated as a universal decoder.
 
 ## Contributing
 

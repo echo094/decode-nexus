@@ -2,23 +2,19 @@
 
 See @SKILL.md for complete repository skills and operational directives. It is the single
 copy: Standing Rules decide how a session is run, and Commit Conventions carry the commit
-format, sign-off and identity rules. The only thing this file owns is the one directive that
-is agent-specific — the session's default shape, below.
+format, sign-off and identity rules. This bootloader owns Claude-specific session defaults and
+tool mappings; shared roles and ownership live in [orchestration.md](skills/orchestration.md).
 
-**Default session shape: work directly.** Delegate to subagents only when the work will span
-sessions or compactions, when it holds two or more independently verifiable tasks with disjoint
-write scopes, or when the user asks — and then read `skills/orchestration.md` before the first
-task packet.
+**Default session shape: work directly for compact tasks.** Delegate substantial independent work
+before its investigation fills Main's context. Read [orchestration.md](skills/orchestration.md)
+before dispatching and follow its Main operating sequence. Preserve decision context rather than
+optimizing dispatch count or exact token cost.
 
-## Measuring a dispatched task
+Engineers and delivery architects edit and validate their assigned authoritative files. Main
+coordinates ownership, acceptance and Git operations; it need not translate architectural memos or
+rederive specialist reasoning. Advisory/review architects return findings under the same guideline.
 
-Claude Code's extractor is [`tools/measure-claude-code.py`](tools/measure-claude-code.py), and
-everything specific to this harness — where the transcripts are, why records fold by `requestId`,
-which fields carry each metric, what the window has to be passed as — is documented in its own
-header, beside the code that acts on it.
-
-    tools/measure-claude-code.py <session-dir> [--window 1000000] [transcript-id-prefix ...]
-
-**Run it; never read a subagent transcript into context**, since one will overflow the window it is
-meant to be measuring. Writing the finished row is `skills/orchestration.md`'s "Recording the
-dispatch"; the invariants behind the script are in `skills/orchestration-log.md`.
+Ordinary dispatches record a concise task brief, the child ID returned by the harness, report and
+acceptance. Starting sources are not a read allowlist. Rely on native history without locating or
+exporting transcripts as part of dispatch. Export is a separate task when requested; native history
+does not guarantee permanent retention or exact reproduction.

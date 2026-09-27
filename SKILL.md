@@ -35,7 +35,14 @@ All operational expertise, AST transformation rules, and submodule interactions 
   still hold, not merely diffed and read. Moving the pin first and reconciling afterward
   records an encoder claim nothing has verified, which is the gap a decode attempt exists to
   close. Full process: "Updating a Submodule's Commit Pin."
-- **Editable Decoders:** Decoder submodules (currently `decoder/decode-js`) may be
+- **Decoder Role Does Not Determine Mutability:** A decoder submodule may be an editable reusable
+  engine or a read-only evidence corpus; the role must be explicit in the hub registry and its
+  skill package.
+- **Read-Only Decoder Corpora:** Evidence submodules (currently
+  `decoder/claude-vs-js-confuser`) must not be modified, branched, or committed. Their
+  experiment-specific scripts are bounded prior art; useful deductions must be re-derived into an
+  editable decoder only after transfer evidence and the decoder's own acceptance gates.
+- **Editable Decoder Engine:** Decoder submodules (currently `decoder/decode-js`) may be
   modified — linting, fixes, and new decode capabilities are allowed — subject to:
   - **Branch inside the submodule first.** Create the branch *in that submodule's own
     repository*. Never hold submodule work on a hub branch, never commit from a detached HEAD.
@@ -44,13 +51,24 @@ All operational expertise, AST transformation rules, and submodule interactions 
 - **Project Independence:** Each skill package documents exactly one submodule, in isolation.
   Never cross-reference, assume, or depend on another project's code, coverage, or status — a
   skill file should read the same regardless of which other submodules exist here.
-  Cross-project observations belong in a separate note.
+  Cross-project observations belong in a parent-level hub study that hosts every project being
+  compared, never in one participant's own package. **For two decoders this includes capability
+  comparisons, algorithm-transfer or adoption lineage, readability conclusions, benchmark
+  summaries, and statements that one informed, outperformed, or was generalized into the other.**
+  Each decoder package documents only its own mechanism and independently verified boundary; it
+  must not name, link, summarize, or depend on the other decoder inside its own durable scope.
   - **Exception — decoder → encoder**, one-directional and narrow: a decoder package may
     reference the encoder it actually decodes, since a decode capability is only meaningful in
     terms of what it reverses. An encoder package must never reference a decoder, and
     decoder↔decoder or encoder↔encoder cross-references stay forbidden — **across** packages,
-    not *within* one, where sibling docs may freely link each other. Use real links, not
-    name-only text.
+    not *within* one, where sibling docs may freely link each other. The exception requires a real
+    link; name-only text is not a workaround for a forbidden cross-project reference.
+- **Ignored Evidence Is Never Durable:** Any ignored generated, probe, corpus, or task-session
+  tree is session-local staging only. Skills, checkpoints, reports, tests, and other tracked
+  documents must not name or link any path in that tree or depend on it for resumption. Promote
+  the accepted fact to tracked documentation/tests, or retain the bytes in a verified archive
+  identified by stable session metadata and a manifest digest; a later session must receive that
+  archive explicitly rather than resolving an old local path.
 - **Root File Scope:** Keep a skill package's root file about the workflow, not the plumbing,
   and name it after the skill (e.g. `js-confuser.md`) — a subfolder of files all named
   `SKILL.md` is unnavigable. It covers the parser/AST foundation, the package's own verified
@@ -203,12 +221,9 @@ Gate) — not a first step that gets reconciled afterward:
   the form of a hub↔submodule reference. The specifications Standing Rules points at.
 - [checkpoint-format](skills/checkpoint-format.md) — The layout `checkpoint.md` must hold, what
   never goes in it, and what a handoff owes. Read before writing to that file, in any session.
-- [orchestration](skills/orchestration.md) — Roles, write ownership, the task packet, and wave
-  integration for multi-agent work. Read **only** when the Orchestration Gate says the mode
-  applies.
-- [orchestration-log](skills/orchestration-log.md) — One row per dispatched task: model, effort,
-  peak context against the window, and what the run cost. The calibration data behind
-  orchestration's sizing rules; read when setting or challenging one.
+- [orchestration](skills/orchestration.md) — Roles, write ownership, direct recording into the
+  current partial bundle, evidence graduation, and wave integration for multi-agent work. Read
+  **only** when the Orchestration Gate says the mode applies.
 - [encoder-decoder-method](skills/encoder-decoder-method.md) — How to diagnose an existing
   decoder: the labelled rules, tiered by how often a session needs them. The required read.
 - [encoder-decoder-incidents](skills/encoder-decoder-incidents.md) — The bug or wrong plan
@@ -222,3 +237,11 @@ Gate) — not a first step that gets reconciled afterward:
   for the `encoder/js-confuser` obfuscator's AST patterns.
 - [decode-js](skills/decode-js/decode-js.md) — Plugin-by-plugin reference for the
   `decoder/decode-js` deobfuscator's Babel + isolated-vm decode passes.
+- [claude-vs-js-confuser](skills/claude-vs-js-confuser/claude-vs-js-confuser.md) — Read-only decoder
+  corpus algorithms, supplied examples, controls, and experiment registry.
+- [cross-decoder study](skills/cross-decoder-study.md) — Parent-level comparison of the pinned
+  corpus and editable decoder, including transfer boundaries, adoption decisions, and readability.
+- [js-confuser-vm study](skills/js-confuser-vm-study.md) — Target-specific cross-project method
+  dispositions, Phase-1 scope, and remaining acceptance debt for the pinned virtualization study.
+- [exact inner VM recovery](skills/decode-js/transforms/jsconfuser-vm/exact-inner-recovery.md) —
+  Proposed source-derived transform for a future independent VM-2 benchmark.

@@ -49,7 +49,7 @@ value.
 guards before either mapping applies — `isVariableIdentifier` (skip a non-reference
 identifier, e.g. a property key or import specifier name), `isDefiningIdentifier` (skip a
 declaration site itself), the `GEN_NODE` flag (skip `Finalizer`'s own synthetic literal-respelling
-identifiers — see that transform's Downstream Effects for why this guard has to exist),
+identifiers — see that transform's Later Stages for why this guard has to exist),
 `WITH_STATEMENT`, `reservedIdentifiers`/`reservedNodeModuleIdentifiers` (allow
 `module`/`exports`/`require` through unmapped when `target: "node"`),
 `options.globalVariables`, the transform's own `objectName`/`variableFunctionName`, then
@@ -75,7 +75,7 @@ node observes the mutation. Generates the whole rewritten program to a compact s
 ([`pack.ts#L226-L229`](https://github.com/MichaelXF/js-confuser/blob/31c5a47a79f97e4b4c2d4b2a8552c11a8b548fb0/src/transforms/pack.ts#L226-L229)):
 `{prependNodes}\nFunction({objectName}, {outputCode})({objectExpression});`.
 
-## 4. Downstream Effects
+## 4. Later Stages
 
 None currently documented — Pack is the last content-changing stage before `Integrity`
 (Order 37), and nothing has been found that further rewrites Pack's own wrapper output; a

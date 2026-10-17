@@ -106,10 +106,10 @@ later. Every *other* transform's own later-inserted marker calls are instead cle
 [Finalizer](finalizer.md)'s identical fallback, since it's the last stage that could still
 catch them.
 
-## 4. Downstream Effects
+## 4. Later Stages
 
 None currently documented — Preparation runs first (Order 0), so by definition every later
-stage's Downstream Effects entries are about what happens *to* Preparation's output, not
+stage's Later Stages entries are about what happens *to* Preparation's output, not
 what Preparation does to a later stage's.
 
 ## 5. Known Quirks

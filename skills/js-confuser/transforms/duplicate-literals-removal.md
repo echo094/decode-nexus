@@ -99,7 +99,7 @@ Key points, all confirmed against the pinned source (not inferred):
   is inserted at all
   ([`duplicateLiteralsRemoval.ts#L144`](https://github.com/MichaelXF/js-confuser/blob/31c5a47a79f97e4b4c2d4b2a8552c11a8b548fb0/src/transforms/extraction/duplicateLiteralsRemoval.ts#L144)).
 
-## 4. Downstream Effects
+## 4. Later Stages
 
 Three later encoder stages reshape this transform's own output before the file is done:
 

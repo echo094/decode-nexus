@@ -96,7 +96,7 @@ flowchart TD
    `{ph}_fnLength(fn, length)` helper if `preserveFunctionLength` is set — the
    same helper Dispatcher/RGF/Flatten can also emit.
 
-## 4. Downstream Effects
+## 4. Later Stages
 
 - **`DuplicateLiteralsRemoval` (Order 22)** extracts a mask key into its own shared array
   wherever it repeats, so a slot reads `stk[arr[4]]` instead of `stk["length"]` — including

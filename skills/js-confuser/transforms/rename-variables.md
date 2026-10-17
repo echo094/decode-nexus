@@ -12,7 +12,7 @@ data or control flow in its own right, in the sense that it doesn't hide a value
 branch — but reassigning *every* identifier in the program, including every other
 transform's own internal runtime-helper names, is exactly what makes name-based
 identification unsafe anywhere else in this pipeline; several other transforms' own
-Downstream Effects sections document the specific matchers this invalidates.
+Later Stages sections document the specific matchers this invalidates.
 
 ## 2. Algorithm
 
@@ -64,7 +64,7 @@ decided):
   ([`#L254-L280`](https://github.com/MichaelXF/js-confuser/blob/31c5a47a79f97e4b4c2d4b2a8552c11a8b548fb0/src/transforms/identifier/renameVariables.ts#L254-L280)):
   `false` for any `__NO_JS_CONFUSER_RENAME__`-prefixed name; unconditionally `true` for
   any placeholder-prefixed name (`__p_...`, see
-  [ObjectExtraction](object-extraction.md)'s Downstream Effects); `false` for an exported
+  [ObjectExtraction](object-extraction.md)'s Later Stages); `false` for an exported
   binding; otherwise gated by `options.renameGlobals` (if global) and
   `options.renameVariables`'s probability map.
 - **Picking the actual new name**
@@ -82,7 +82,7 @@ truly "in scope" for that purpose, not the whole function body. A `__JS_CONFUSER
 marker call is swapped for a plain `StringLiteral` of the resolved name directly, rather
 than being renamed like an ordinary reference.
 
-## 4. Downstream Effects
+## 4. Later Stages
 
 None currently documented — `RenameVariables` runs at Order 30, and the only later stages
 (`Finalizer` 35, `Pack` 36, `Integrity` 37) don't rewrite its renamed identifiers, they

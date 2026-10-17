@@ -40,11 +40,11 @@ and re-escapes every character below code point 128 as `\xHH` or `\uHHHH`
 [`toHexRepresentation`](https://github.com/MichaelXF/js-confuser/blob/31c5a47a79f97e4b4c2d4b2a8552c11a8b548fb0/src/transforms/string/stringEncoding.ts#L21-L33)/
 [`toUnicodeRepresentation`](https://github.com/MichaelXF/js-confuser/blob/31c5a47a79f97e4b4c2d4b2a8552c11a8b548fb0/src/transforms/string/stringEncoding.ts#L35-L47)).
 
-## 4. Downstream Effects
+## 4. Later Stages
 
 **`Pack` (Order 36) explicitly guards against this transform's `GEN_NODE` identifiers too**
 — the same fact and the same source citation as [finalizer.md](finalizer.md)'s own
-Downstream Effects, since both literal-respelling pieces share the identical `GEN_NODE`
+Later Stages, since both literal-respelling pieces share the identical `GEN_NODE`
 mechanism and Pack's guard checks the flag, not which transform set it.
 
 ## 5. Known Quirks

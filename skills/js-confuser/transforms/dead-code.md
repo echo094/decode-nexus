@@ -22,7 +22,7 @@ Nothing beyond the algorithm above — the template selection and predicate mech
 themselves live in [dead-code-templates.md](../templates/dead-code-templates.md) and
 [predicate-gen.md](../utils/predicate-gen.md), shared with `OpaquePredicates`.
 
-## 4. Downstream Effects
+## 4. Later Stages
 
 - **`OpaquePredicates` (Order 13)** wraps *every* `if` statement it visits, including this
   transform's own inserted guard, since `Order.DeadCode = 8` runs before it — so real

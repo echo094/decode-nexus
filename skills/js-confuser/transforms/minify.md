@@ -70,14 +70,14 @@ unreachable-code and implied-trailing-`return` removal in the shared
 → `var a = b`, via `trySimpleDestructuring`
 ([`minify.ts#L26-L63`](https://github.com/MichaelXF/js-confuser/blob/31c5a47a79f97e4b4c2d4b2a8552c11a8b548fb0/src/transforms/minify.ts#L26-L63)).
 
-## 4. Downstream Effects
+## 4. Later Stages
 
 None currently documented — Minify runs at Order 28, and no later stage (`AstScrambler`
 29, `RenameVariables` 30, `Finalizer` 35, `Pack` 36) has been found to rewrite its output
 in a way that matters. The relationship the other direction is the significant one: Minify
 is itself late enough to rewrite several *earlier* transforms' output out from under a
 matcher written against the un-minified shape — see
-[control-flow-flattening.md](control-flow-flattening.md)'s Downstream Effects for the
+[control-flow-flattening.md](control-flow-flattening.md)'s Later Stages for the
 three confirmed cases (while/for/with brace-stripping, computed-to-dot member rewrite,
 `return undefined` → bare `return`).
 

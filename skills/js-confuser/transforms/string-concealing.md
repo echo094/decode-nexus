@@ -36,7 +36,7 @@ prepended once regardless of block count — itself built on a
 sniff for `globalThis`/`global`/`window`/`Function("return this")()`, used to locate
 `TextDecoder`/`Buffer` if present (falling back to a hand-rolled `utf8ArrayToStr`).
 
-## 4. Downstream Effects
+## 4. Later Stages
 
 - **`RenameVariables` (Order 30)** renames every declaration independently, and can
   coincidentally collide two unrelated declarations onto the identical name — a block's

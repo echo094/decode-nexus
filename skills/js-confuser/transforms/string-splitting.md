@@ -16,7 +16,7 @@ string-literal chunks, random chunk sizes: `"hello"` → `"he" + "ll" + "" + "o"
 
 Nothing beyond the algorithm above — this is a genuinely small transform.
 
-## 4. Downstream Effects
+## 4. Later Stages
 
 None currently documented.
 

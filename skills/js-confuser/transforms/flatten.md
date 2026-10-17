@@ -40,7 +40,7 @@ The accessor object's shape tags how each original reference was used:
 | `typeof outer` | `get "k"(){ return typeof outer }` |
 | `outer(...)` direct call | `"k"(...a){ return outer(...a) }` |
 
-## 4. Downstream Effects
+## 4. Later Stages
 
 - **`RenameVariables` (Order 30)** assigns a name to every binding independently, so it can
   hand the identical string to both an outer free variable this transform's accessor

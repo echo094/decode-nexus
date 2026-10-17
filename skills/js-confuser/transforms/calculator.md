@@ -57,7 +57,7 @@ of *distinct* operators actually rewritten (1 to 4), never one case per call sit
 the function is never inserted at all
 ([`calculator.ts#L62-L65`](https://github.com/MichaelXF/js-confuser/blob/31c5a47a79f97e4b4c2d4b2a8552c11a8b548fb0/src/transforms/calculator.ts#L62-L65)).
 
-## 4. Downstream Effects
+## 4. Later Stages
 
 - **`StringConcealing` (Order 17)** conceals *every* string literal in the program
   indifferently, including this transform's own operator-key strings — a switch case's

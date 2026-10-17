@@ -94,7 +94,7 @@ through this path at all — their arity was never in question. A **Program-leve
 of whether any block actually dispatches a function — an empty no-op if
 `preserveFunctionLength` is off, the real template otherwise.
 
-## 4. Downstream Effects
+## 4. Later Stages
 
 - **`VariableMasking` (Order 20)** masks this transform's own generated scaffolding too,
   not just user code: `createFunction`'s local `var fnLength = fnLengths[name];`, and this

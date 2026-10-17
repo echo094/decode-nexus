@@ -93,7 +93,7 @@ flowchart TD
     E --> F["original becomes:\nreturn {ph}_rgf[i].apply(this,[{ph}_rgf,arguments])"]
 ```
 
-## 4. Downstream Effects
+## 4. Later Stages
 
 None of RGF's own inserted nodes (the array, the eval-wrapper function, the call site) are
 `path.skip()`-protected, unlike [Lock's](lock-integrity.md) — so they're exposed to every

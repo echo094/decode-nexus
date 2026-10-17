@@ -47,7 +47,7 @@ applies the decision — a removed `LabeledStatement` is replaced by its own bod
 a renamed one keeps its structure with a new label name; every `break`/`continue` that
 referenced it is updated to match (label cleared, or renamed to the same new name).
 
-## 4. Downstream Effects
+## 4. Later Stages
 
 None currently documented.
 

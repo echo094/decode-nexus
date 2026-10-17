@@ -84,7 +84,7 @@ object, so every merge point across the whole file shares the same helper. Only
 `ExpressionStatement`s are ever merged — directives such as `"use strict"` don't parse as
 one, and declarations/control flow aren't expressions at all.
 
-## 4. Downstream Effects
+## 4. Later Stages
 
 - **`RenameVariables` (Order 30)** renames the shared no-op helper's name, with no
   functional or structural effect — nothing about this transform's own output is

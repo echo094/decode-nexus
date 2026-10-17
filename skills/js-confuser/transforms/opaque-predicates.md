@@ -21,7 +21,7 @@ built; the same generator backs [DeadCode](dead-code.md)'s own guard.
 
 Nothing beyond the algorithm above and `PredicateGen`'s own mechanics.
 
-## 4. Downstream Effects
+## 4. Later Stages
 
 None currently documented.
 

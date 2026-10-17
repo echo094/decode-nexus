@@ -282,7 +282,7 @@ Every function this pass modified is marked `UNSAFE` afterward
 (`functionsModified`, `L1825-1827`) — later transforms in the pipeline won't
 touch the flattened bodies.
 
-## 4. Downstream Effects
+## 4. Later Stages
 
 - **`RenameVariables` (Order 30)** reassigns *every* identifier — including CFF's own
   runtime helper names (`_cff_sum`, `_cff_slice`, `_cff_xor`, `_strings`,

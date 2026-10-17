@@ -46,7 +46,7 @@ Nothing beyond the algorithm above and the shared sniffer template
 ([string-concealing.md](string-concealing.md)) — the switch/decoy generation is a single
 mechanism with no further sub-cases.
 
-## 4. Downstream Effects
+## 4. Later Stages
 
 - **`StringConcealing` (Order 17)** can conceal this transform's own switch-case key
   strings and `realName` arguments, same as any other string literal in the program.

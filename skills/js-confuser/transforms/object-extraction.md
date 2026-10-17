@@ -42,7 +42,7 @@ Naming: `newObjectName = {ph}_{originalName}`; each property's flat name is
 `{newObjectName}_{propertyKey}` if `propertyKey` is a valid identifier, else
 `{newObjectName}_{ph}`.
 
-## 4. Downstream Effects
+## 4. Later Stages
 
 **`RenameVariables` (Order 30) unconditionally renames every placeholder-prefixed
 identifier this transform produces.** `shouldRename()` returns `true` unconditionally for

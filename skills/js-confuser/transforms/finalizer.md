@@ -77,7 +77,7 @@ constructing a fresh literal node, which has no `extra` to begin with) — worth
 since it's the reason a prior "nothing to build" description of both of these specifically
 was wrong, unlike most of this project's other genuinely-free cosmetic transforms.
 
-## 4. Downstream Effects
+## 4. Later Stages
 
 **`Pack` (Order 36) explicitly guards against both literal-respelling pieces' own
 `GEN_NODE` identifiers.** Pack's `Identifier: exit` visitor

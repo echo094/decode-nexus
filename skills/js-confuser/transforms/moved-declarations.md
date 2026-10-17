@@ -6,7 +6,7 @@ Source: [`transforms/identifier/movedDeclarations.ts`](https://github.com/Michae
 Because Order 25 runs **after** ControlFlowFlattening (Order 24), everything CFF emits —
 its `_main` declaration, its entry harness — reaches later stages already rewritten by
 this transform. Anything reading that output has to expect both forms (see
-[control-flow-flattening.md](control-flow-flattening.md)'s Downstream Effects).
+[control-flow-flattening.md](control-flow-flattening.md)'s Later Stages).
 
 ## 1. Target
 
@@ -107,7 +107,7 @@ so the guard is always taken. It's prepended to the **top of the body**, not to 
 declaration stood — any adjacency between that declaration and the statements that
 followed it is lost.
 
-## 4. Downstream Effects
+## 4. Later Stages
 
 **`Minify` (Order 28) re-spells Mechanism 1's output twice**, and it runs after this
 transform (Order 25), so what a reader of finished output sees is the *composition*, not

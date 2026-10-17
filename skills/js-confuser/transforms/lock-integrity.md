@@ -208,7 +208,7 @@ flowchart TD
     F --> G["rewrite foo's body to the\nhash-check-then-call wrapper"]
 ```
 
-## 4. Downstream Effects
+## 4. Later Stages
 
 **Lock (`Order.Lock = 3`) runs early, but most of its output turns out immune to later
 reshaping.** `lock.ts`'s own `Block: exit` visitor calls `path.skip()` on every
@@ -226,7 +226,7 @@ exception: it's inserted via plain `prependProgram`, not `applyLockToBlock`, so 
 [**GlobalConcealing** (Order 12)](global-concealing.md) does reach into it, wrapping
 every native call site in a call to the `NativeFunctionTemplate` checker.
 
-**Integrity (`Order.Integrity = 37`) has no downstream effects** — it is the encoder's
+**Integrity (`Order.Integrity = 37`) has no later stages** — it is the encoder's
 last stage; nothing runs after it, so its own output is never reshaped.
 
 ## 5. Known Quirks

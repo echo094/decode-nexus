@@ -62,7 +62,7 @@ case. This is `E-directive-rehoist-nested-residual` in [versions.md](../versions
 **The removal walk is scoped to the current node, not the program**, so a directive recorded for
 scope A is only ever removed from within A.
 
-## 4. Downstream Effects
+## 4. Later Stages
 
 Nothing meaningful runs after it. It shares `Finalizing`'s first level with
 [escape-sequences.md](escape-sequences.md), and the two do **not** collide even though they look

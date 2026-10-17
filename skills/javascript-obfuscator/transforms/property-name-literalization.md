@@ -89,7 +89,7 @@ Position-by-position detail:
 The constructor exemption is semantic, not cosmetic: a computed key never designates a class
 constructor, so literalizing it would change what the class does rather than how it reads.
 
-## 4. Downstream Effects
+## 4. Later Stages
 
 **The three positions do not share a downstream fate.** A literal in a **computed** position is
 eligible for concealment; a **non-computed

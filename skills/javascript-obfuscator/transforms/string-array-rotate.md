@@ -136,7 +136,7 @@ renamed `convert` → `convertIntegerNumberData` (`2.10.4`), a parameter type re
 (`2.13.0`). None changes the emitted shape, and the corpus agrees: `2.10.0`, `2.11.1` and `2.12.0`
 emit the same rotator signature.
 
-## 4. Downstream Effects
+## 4. Later Stages
 
 | Later | Effect on this transform's output |
 |---|---|

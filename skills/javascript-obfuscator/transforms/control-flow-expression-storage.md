@@ -149,7 +149,7 @@ The wrapper cache remains keyed only by arity until `5.4.3`, so mixed same-arity
 optional calls can still select the wrong wrapper; that is a later reuse-key axis, not this body's
 syntax boundary.
 
-## 4. Downstream Effects
+## 4. Later Stages
 
 | Later pass | What it does to this transform's output | Era |
 |---|---|---|

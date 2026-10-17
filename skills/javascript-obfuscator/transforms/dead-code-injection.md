@@ -83,7 +83,7 @@ the branch the test does not take, along with the rest of the clone.
 non-zero `stringArrayThreshold` when one was not given — so a sample carrying this transform always
 carries a string array too.
 
-## 4. Downstream Effects
+## 4. Later Stages
 
 | Later stage | What it does to this transform's output |
 |---|---|

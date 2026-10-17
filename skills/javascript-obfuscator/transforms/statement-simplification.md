@@ -103,7 +103,7 @@ one release apart, which is the only shape movement this component has inside ph
 — so a bare `return;` terminates the run and keeps its block. That is the difference between a
 function ending `return x;` and one ending `return;`, and it is invisible in the output.
 
-## 4. Downstream Effects
+## 4. Later Stages
 
 `Simplifying` is stage 9 of 10, so almost nothing runs after it. What does:
 

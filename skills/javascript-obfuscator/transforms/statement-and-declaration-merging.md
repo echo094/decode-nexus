@@ -64,7 +64,7 @@ transform without the other gives the wrong picture of what the output contains.
 No era-tagged rows: neither transformer's emitted shape moves anywhere in the read range
 (`2.9.6` – `5.5.0`). See [versions.md](../versions.md)'s `E-adjacent-merge-*`.
 
-## 4. Downstream Effects
+## 4. Later Stages
 
 | Later stage | Effect on this transform's output |
 |---|---|

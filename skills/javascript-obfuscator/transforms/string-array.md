@@ -157,7 +157,7 @@ counting statements in the body is matching a spelling rather than the shape.
 contributed by whichever scope calls wrapper the use site was routed through, and it is inert for
 the root wrapper. It is recorded here because it changes the emitted index arithmetic.
 
-## 4. Downstream Effects
+## 4. Later Stages
 
 The `StringArray` stage is late — 8 of 10 — so little follows it, but what does is load-bearing.
 

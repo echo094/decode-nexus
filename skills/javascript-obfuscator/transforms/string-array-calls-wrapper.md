@@ -106,7 +106,7 @@ says `const`, the corpus prints `var`.
 having on the axis now because it is a *reversion* — the self-replacement that arrived at `2.15.4`
 is removed again at `4.2.0`. The self-replacing signature is therefore non-monotonic across eras.
 
-## 4. Downstream Effects
+## 4. Later Stages
 
 | Later | Effect on this transform's output |
 |---|---|

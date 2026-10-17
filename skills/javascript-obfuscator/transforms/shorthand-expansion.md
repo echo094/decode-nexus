@@ -55,7 +55,7 @@ decides which non-static top-level cases participate.
   bypasses the Program-scope skip. Wrapped static-block controls therefore already expand on both
   sides of the focused boundary.
 
-## 4. Downstream Effects
+## 4. Later Stages
 
 | Later stage | What it does to this transform's output |
 |---|---|

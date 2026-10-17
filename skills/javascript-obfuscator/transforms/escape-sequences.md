@@ -66,7 +66,7 @@ rotate-function fragment that `StringArrayRotateFunctionTransformer` builds thro
 private pipeline and then marks ignored ([order.md](../order.md)). The cache is what stops that
 fragment's literals being double-escaped.
 
-## 4. Downstream Effects
+## 4. Later Stages
 
 `EscapeSequenceTransformer` is in the **last** node stage, in its first level. Two things follow it:
 

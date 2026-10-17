@@ -68,7 +68,7 @@ and rewriting them would change what it is handed.
   The distinction is therefore source-readable only on a synthetic invalid untagged AST; every
   valid input emits the same concatenation on both sides.
 
-## 4. Downstream Effects
+## 4. Later Stages
 
 | Later stage | What it does to this transform's output |
 |---|---|

@@ -82,7 +82,7 @@ from `2.15.2` a `ThisExpression` is collected too, under the reserved name `'thi
 **An empty object is never extracted** — the length check precedes everything, so `{}` in the source
 stays `{}`.
 
-## 4. Downstream Effects
+## 4. Later Stages
 
 | Later stage | What it does to this transform's output |
 |---|---|

@@ -187,7 +187,7 @@ does contain array reads. So the wrappers of that scope are part of the string-a
 rather than of the program, and the rotator's comparison operands are calls to them rather than to
 the root wrapper.
 
-## 4. Downstream Effects
+## 4. Later Stages
 
 | Later | Effect on this transform's output |
 |---|---|

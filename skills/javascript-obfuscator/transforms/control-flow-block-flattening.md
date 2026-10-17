@@ -94,7 +94,7 @@ written in modern style is essentially never flattened — verified by encoding 
 twice, once with `var` and once with `const`: the `var` spelling produces two flattened blocks and
 the `const` spelling produces none.
 
-## 4. Downstream Effects
+## 4. Later Stages
 
 ### The controller literal rarely survives as a literal
 

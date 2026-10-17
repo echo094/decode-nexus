@@ -62,7 +62,7 @@ the malformed `extends!![]` or `extends![]` forms captured by the focused adjace
 `2.10.0`, when it became a public default passed in by the caller — the same value, so the emitted
 expression is unchanged.
 
-## 4. Downstream Effects
+## 4. Later Stages
 
 | Later stage | What it does to this transform's output |
 |---|---|

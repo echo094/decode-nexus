@@ -138,7 +138,7 @@ contains a nested function, the later era's contains none.
 lowercase before the domain-lock group places its helper. Focused `5.4.0`/`5.4.1` cases check the
 changed and control forms; their browser-like harness is not a browser-platform claim.
 
-## 4. Downstream Effects
+## 4. Later Stages
 
 **Everything in this doc is emitted at stage 2, so eight later stages rewrite it.** That is the
 defining fact about these shapes: unlike a transform that runs late, a custom code helper is

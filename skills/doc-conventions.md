@@ -90,12 +90,12 @@ an invented one is not.
   line citations, data structures. Whatever a doc puts under a heading like "Stage
   1/2/3" beyond the high-level approach belongs here, not in Algorithm. Where an era
   differs only here, it is a tagged row, not a second doc.
-- **4. Downstream Effects (encoder) / Upstream Effects (decoder)** — one slot and one
-  principle, mirrored: **what another pass in the same project's pipeline does to the
-  shapes this one has to live with.** Each side names the other party by its position in
-  *its own* pipeline, which is why the two halves have opposite names — an encoder runs
-  forwards, a decoder runs the same ground in reverse.
-  - **Encoder — Downstream Effects.** What a *later* encoder stage does to this
+- **4. Later Stages (encoder) / Input Shapes (decoder)** — one slot and one principle,
+  mirrored: **where a shape this pass handles comes from, or goes to, outside the pass.**
+  The two halves record one interaction from opposite ends, each named for what it holds:
+  an encoder doc says what later stages do to its output; a decoder doc says what its
+  input holds that it did not make.
+  - **Encoder — Later Stages.** What a *later* encoder stage does to this
     transform's own output, derived from the stage order
     (`encoder-decoder-method.md`'s W1) rather than discovered only after a decoder breaks
     on it. Harvest an existing decoder-doc bug writeup first (rename-proofing, minify
@@ -104,8 +104,10 @@ an invented one is not.
     an order is rarely a flat list to read off, and where it is assembled from per-stage
     dependencies a reordering leaves no trace in a changelog. One such change rewrites
     this item for many transforms at once, which is why it is carried as rows.
-  - **Decoder — Upstream Effects.** What an *earlier decoder pass* does to this pass's
-    input. A decoder pass is not only a consumer of encoder output: it emits shapes of
+  - **Decoder — Input Shapes.** Every shape in this pass's input that the pass did not
+    make: what encoder stages left there (and what later encoder stages made of it), and
+    what an *earlier decoder pass* emitted; each row names its producer. A decoder pass
+    is not only a consumer of encoder output: it emits shapes of
     its own, and every pass scheduled after it inherits them. Reading the encoder's stage
     order tells you which *encoder* residue is still in your input; it says nothing about
     what your own pipeline put there, and that has repeatedly been the actual blocker —
@@ -130,8 +132,8 @@ an invented one is not.
     branch is written. Worked example and its incident:
     [decode-js/visitors/jsconfuser/dispatcher.md](decode-js/visitors/jsconfuser/dispatcher.md).
   - **Fixing one is a different decision from documenting it.** An encoder is read-only,
-    so a Downstream Effect can only ever be worked around. An Upstream Effect has a
-    second option the encoder side lacks: change the pass that *emits* the shape. Prefer
+    so a Later Stages entry can only ever be worked around. An input shape our own pass
+    emits has a second option the encoder side lacks: change the pass that *emits* it. Prefer
     that when the shape is ours — it fixes every pass the shape defeats at once, whereas
     teaching each affected matcher to tolerate it is the same fix re-paid per consumer
     (`encoder-decoder-method.md`'s T1, "fix it at the pass that produces it").
@@ -145,8 +147,8 @@ an invented one is not.
   discrepancy, a dead code path) — never a bug to fix. A decoder's gaps are usually
   fail-closed incompleteness, not wrongness, and are meant to close eventually. Once a
   gap closes, it leaves this section — the durable fact it revealed graduates into
-  Algorithm, Implementation, or item 4 (Downstream Effects on the encoder side, Upstream
-  Effects on the decoder side), whichever level it actually sits at. A closed decoder gap
+  Algorithm, Implementation, or item 4 (Later Stages on the encoder side, Input Shapes
+  on the decoder side), whichever level it actually sits at. A closed decoder gap
   lands in item 4 more often than it looks: if what blocked the pass was a shape another
   of our passes emits, the durable fact is that dependency, not the matcher tweak that
   absorbed it. The discovery narrative (dates, how it was found, before/after numbers)
@@ -299,7 +301,7 @@ versions are the unit throughout.
   | 1. Target | never diverges — if the purpose changed it is a different transform |
   | 2. Algorithm | **split into a separate doc and code file** |
   | 3. Implementation | era-tagged table rows |
-  | 4. Downstream/Upstream Effects | era column on the spellings table |
+  | 4. Later Stages / Input Shapes | era column on the spellings table |
   | 5. Known Quirks / Known Gaps | era-scoped entry |
   | `## Fixtures` | era column |
 

@@ -26,7 +26,7 @@ params/body out of the decoded sub-program by cross-reference (the destructured 
 names, the inner function's own name) rather than fixed statement order, since none of
 RGF's inserted nodes in the sub-program are `path.skip()`-protected either — later
 encode-side passes on the sub-program can reorder or reshape them the same way the outer
-program's scaffolding is exposed (see the encoder doc's Downstream Effects).
+program's scaffolding is exposed (see the encoder doc's Later Stages).
 
 **Verified safe under `RenameVariables` for a reason specific to RGF.**
 `extractReplacementFn` does compare several captured (not hardcoded) names and splices a
@@ -117,7 +117,7 @@ arguments]) }`) with no rest param at all, which `function-length.js` checks for
 call-site match is unaffected regardless, since it matches the function's own body shape,
 not how it's referenced.
 
-## 4. Upstream Effects
+## 4. Input Shapes
 
 **The call site's array index reaches this matcher as folded arithmetic, not as a literal.**
 RGF is encoder Order 4 and `Calculator` is Order 9, so Calculator runs *later* on the encode

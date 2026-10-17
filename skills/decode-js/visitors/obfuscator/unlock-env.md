@@ -64,7 +64,7 @@ references. If the wrapper contains an unrelated effect, only the proven interva
 removed. After guard removal the Program scope is crawled before debug-protection references are
 read, keeping Babel's derived binding state consistent with the live tree.
 
-## 4. Upstream Effects
+## 4. Input Shapes
 
 | Input spelling | Producer | Era | Requirement |
 |---|---|---|---|

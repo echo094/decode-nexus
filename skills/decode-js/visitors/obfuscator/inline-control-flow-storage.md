@@ -50,7 +50,7 @@ values. After accepted replacements and removal, the visitor crawls from the Pro
 pre-string-array slot changes references used by a later detector, and a local crawl would leave
 enclosing bindings describing the tree from before the rewrite.
 
-## 4. Upstream Effects
+## 4. Input Shapes
 
 | Spelling reaching this pass | Produced by | Whose | Era |
 |---|---|---|---|

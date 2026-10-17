@@ -23,7 +23,7 @@ decode-js pass reverses any of the three rewrites that leave less-readable outpu
 
 Nothing jsconfuser-specific implemented.
 
-## 4. Upstream Effects
+## 4. Input Shapes
 
 **Preparation rewrites every non-computed member access to a computed string-keyed one
 (`object.foo` → `object["foo"]`), and that spelling is what the rest of this pipeline reads.**

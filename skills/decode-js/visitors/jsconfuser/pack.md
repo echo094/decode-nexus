@@ -63,7 +63,7 @@ the encoder placed *before* the wrapper are untouched by construction, since onl
 statement is ever read or replaced — verified empirically with a leading `import`
 statement ahead of the wrapper.
 
-## 4. Upstream Effects
+## 4. Input Shapes
 
 **None inbound** — Pack is the pipeline's first pass, so no decoder pass of ours has
 touched its input. What it owes the rest of the pipeline is the inventory of what it

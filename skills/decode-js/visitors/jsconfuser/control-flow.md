@@ -108,7 +108,7 @@ literal resolver above needs as input:
   redundant label — `parseDispatcher` accepts both shapes, and every label check
   downstream already treats a `null` label as "don't check." Built on the shared
   `parseWhileSwitch`, which also accepts the `while` body with or without its
-  `BlockStatement` wrapper — `Minify` (see encoder doc's Downstream Effects) strips it for
+  `BlockStatement` wrapper — `Minify` (see encoder doc's Later Stages) strips it for
   a single-statement body, printing `while(x)switch(y){...}` with no braces.
 
 **`interpretBlockGroup(group, vector, statesName, switchLabel)`** interprets one matched
@@ -125,7 +125,7 @@ obvious ones:
   gives the node `type: 'throw'`, and `foldBranchesInGraph`'s `emitChain` ends the chain on
   it exactly as it does for a `return`.
 - **Reading a goto whose partition `AstScrambler` dissolved** (a later encoder stage —
-  see the encoder doc's Downstream Effects). "Goto pair" is the shape this transform
+  see the encoder doc's Later Stages). "Goto pair" is the shape this transform
   *prints* on the encode side — one `ExpressionStatement` wrapping a `SequenceExpression`
   of state updates, then `break` — but AstScrambler can merge that into a no-op call
   spreading the sequence into flat arguments, so the goto reaches this decoder in one of
@@ -165,7 +165,7 @@ the scope-parent chain only to collect every ancestor's own `propertyName` into 
 object, so a reference from any nesting depth is always this same two-level shape. Each
 key is read through the shared `readScopeMemberKey`, which accepts both the encoder's
 native bracketed-string form (`scope["x"]`) and the dot-notation form `Minify` (see
-encoder doc's Downstream Effects) rewrites it to whenever the key is also a valid
+encoder doc's Later Stages) rewrites it to whenever the key is also a valid
 identifier — safe to treat as plain-string either way only because this runs *after*
 `undoLiteralEntanglementInGraph`. Needs state shared **across the whole graph**, not
 per-node (the same `(scopeProperty, varName)` pair is read from multiple blocks and must
@@ -362,7 +362,7 @@ function declared with no parameters decodes to a body that reads nothing from t
 arguments, and giving it `(...argName)` regardless invents a parameter the source never had —
 free to drop, since a rest parameter contributes nothing to `fn.length` and a name nothing
 reads cannot be observed. `dropTrailingDeadReturn` above is the same move on the body's other
-end, and both exist for the same reason — [dispatcher.js](dispatcher.md)'s Upstream Effects
+end, and both exist for the same reason — [dispatcher.js](dispatcher.md)'s Input Shapes
 owns the account of what each was defeating, per the rule that the affected pass's own doc
 holds the fact.
 
@@ -388,7 +388,7 @@ function is the one currently being flattened — a return physically inside an 
 nested function's own portion of the table doesn't meet that, so it stays a plain `return
 value;`. `parseReturnValue` now tries the wrapped shape first and falls back to the
 argument as-is. Separately, an argument-less `return;` — CFF's own `return undefined;`
-terminator as `Minify` (see encoder doc's Downstream Effects) reprints it — resolves to
+terminator as `Minify` (see encoder doc's Later Stages) reprints it — resolves to
 `null`, and every caller carries that through as "returns undefined" rather than as an
 unrecognized shape, since treating it as a match failure fails the whole enclosing
 application closed.
@@ -569,7 +569,7 @@ deletes the wrapper. Three design points:
 3. **Deletion is by paths collected before any mutation, not `safeDeleteNode`** — a
    preference, not a requirement: every count this collapse needs has just been verified, so
    the reference-count re-check would add nothing. `safeDeleteNode` is safe to call here (see
-   Upstream Effects for what a wrapper-body rewrite does and does not do to a binding).
+   Input Shapes for what a wrapper-body rewrite does and does not do to a binding).
 
 **Dispatcher-closure residue is not collapsed here, and must not be.** CFF stacked on
 Dispatcher wraps an already-decoded interpreter body in a dispatcher-nested-function
@@ -608,7 +608,7 @@ evidence of its own.
    AST** — see point 1 under "Collapsing the call harness" above; the same reasoning
    applies to any future decode path that might set or clear it.
 
-## 4. Upstream Effects
+## 4. Input Shapes
 
 **This decode's candidate scan only finds anything because
 [`deMovedDeclarations`](moved-declarations.md) has already run.** Candidates are

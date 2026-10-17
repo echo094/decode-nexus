@@ -21,7 +21,7 @@ loop/switch/block unlabeled.
 
 Nothing implemented.
 
-## 4. Upstream Effects
+## 4. Input Shapes
 
 None, and not for want of looking: item 3 implements nothing, so there is no input in this
 pipeline for an earlier pass to reshape. Nothing would change this — the section stays empty

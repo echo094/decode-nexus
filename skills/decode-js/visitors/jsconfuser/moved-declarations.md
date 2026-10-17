@@ -19,7 +19,7 @@ function is not a `FunctionDeclaration` at all, so every decode pass that identi
 structure by declaration shape stops seeing it — silently, and without any runtime symptom,
 since the packed code is perfectly correct. That makes this pass a prerequisite for those,
 which is why it is scheduled early; each affected pass records the dependency in its own
-Upstream Effects section rather than it being enumerated here (the
+Input Shapes section rather than it being enumerated here (the
 [ControlFlowFlattening decode](control-flow.md) is the one that has actually been bitten).
 
 `matchPackedFunctionGuard` requires the exact emitted shape, fail-closed on anything else:
@@ -82,7 +82,7 @@ them is a parameter binding — the collision class that hit
 [variable-masking.js](variable-masking.md)/[string-concealing.js](string-concealing.md)
 cannot occur here.
 
-## 4. Upstream Effects
+## 4. Input Shapes
 
 **This pass's one structural decline is invisible in the output because
 [dispatcher.js](dispatcher.md) runs later and removes the shapes it declines on.**

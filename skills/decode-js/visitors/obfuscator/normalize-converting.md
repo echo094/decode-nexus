@@ -79,7 +79,7 @@ so step 2 needs no exclusion list, only the identifier-form gate.
 `export { foo }` — an `ExportSpecifier` whose `local` and `exported` names match — so there is no
 node to rewrite, and the generator already prints the short form.
 
-## 4. Upstream Effects
+## 4. Input Shapes
 
 | Earlier pass | What this one inherits | Era |
 |---|---|---|

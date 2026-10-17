@@ -74,7 +74,7 @@ There's also no cross-scope splice of the kind that broke [flatten.md](flatten.m
 renaming — the dead function and its guard are deleted outright, never merged into another
 scope.
 
-## 4. Upstream Effects
+## 4. Input Shapes
 
 Two shapes this matcher has to read reach it from the
 [ControlFlowFlattening decode](control-flow.md), not from the encoder — this pass is
@@ -105,7 +105,7 @@ residue still disappears. The dependency is real and worth keeping even though t
 is gone: if a dispatcher ever declines again, this shape comes back, and it will look like a
 defect in this matcher rather than in the pass that owns it.
 
-Distinct from all three, and *not* an upstream effect: the dead helper is as often `var X;` +
+Distinct from all three, and *not* an input shape from another pass: the dead helper is as often `var X;` +
 `X = function () {…}` as the `FunctionDeclaration` the encoder emitted. That split is the
 encoder's own MovedDeclarations (Order 25, later than
 [DeadCode](../../../js-confuser/transforms/dead-code.md)'s Order 8), whose variable half

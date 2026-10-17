@@ -25,7 +25,7 @@ local variable), because the array's own `VariableDeclarator` doesn't own a scop
 occur here.
 
 **Two spellings are matched, not one**, because `MovedDeclarations` (a later encoder stage
-— see the encoder doc's Downstream Effects) can rewrite the array's own declaration into a
+— see the encoder doc's Later Stages) can rewrite the array's own declaration into a
 hoisted bare declaration plus a separate assignment. Both entry points require the binding
 to be assigned at most once — an array whose contents can change has no fixed element for
 a read to resolve to, and substituting the initializer's element anyway would be wrong
@@ -106,7 +106,7 @@ needed — every matched array name is cleaned up from `Program: exit`'s own sco
 alone because it didn't match) is correctly kept rather than deleted out from under its
 still-live reference.
 
-## 4. Upstream Effects
+## 4. Input Shapes
 
 **A fraction of this array's own reference sites are unreadable until our CFF decode has run,
 which is what forces two slots.** `ControlFlowFlattening` is encoder Order 24 against

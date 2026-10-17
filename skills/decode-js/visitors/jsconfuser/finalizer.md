@@ -60,7 +60,7 @@ for all of them). Reusing the shared visitor rather than forking a jsconfuser-sp
 copy was a deliberate call; this is jsconfuser's decode pipeline's first actual import of
 the file.
 
-## 4. Upstream Effects
+## 4. Input Shapes
 
 **This pass is a no-op on everything the other decode passes produce, and that is why it is safe
 to run unconditionally.** `delete-extra.js` strips a parser-preserved `extra.raw` so the

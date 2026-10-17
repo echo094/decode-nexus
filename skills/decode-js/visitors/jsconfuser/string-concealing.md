@@ -53,7 +53,7 @@ included.
 
 **Flattening independently-scoped declarations into one shared eval scope re-introduces
 name collisions the real program doesn't have**, whenever `RenameVariables` (see encoder
-doc's Downstream Effects) happens to give two unrelated declarations the same generated
+doc's Later Stages) happens to give two unrelated declarations the same generated
 name — legitimate and unambiguous in the real program (disambiguated by actual scope
 nesting), but a genuine same-scope collision once concatenated into flat bundle text.
 Guarded two ways: the dependency-collection step keys by the declaration's own AST node,
@@ -128,7 +128,7 @@ block that uses it. Deletion is deferred to `Program: exit` and retried to a fix
 rather than discovered incrementally. A wrapper whose call sites weren't *all*
 successfully resolved is excluded from the cleanup pool entirely — it's still needed.
 
-## 4. Upstream Effects
+## 4. Input Shapes
 
 The wrapper this pass matches rarely arrives in the shape the encoder emitted. Two of the
 three spellings item 3 accepts are produced by passes ahead of this one in our own pipeline,

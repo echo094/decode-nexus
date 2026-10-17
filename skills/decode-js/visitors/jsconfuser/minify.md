@@ -52,7 +52,7 @@ shapes) and removed along with the now-meaningless `arrowFunc` plumbing it fed i
 failure mode as [DuplicateLiteralsRemoval](duplicate-literal.md) and
 [StringConcealing/GlobalConcealing](string-concealing.md) hit before it.
 
-## 4. Upstream Effects
+## 4. Input Shapes
 
 **None of its own — there is no pass here to have any.** No dedicated visitor exists (see
 Source), so nothing in this pipeline has an input for an earlier pass to reshape. The two
@@ -62,7 +62,7 @@ generic passes that absorb Minify's reversible half —
 dependencies in their own docs.
 
 This is not the same slot as what Minify does to *other* decoders' input. That is a
-Downstream Effect of an encoder stage, it is item 2's whole subject here, and the sweep item
+Later Stages entry of an encoder stage, it is item 2's whole subject here, and the sweep item
 3 records is how far it was chased.
 
 ## 5. Known Gaps
@@ -73,7 +73,7 @@ targets, so that decoder's matchers see Minify's output, not the pre-minify shap
 likely written and tested against. Two of its rewrites are confirmed hazards that already
 broke a real decoder and are now tolerated — the encoder-side fact lives in
 [control-flow-flattening.md](../../../js-confuser/transforms/control-flow-flattening.md)'s
-Downstream Effects, the current tolerance in [control-flow.md](control-flow.md)'s
+Later Stages, the current tolerance in [control-flow.md](control-flow.md)'s
 `parseWhileSwitch`/`readScopeMemberKey` (brace-stripping + computed-to-dot member rewrite)
 and `parseReturnValue` (`return undefined` → bare `return`):
 

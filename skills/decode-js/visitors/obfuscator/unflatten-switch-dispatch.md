@@ -94,7 +94,7 @@ string expression beside a real scope directive unless this pass recognizes the 
 - The old empty spelling and the new retained spelling converge on the same reconstruction; there
   is no version branch.
 
-## 4. Upstream Effects
+## 4. Input Shapes
 
 | Shape | Producing pass | Ours or the encoder's | Era |
 |---|---|---|---|
@@ -147,7 +147,7 @@ storage read has been inlined. Scheduling this pass first makes it inert, not wr
 
 **That constraint makes this pass a member of a fixpoint group rather than a stage in a line.** The
 storage reversal re-opens Converting work when it inlines a string into computed-member-key
-position ([normalize-converting.md](normalize-converting.md)'s Upstream Effects), so the group —
+position ([normalize-converting.md](normalize-converting.md)'s Input Shapes), so the group —
 Converting, storage, folding, this pass — repeats until the tree stops moving. Two of this pass's
 own preconditions are why it has to sit *inside* that loop rather than after it: an un-flattened
 outer block can expose an inner one that was not a `while { switch; break }` when the round began,

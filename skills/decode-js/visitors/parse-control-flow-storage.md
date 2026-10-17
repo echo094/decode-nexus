@@ -52,7 +52,7 @@ chance at. A pipeline that runs property-spelling normalization once, before thi
 exactly those keys computed — and no census of *that* pass can see it, because the shape is created
 after it reported clean. Schedule the two as a group that repeats until the tree stops moving. The
 worked instance is
-[obfuscator/normalize-converting.md](obfuscator/normalize-converting.md)'s Upstream Effects.
+[obfuscator/normalize-converting.md](obfuscator/normalize-converting.md)'s Input Shapes.
 
 ## Known Gaps
 

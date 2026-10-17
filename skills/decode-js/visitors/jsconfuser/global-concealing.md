@@ -80,7 +80,7 @@ this reads the initializer from the declarator *or* from a single `=` write to t
 before `safeDeleteNode` removes those writes. More than one write and it declines: there is
 then no one initializer to read.
 
-## 4. Upstream Effects
+## 4. Input Shapes
 
 **This pass matches nothing at its early slot on a `high` sample, and the second visit that
 fixes that cannot sit where the obvious argument puts it.** The switch function is inside the

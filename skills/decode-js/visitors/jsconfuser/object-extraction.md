@@ -5,7 +5,7 @@
 No decoder exists for
 [ObjectExtraction](../../../js-confuser/transforms/object-extraction.md), and — on the
 default, preset-based path — building one would decode nothing: per the encoder doc's own
-Downstream Effects, `RenameVariables` unconditionally scrubs every placeholder-prefixed
+Later Stages, `RenameVariables` unconditionally scrubs every placeholder-prefixed
 name this transform produces, in all three built-in presets, before output is ever
 generated.
 
@@ -39,12 +39,12 @@ naming convention.
 
 Nothing implemented.
 
-## 4. Upstream Effects
+## 4. Input Shapes
 
 None — item 3 implements nothing, so no pass here has an input for an earlier one to
 reshape. The dependency that decides this transform's fate is an *encoder*-side one
 (`RenameVariables` at Order 30 scrubbing the placeholder naming, item 2), which is a
-Downstream Effect on the encoder's side of the pipeline and does not belong in this slot.
+Later Stages entry on the encoder's side of the pipeline and does not belong in this slot.
 
 ## 5. Known Gaps
 

@@ -157,7 +157,7 @@ generated wrapper (a 0-param top-level function: `if(hasInvoked) return; hasInvo
 true; userFn();`, with `hasInvoked` resolved to a sibling `var ... = false` by binding,
 not name text).
 
-## 4. Upstream Effects
+## 4. Input Shapes
 
 **tamperProtection's call sites reach this pass in a shape
 [GlobalConcealing](global-concealing.md)'s decode leaves behind, not the encoder's.** When

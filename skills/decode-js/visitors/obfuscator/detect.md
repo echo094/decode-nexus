@@ -159,7 +159,7 @@ What remains in `foreignWrappers` after that is the genuine blocker: a function 
 machinery with non-constant arguments that is *not* a resolvable scope wrapper. Control-flow
 storage is the expected shape, and nothing in the corpus or the fixtures produces one yet.
 
-## 4. Upstream Effects
+## 4. Input Shapes
 
 | Spelling reaching this pass | Produced by | Whose | Era |
 |---|---|---|---|

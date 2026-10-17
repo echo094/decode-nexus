@@ -186,7 +186,7 @@ on exactly the high-strength samples that matter most.
 **Decoded values are cached by `(wrapper, argument text)`.** The same index recurs across a
 program, and once the rotation has run the wrappers are pure with respect to the array.
 
-## 4. Upstream Effects
+## 4. Input Shapes
 
 | Spelling reaching this pass | Produced by | Whose | Era |
 |---|---|---|---|

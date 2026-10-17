@@ -102,7 +102,7 @@ rewriting walks `binding.referencePaths` (identity-based, not name text), and th
 Program-level cleanup resolves the helper from Program's own scope, which can't legally
 hold two independent bindings under the same renamed text.
 
-## 4. Upstream Effects
+## 4. Input Shapes
 
 Three passes run ahead of this one; each is listed with what it actually does to this
 matcher's input, not merely that it precedes it.

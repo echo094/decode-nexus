@@ -34,7 +34,7 @@ back to a single literal with zero residue, since the fold never inspects that n
 Nothing jsconfuser-specific — see `calculate-constant-exp.md` for the shared fold's own
 mechanics.
 
-## 4. Upstream Effects
+## 4. Input Shapes
 
 The fold itself is generic, but its *input* is manufactured by two earlier jsconfuser
 passes, and on a real `high` sample nothing folds until both have run. Both are properties

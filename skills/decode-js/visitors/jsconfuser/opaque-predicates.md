@@ -77,7 +77,7 @@ deeply nested the predicate expression itself is, so a single `Program: exit` pa
 the Program's own scope is enough — no per-candidate scope tracking needed here (contrast
 with [dead-code.js](dead-code.md), whose dead function can live in any nested block).
 
-## 4. Upstream Effects
+## 4. Input Shapes
 
 **This pass is scheduled twice, and on a `high` sample the early slot has no population.** The
 predicate does not exist as a reachable expression until the ControlFlowFlattening decode has

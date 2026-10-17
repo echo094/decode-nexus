@@ -24,12 +24,12 @@ no benefit.
 
 **Must run after `StringConcealing` and after `DuplicateLiteralsRemoval`'s late pass** —
 both later encoder stages can reshape the operator-key strings this decoder needs to read
-as plain literals (see the encoder doc's Downstream Effects). Wired accordingly: right
+as plain literals (see the encoder doc's Later Stages). Wired accordingly: right
 after `StringConcealing`'s two passes, so every switch case's `test` is already a plain
 `StringLiteral` again by the time this visitor runs.
 
 **Resolve this function's binding from `fnPath.scope.parent`, never `fnPath.scope`** — the
-shadowing-parameter collision under `RenameVariables` (see Downstream Effects), and the
+shadowing-parameter collision under `RenameVariables` (see Later Stages), and the
 invisible total non-decode it produces, are [babel.md](../../babel.md)'s first section. **This
 pass is where that bug was confirmed**, which is why the requirement is stated at algorithm
 level here rather than left to item 3.
@@ -71,7 +71,7 @@ capture is needed — every matched function name is cleaned up from `Program: e
 scope via `safeDeleteNode`, gated on `resolveBindingFunction` rather than on the declaration
 form.
 
-## 4. Upstream Effects
+## 4. Input Shapes
 
 **This pass needs two visits, and for a `high` sample only the second one does anything.**
 At its early slot the dispatch function is still inside the ControlFlowFlattening

@@ -36,7 +36,7 @@ source to an isolate, and re-spelling that source before it gets there buys noth
 | Operation | `delete node.extra`, unconditional |
 | Reports | nothing. It has no change channel, so a caller running to a fixpoint cannot count it |
 
-## 4. Upstream Effects
+## 4. Input Shapes
 
 | Shape reaching this pass | Producing pass | Ours or the encoder's | Era |
 |---|---|---|---|

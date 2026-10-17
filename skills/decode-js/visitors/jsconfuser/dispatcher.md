@@ -127,7 +127,7 @@ Every string-valued key (`fns`'s per-function keys, the `returnAsObjectProperty`
 is read through a small `keyName` helper accepting either a plain `Identifier` or a
 `StringLiteral` — `Preparation` unconditionally normalizes non-computed keys to
 quoted/computed form, and `Minify` can convert a valid-identifier string key back
-afterward (see encoder doc's Downstream Effects).
+afterward (see encoder doc's Later Stages).
 
 `parseCreateFunction` validates the `nonCall` branch's `createFunction` helper shape. It
 was documented here as confirming the template "not because anything here affects
@@ -270,7 +270,7 @@ that is correct S3 cleanup arriving under a narrow name, not a misattribution to
 against. What it must *not* be widened to is empty *variadic* functions: a surviving rest
 parameter means some pass invented one (item 4), and the fix belongs at that pass.
 
-## 4. Upstream Effects
+## 4. Input Shapes
 
 **How completely [variable-masking.js](variable-masking.md) unmasked an entry decides
 whether this pass can reconstruct it at all.** An entry's original `var [a, b] = payload`

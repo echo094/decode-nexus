@@ -25,7 +25,7 @@ delete the now-dead extracted function.
 **Splicing a resolved outer reference back in needs a hygiene check first.** The name
 `substituteFlatAccess` reads for an accessor property is captured as a bare string; with
 real source names it can never coincide with a name already bound inside the function
-being inlined, but `RenameVariables` (see the encoder doc's Downstream Effects) assigns
+being inlined, but `RenameVariables` (see the encoder doc's Later Stages) assigns
 names independently per binding and can hand the identical string to both. Before
 splicing, the substitution checks whether that name currently resolves (from the
 substitution site) to a binding living *inside* the extracted function's own scope tree
@@ -116,7 +116,7 @@ it already satisfies `function-length.js`'s `hasRestParam` guard directly —
 `processStackParam` resolves the real param count from the `{ph}_fnLength(fn, length)`
 call's second argument.
 
-## 4. Upstream Effects
+## 4. Input Shapes
 
 **`readFlatObjectProps` demands a non-computed key, and an earlier pass of ours guarantees a
 computed one.** The gate is `!t.isObjectMethod(prop) || prop.computed || !t.isStringLiteral(

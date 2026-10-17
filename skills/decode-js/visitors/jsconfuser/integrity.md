@@ -71,7 +71,7 @@ collected *before* it's removed, and a successful removal enqueues those referen
 further candidates. `safeDeleteNode` itself re-checks reference counts at deletion time,
 so a name only clears the queue once nothing else in the program still calls it.
 
-## 4. Upstream Effects
+## 4. Input Shapes
 
 **[Pack](pack.md) only**, and that is deliberate rather than incidental — item 2 has why the
 least-processed input is the right one here. On a packed sample nothing this matcher looks

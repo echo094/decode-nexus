@@ -35,7 +35,7 @@ section rather than repeating the audit here (e.g. [control-flow.md](control-flo
 
 Nothing implemented, and nothing to implement — see Algorithm.
 
-## 4. Upstream Effects
+## 4. Input Shapes
 
 None — item 3 implements nothing, so no pass here has an input for an earlier one to
 reshape. The reason this file exists at all runs the other way: `RenameVariables` is a

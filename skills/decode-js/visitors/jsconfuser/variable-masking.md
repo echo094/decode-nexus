@@ -263,7 +263,7 @@ mask keys (`UnaryExpression{-, NumericLiteral}`, one of the encoder's three rand
 styles) are recognized via `safeGetName` delegating to `safeGetLiteral`, a shared helper
 used across the jsconfuser visitors.
 
-## 4. Upstream Effects
+## 4. Input Shapes
 
 Both shapes item 2 has to un-mask *besides* the encoder's own come from the
 [ControlFlowFlattening decode](control-flow.md), and the two scheduling dependencies below

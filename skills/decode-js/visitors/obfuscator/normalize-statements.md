@@ -62,7 +62,7 @@ Returns a stats object — per-rewrite counts, `rounds`, and `cappedOut` — whi
 [`src/utility/logger.js`](../../decode-js.md), not `console.error`; individual declines are not
 logged as progress.
 
-## 4. Upstream Effects
+## 4. Input Shapes
 
 **Nothing of ours runs before it**, which is the point — it is scheduled first precisely so that
 no later matcher has to tolerate the packed spellings. What it must tolerate is the encoder's own

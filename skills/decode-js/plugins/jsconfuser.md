@@ -214,7 +214,7 @@ positions as they get added, rather than a strict reversal:
     that is not the param, and case tests still spelled as `{ph}_STR_N(a, b)` calls. Those
     are cleared by VariableMasking, then StringConcealing, then the fold after it — so this
     pass sits *after all three*, later than every other member of this block. See
-    [global-concealing.md](../visitors/jsconfuser/global-concealing.md)'s Upstream Effects.
+    [global-concealing.md](../visitors/jsconfuser/global-concealing.md)'s Input Shapes.
 
     One pass in this block runs *only* here: **`deScopeAnchorCleanupInit()`**
     (`control-flow-graph.js`), which drops the `scope[scopeProperty] = {}` statements
@@ -241,7 +241,7 @@ positions as they get added, rather than a strict reversal:
     declaration and rewrites call sites back to direct calls/references. Needs
     `variable-masking.js`'s pass above to have already reversed VariableMasking's
     rest-param masking on the dispatcher function's own signature (see that visitor
-    doc's "Upstream Effects", which also covers why this pass drives `unmaskStack`
+    doc's "Input Shapes", which also covers why this pass drives `unmaskStack`
     itself rather than waiting for it).
 
     Immediately after it, **`deCffHelperCleanupInit()`** (`control-flow-graph.js`) runs a

@@ -32,7 +32,7 @@ correct regardless of who wrote it.
 ## 3. Implementation
 
 The two visitors are scheduled inside the group documented at
-[unflatten-switch-dispatch.md](unflatten-switch-dispatch.md)'s Upstream Effects, and the ordering
+[unflatten-switch-dispatch.md](unflatten-switch-dispatch.md)'s Input Shapes, and the ordering
 constraint is real in both directions:
 
 - the string-array decode **must** precede them, because both test operands are five-character
@@ -45,7 +45,7 @@ constraint is real in both directions:
 **So `prune-if-branch` does double duty**, and neither role is optional. Removing it from the group
 leaves both this transform's residue and flattened blocks the un-flattener rightly declines.
 
-## 4. Upstream Effects
+## 4. Input Shapes
 
 | Earlier pass | What this reversal inherits | Era |
 |---|---|---|

@@ -100,5 +100,5 @@ algorithm.
 | string-array refusal cases | `unreadable` refuses, while `absent` does not | the era attached to each visitor fixture |
 
 The shared harness must check both emitted output and live Babel-derived state. A golden alone does
-not satisfy the Encoder/Decoder Method's S6 contract; plugin cases require the one-AST consistency
+not satisfy the Encoder/Decoder Method's [F3](../../encoder-decoder-method.md#f3-keep-tree-and-derived-state-consistent) contract; plugin cases require the one-AST consistency
 oracle described in [tests.md](../tests.md).

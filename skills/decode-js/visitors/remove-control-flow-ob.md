@@ -89,7 +89,7 @@ that decided the fork and why three of them are worse than declining.
 **None, and the absence is the point rather than an oversight.** This visitor has no committed
 cases at all, in a repository where three plugins depend on it. What stands in for coverage today
 is one encoder's corpus, and Known Gaps above is a list of behaviours that corpus cannot reach —
-which is the shape of evidence W7 warns about: a pass validated only against one
+which is the shape of evidence [F7](../../encoder-decoder-method.md#f7-a-shared-pass-needs-off-path-cases) warns about: a pass validated only against one
 encoder's whole output is not proven sound, because the gaps are exactly the inputs that encoder
 cannot produce, so every census reads clean and the pass looks proven.
 

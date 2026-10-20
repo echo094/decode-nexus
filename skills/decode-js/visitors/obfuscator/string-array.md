@@ -56,7 +56,7 @@ encode wraps the first's whole output, so peeling is outermost-first and each la
 single-encode once it is outermost — but the dangerous failure there is a pass mutating the layer
 *beneath* it, and stopping at the boundary is what makes that boundary observable. Layers also
 need not come from the same encoder, so no single decoder can internalise the loop
-([encoder-decoder-method.md](../../../encoder-decoder-method.md)'s W1 limiting case); it would
+([P1](../../../encoder-decoder-method.md#p1-work-in-reverse-encoder-stage-order-each-stage-placed-by-its-last-write)); it would
 loop for a homogeneous stack and hand back for a foreign one, which is two behaviours where the
 caller wants one.
 

@@ -74,7 +74,7 @@ those declarators so they shadow nothing.
 Reading this condition as `unmaskDestructuredRest`'s and reusing it verbatim was the earlier
 choice, and it cost a run of dispatchers: the sibling's rule is about *its* rewrite, and copying a
 guard is not the same as copying the reason for it
-([encoder-decoder-method.md](../../../encoder-decoder-method.md) T3).
+([F4](../../../encoder-decoder-method.md#f4-keep-a-guard-only-where-a-real-case-needs-it)).
 
 **Because reconstruction *rebuilds* the entry rather than editing it, none of this mutates
 the tree.** The rebuilt function is a fresh `FunctionDeclaration` built from the collected
@@ -266,7 +266,7 @@ semantics to preserve, and `safeDeleteNode`'s reference count is what makes the 
 so the shape does not need to identify *which* scaffolding it is. It does mean the sweep
 collects unrelated empty orphans — a DeadCode-injected wrapper whose guard
 [dead-code.js](dead-code.md) removed, leaving nothing behind it, is the case that occurs — and
-that is correct S3 cleanup arriving under a narrow name, not a misattribution to guard
+that is correct [M2](../../../encoder-decoder-method.md#m2-measure-residue-what-an-encoder-stage-added-and-the-decode-left) cleanup arriving under a narrow name, not a misattribution to guard
 against. What it must *not* be widened to is empty *variadic* functions: a surviving rest
 parameter means some pass invented one (item 4), and the fix belongs at that pass.
 
@@ -285,7 +285,7 @@ invalid, and that marking is scoped to *value substitution* — nothing can be s
 into `stk[3]++`. It says nothing about un-masking: `unmaskStack` never reads `invalid`,
 promoting each remaining slot to a real local instead, which `_local++` satisfies. Reading
 the marking as an inherent limit is the trap
-([encoder-decoder-method.md](../../../encoder-decoder-method.md) T3 — a guard outlives the
+([F4](../../../encoder-decoder-method.md#f4-keep-a-guard-only-where-a-real-case-needs-it) — a guard outlives the
 operation it was written for, and `++` updates are its own worked example).
 
 **The missing premise, not a defect, is what kept that step out of reach — so this file
@@ -351,7 +351,7 @@ the emitter:
 
 Fixing any of them here would have been the reflex and would have bought only this matcher;
 all three shapes reached every consumer of a reconstructed function
-([encoder-decoder-method.md](../../../encoder-decoder-method.md) T9's case 1).
+([D4](../../../encoder-decoder-method.md#d4-fix-the-producer-not-the-consumer)'s case 1).
 
 **A fourth belongs with them, and it is the one this file got wrong for longest: the
 dispatcher's own holder.** Two of the three statement forms item 3 accepts are emitted by
@@ -377,7 +377,7 @@ comes next. Two gates here still read the spelling instead:
   closure written as an initialized declarator. **Building a closure evaluates neither body
   nor defaults**, so the two are equally inert and the refusal protects nothing — a guard
   outliving the operation it was written for
-  ([encoder-decoder-method.md](../../../encoder-decoder-method.md) T3).
+  ([F4](../../../encoder-decoder-method.md#f4-keep-a-guard-only-where-a-real-case-needs-it)).
 
 **Censused, and both are latent: `isInertAboveUnpack` refuses none of the sites that have an
 unpack line with statements above it** — read over the tree as it stands at the `rgf`
@@ -401,7 +401,7 @@ been taken here, including the two call-site spellings that collapse was scoped 
 (the 3-arg `asObject`/`new` wrap and the memoized `nonCall` reference, both of which
 `matchCallSite` has always handled, the wrap inline via its `wrapCandidate` read). The
 general form is
-[encoder-decoder-method.md](../../../encoder-decoder-method.md) T8's first in-tree check:
+[D1](../../../encoder-decoder-method.md#d1-read-the-tree-and-its-docs-before-you-probe-or-propose)'s first in-tree check:
 **look for a matcher that already resolves the entity before building a second path to it**;
 a fail-closed duplicate leaves no trace at all, so nothing but a census finds it.
 
@@ -427,7 +427,7 @@ addressed by a surviving `X.prop = {}` anchor that `deScopeAnchorCleanupInit` di
 This fails closed. **All three of these were invisible while the `body[0]` read was in place**
 — those entries declined before anything looked at what they captured or what parameters they
 carried, so the preconditions never had to be stated, and making the unpack line locatable is
-what surfaced them ([encoder-decoder-method.md](../../../encoder-decoder-method.md) T7's first
+what surfaced them ([F5](../../../encoder-decoder-method.md#f5-one-fix-is-never-the-whole-fix)'s first
 multiplicity: an outer bail-out masks everything downstream, and the two it was hiding
 appeared as *wrong output*, not as declines).
 
@@ -436,8 +436,7 @@ already run, and the dependency is invisible until they have.** With the block s
 assignment-held dispatchers, a batch of them declined at the three role reads — a role's test
 rewritten to `!("s" in fn) && flagArg === "key"`, or its branch body padded with a dead helper
 and its guarded call. DeadCode is encoder Order 8 and OpaquePredicates Order 13, both *later*
-than Dispatcher's Order 6, so [encoder-decoder-method.md](../../../encoder-decoder-method.md)
-W1 said a later stage invalidates this matcher's assumptions and W4's first corollary said to
+than Dispatcher's Order 6, so [P1](../../../encoder-decoder-method.md#p1-work-in-reverse-encoder-stage-order-each-stage-placed-by-its-last-write) said a later stage invalidates this matcher's assumptions and its corollary said to
 remove that residue before tuning anything here, warning the symptom might not survive it. It did not: teaching [opaque-predicates.js](opaque-predicates.md) and
 [dead-code.js](dead-code.md) to recognise their own anchor again raised the match count
 substantially with **no change to this file at all**. That is the durable shape of the

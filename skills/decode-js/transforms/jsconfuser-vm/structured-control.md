@@ -136,7 +136,7 @@ coverage cannot cure their projection limits or make unmodeled property exceptio
 
 ## Source
 
-Line ranges below were read at decoder revision `66f79bd3b6335e2b002a94ddefca919305ea19dd`;
+Line ranges below were read at decoder revision `9885dc709d3fba53dc2a7e8cf07574d0074a53c8`;
 emit-structured-control.js is named by function.
 Moving decoder files are linked relatively; the item-3 procedures name the exact mechanisms.
 
@@ -147,7 +147,7 @@ Moving decoder files are linked relatively; the item-3 procedures name the exact
 | [structured-control-contract.js](../../../../decoder/decode-js/src/vm/jsconfuser-vm/structured-control-contract.js) | Lines 1-66 schemas, cloning/freezing and equality. |
 | [structured-control-cfg.js](../../../../decoder/decode-js/src/vm/jsconfuser-vm/structured-control-cfg.js) | Lines 1-26 owned CFG indexes. |
 | [structured-control-exceptions.js](../../../../decoder/decode-js/src/vm/jsconfuser-vm/structured-control-exceptions.js) | Lines 1-34 H indexes; only states are consumed. |
-| [diagnose-standalone.js](../../../../decoder/decode-js/src/vm/jsconfuser-vm/diagnose-standalone.js) | Lines 365-429 K construction, census gate and model handoff, as items 3-4 explain. |
+| [diagnose-standalone.js](../../../../decoder/decode-js/src/vm/jsconfuser-vm/diagnose-standalone.js) | Lines 461-526 K construction, census gate and model handoff, as items 3-4 explain. |
 
 ## Fixtures
 

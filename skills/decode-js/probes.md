@@ -1,9 +1,12 @@
-# Probe Reference (`decoder/decode-js/sandbox-tests/`)
+# Probe Reference (external ephemeral probe workspace)
+
+In this page, `<probe-root>` is a caller-supplied ephemeral workspace. It is disposable staging,
+not a repository contract, and must never be a durable dependency or link target.
 
 A **probe** is a throwaway script that answers one question about the decoder — how many
 samples still carry a shape, which guard rejected them, what a stage emits — by reading real
 decoded output or by breadcrumbing a pass from the inside. Probes are how nearly every cause in
-this project was actually found ([encoder-decoder-method.md](../encoder-decoder-method.md) T6);
+this project was actually found ([D3](../encoder-decoder-method.md#d3-instrument-one-real-failure));
 the committed test suite ([tests.md](tests.md)) is what pins a fix once it exists.
 
 **This page is a recipe, not an inventory.** No probe is in git, and none should be: a probe is
@@ -15,8 +18,8 @@ belongs in the hub.**
 
 ## Where probes live
 
-Under `decoder/decode-js/sandbox-tests/`, untracked, and excluded through the submodule's own
-`info/exclude` (`sandbox-tests/`). A submodule's `.git` is a *file* pointing at the real gitdir,
+Under `<probe-root>`, untracked, and excluded through the submodule's own local `info/exclude`.
+A submodule's `.git` is a *file* pointing at the real gitdir,
 so that path is `<hub>/.git/modules/decode-js/info/exclude`, not
 `decoder/decode-js/.git/info/exclude` — `git rev-parse --git-dir` from the submodule prints it.
 That exclusion is **local to one working copy** — a fresh clone has neither the probes nor the
@@ -32,7 +35,7 @@ it.
 Every probe reads one of two things: the frozen corpus, or the decodes of it. Neither is
 committed, and neither needs to be — both rebuild from committed test-case sources.
 
-1. **`sandbox-tests/high-size/corpus/` — the frozen corpus.**
+1. **`<probe-root>/high-size/corpus/` — the frozen corpus.**
    Read every `.src.js` under `test/jsconfuser/` **and** `test/jsconfuser/rename-variables/`,
    encode each `RUNS` times (default 3) at `{ target: 'node', preset: 'high' }`, and write an
    `.obf.js`/`.src.js` pair per sample as `<name>.<i>.obf.js`.
@@ -46,14 +49,14 @@ committed, and neither needs to be — both rebuild from committed test-case sou
    **It needs `encoder/js-confuser/dist/` built** (`npm run build` there) — with the encode-side
    probes it is the only kind that requires the encoder at all. This is the long step; run it
    in the background. The encoder ships **CommonJS**, so an ESM probe reaches it through
-   `createRequire`, four levels up from `sandbox-tests/<group>/`:
+   `createRequire`, four levels up from `<probe-root>/<group>/`:
 
    ```js
    import { createRequire } from 'module'
    const require = createRequire(import.meta.url)
    const { obfuscate } = require('../../../../encoder/js-confuser/dist/index.js')
    ```
-2. **`sandbox-tests/mask/dec-cache/` — the decodes.**
+2. **`<probe-root>/mask/dec-cache/` — the decodes.**
    Run every corpus `.obf.js` through the current `PluginJsconfuser` and write
    **`<base>.dec.js`** — that suffix is the contract every static reader filters on, and the
    base name must match the corpus sample so a reader can pair a decode with its `.src.js`.
@@ -69,7 +72,7 @@ committed, and neither needs to be — both rebuild from committed test-case sou
 
 **Freeze before comparing, and don't compare across a re-freeze.** The encoder samples randomly,
 so two fresh encodes of the same source are not comparable and a fix can look like a regression
-or vice versa ([encoder-decoder-method.md](../encoder-decoder-method.md) S5). A regenerated
+or vice versa ([M3](../encoder-decoder-method.md#m3-freeze-the-corpus)). A regenerated
 corpus is *different obfuscated bytes*, so every figure measured against the old one becomes
 anecdote — re-measure rather than compare. This is also why **a measured figure is not worth
 recording in a doc**: it dies with the corpus it was taken against. Record the axis and the
@@ -85,9 +88,9 @@ in front of them. Ask which of the two a number is before deleting it.
 The A/B loop that works, for regression-checking a landed fix:
 
 ```sh
-node sandbox-tests/high-size/score.mjs > after.txt
+node <probe-root>/high-size/score.mjs > after.txt
 git stash push -- src test
-node sandbox-tests/high-size/score.mjs > before.txt
+node <probe-root>/high-size/score.mjs > before.txt
 git stash pop
 ```
 
@@ -99,8 +102,8 @@ The default shape, and the one to reach for first: no decode run, so it costs se
 answers "what survived, and in what spelling".
 
 ```js
-// node sandbox-tests/mask/<name>.mjs            # tallies
-// DUMP=<n> node sandbox-tests/mask/<name>.mjs   # print n full candidates
+// node <probe-root>/mask/<name>.mjs            # tallies
+// DUMP=<n> node <probe-root>/mask/<name>.mjs   # print n full candidates
 import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -138,7 +141,7 @@ rather than defaulting to something plausible.
 
 **A census over decoded output means nothing until the same census has been run over the
 `.obf.js` inputs.** The encoder emits dead code of its own, so a shape found in output is only
-*ours* if the control run does not also carry it — this is S3's "was it ever live in the input?"
+*ours* if the control run does not also carry it — this is [M2](../encoder-decoder-method.md#m2-measure-residue-what-an-encoder-stage-added-and-the-decode-left)'s "was it ever live in the input?"
 generalized past helpers to any residue. Build the control into the probe from the start (one
 `DIR=`/`EXT=` pair, one code path), because a census that cannot be pointed at the input is one
 that will be believed without the control.
@@ -298,7 +301,7 @@ Four rules follow, and the third is the one that gets got wrong:
   The cost is tens of megabytes in an ignored sandbox, against whole sessions of re-derivation.
 
 **And when a method rule lands, re-read the probes that feed it.** The recorded instance:
-[encoder-decoder-method.md](../encoder-decoder-method.md)'s `V1` says work the era axis outward one
+[P2](../encoder-decoder-method.md#p2-attribute-era-boundaries-outward-from-a-closed-version) says work the era axis outward one
 boundary at a time, while the comparison script was still diffing every column against the distant
 spine. The rule and its instrument contradicted each other for as long as nobody looked, and the
 neighbour view collapses the same data to far fewer differing cells — each attributable to one era
@@ -412,13 +415,13 @@ under test. It is filled in as each transform is taken, not shipped with the har
 
 **A whole-corpus verdict from this runner is not a decode-quality verdict.** With the residue
 census absent, a cell that "passes" has only shown it did not fail closed —
-[encoder-decoder-method.md](../encoder-decoder-method.md) S4 is the reason that is not the same
-thing. Read the size ratios (S1) alongside it and treat the pass column as a floor.
+[M1](../encoder-decoder-method.md#m1-judge-an-output-by-how-it-reads-against-its-source) is the reason that is not the same
+thing. Read the size ratios ([M2](../encoder-decoder-method.md#m2-measure-residue-what-an-encoder-stage-added-and-the-decode-left)) alongside it and treat the pass column as a floor.
 
 ## Instrumenting a fail-closed matcher
 
 The bail breadcrumb is the instrument for "which guard rejected this shape?"
-([encoder-decoder-method.md](../encoder-decoder-method.md) T6 picks between it and the other
+([D3](../encoder-decoder-method.md#d3-instrument-one-real-failure) picks between it and the other
 three). It is three files: a Python patcher, a shell runner, and a `.orig.js` copy of the pass.
 
 **Tag every `return null` with its own source line** rather than a hand-written list of named
@@ -428,7 +431,7 @@ success counters in the same patch, so the declines have a denominator.
 ```py
 import re
 p = 'src/visitor/jsconfuser/<pass>.js'
-orig = open('sandbox-tests/mask/<pass>.orig.js').read().split('\n')
+orig = open('<probe-root>/mask/<pass>.orig.js').read().split('\n')
 
 # Anchor on syntactic forms, never on a line number: a hand-written line anchor is what
 # made one of these assert and refuse to patch after an unrelated edit.
@@ -465,10 +468,10 @@ a `trap`, because a timeout kills the run before any trailing restore line:
 ```sh
 #!/bin/sh
 cd "$(dirname "$0")/../.."
-trap 'cp sandbox-tests/mask/<pass>.orig.js src/visitor/jsconfuser/<pass>.js' EXIT INT TERM
-cp src/visitor/jsconfuser/<pass>.js sandbox-tests/mask/<pass>.orig.js
-python3 sandbox-tests/mask/<pass>-instrument.py >/dev/null || exit 1
-node sandbox-tests/mask/bc.mjs
+trap 'cp <probe-root>/mask/<pass>.orig.js src/visitor/jsconfuser/<pass>.js' EXIT INT TERM
+cp src/visitor/jsconfuser/<pass>.js <probe-root>/mask/<pass>.orig.js
+python3 <probe-root>/mask/<pass>-instrument.py >/dev/null || exit 1
+node <probe-root>/mask/bc.mjs
 ```
 
 Four rules this pattern exists to enforce, each bought by an incident:
@@ -509,7 +512,7 @@ committed by accident.
   census pointed at a scheduling file with seven `traverse` calls and no rewrite of its own, and
   re-running the same measurement per composed visitor found four distinct producers, three of
   them shared with other plugins. Re-instrument one level down before writing a cause down —
-  [encoder-decoder-method.md](../encoder-decoder-method.md)'s S6 owns what to do with the answer.
+  [F3](../encoder-decoder-method.md#f3-keep-tree-and-derived-state-consistent) owns what to do with the answer.
 - **A static read of a `high` corpus `.obf.js` sees one `Function(…)` call and nothing else.**
   `Pack` puts the whole program inside a string literal, so a shape census over the obfuscated
   *input* reports a clean zero for every shape — indistinguishable from "the encoder didn't emit
@@ -601,7 +604,7 @@ committed by accident.
 - **A bail tally measures the pipeline's interior, not its output.** Read the residue in the
   output before treating a decline count as a gap — a gate that declines can be load-bearing.
   This one is general enough to live in
-  [encoder-decoder-method.md](../encoder-decoder-method.md) T6, along with the name-filter trap
+  [D3](../encoder-decoder-method.md#d3-instrument-one-real-failure), along with the name-filter trap
   (never gate a breadcrumb on an identifier; renamed output reuses names across scopes) and the
   catch-block blind spot (a pass can fail *after* a successful match, and the guard tally then
   actively reassures).
@@ -623,7 +626,7 @@ finding.
 | dead bare `var` declarators | declarators with no init, no reads and no writes | 0 |
 | `_cff_*` orphans, surviving scope anchors | `X.prop = {}` anchors whose property is read nowhere else | 0 |
 | empty-bodied zero-reference functions | exactly that — an empty body has no semantics to argue about | 0 |
-| `arr[n]` reads | computed member reads with a numeric key | 0, and **saturated** — per S2 it no longer discriminates, so don't build a scoreboard on it |
+| `arr[n]` reads | computed member reads with a numeric key | 0, and **saturated** — per [M2](../encoder-decoder-method.md#m2-measure-residue-what-an-encoder-stage-added-and-the-decode-left) it no longer discriminates, so don't build a scoreboard on it |
 
 **A size figure is comparable only within one corpus**, so it belongs in the output of the run
 that produced it and is anecdote anywhere else.
@@ -678,9 +681,9 @@ reporting a handful of affected files to reporting dozens.
 - **Here:** how to build a probe against *this* decoder — the datasets and their recipe, the
   plumbing conventions, the instrumenting pattern, and the construction hazards above.
 - **[encoder-decoder-method.md](../encoder-decoder-method.md):** which instrument to reach for
-  and how to read what it says — T6's four instruments, the bail-tally-vs-output-census ordering,
-  S3's liveness caveats, S5's randomization, T8's "validate a premise before implementing
-  against it".
+  and how to read what it says — [D3](../encoder-decoder-method.md#d3-instrument-one-real-failure)'s instruments, the bail-tally-vs-output-census ordering,
+  [M2](../encoder-decoder-method.md#m2-measure-residue-what-an-encoder-stage-added-and-the-decode-left)'s liveness caveats, [M3](../encoder-decoder-method.md#m3-freeze-the-corpus)'s randomization, [D1](../encoder-decoder-method.md#d1-read-the-tree-and-its-docs-before-you-probe-or-propose) and [D2](../encoder-decoder-method.md#d2-verify-claims-before-acting-on-them)'s "look in the tree, verify
+  before acting".
 - **[tests.md](tests.md):** anything that becomes committed coverage. A probe finds a bug; a
   fixture is what keeps it fixed, and it is the only coverage a fresh clone inherits.
 
@@ -688,11 +691,11 @@ reporting a handful of affected files to reporting dozens.
 wrong for oracles.** A probe answers *one question about one moment* and is correctly disposable.
 An **oracle** answers "is this invariant holding" and is not: it applies to every case, including
 ones written later, so it belongs in the shared test helper where every case inherits it — not in
-`sandbox-tests/`, where it dies with the session that wrote it. Two tells that what you have is an
+`<probe-root>/`, where it dies with the session that wrote it. Two tells that what you have is an
 oracle rather than a probe: it takes an AST or a pass rather than a directory of samples, and
-running it on unrelated cases is meaningful rather than nonsense. Move it, and the audit T7 asks
+running it on unrelated cases is meaningful rather than nonsense. Move it, and the audit [F5](../encoder-decoder-method.md#f5-one-fix-is-never-the-whole-fix) asks
 for stops being a grep you have to remember to run.
 
 **And it goes in *before* the fix when the defect is invisible to output**
-([encoder-decoder-method.md](../encoder-decoder-method.md)'s S6 and T7) — there, the oracle is not
+([F3](../encoder-decoder-method.md#f3-keep-tree-and-derived-state-consistent) and [F5](../encoder-decoder-method.md#f5-one-fix-is-never-the-whole-fix)) — there, the oracle is not
 a regression guard but the only thing that makes the defect observable at all.

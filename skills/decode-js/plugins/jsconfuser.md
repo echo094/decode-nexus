@@ -140,10 +140,16 @@ positions as they get added, rather than a strict reversal:
    the encoder at
    [`309adba`](https://github.com/MichaelXF/js-confuser/commit/309adba); no current-version
    equivalent, and no `StringCompression`/`Shuffle`/compression-template trace remains
-   anywhere in the pinned source. **Present through 2.0.1, gone from 2.1.2 on** — so it
-   shipped in released versions for roughly eighteen months, which is what justifies keeping
-   the decoder. Unlike AntiTooling above it was not removed by the 2.0 rewrite; it survived
-   into 2.x and was cut separately.
+   anywhere in the pinned source. **Present through 2.0.1, gone from 2.1.2 on.** Unlike
+   AntiTooling above it was not removed by the 2.0 rewrite, but 2.0.x re-implemented it on an
+   embedded LZString library (`decompressFromUTF16`, then a delimiter `split`), which this
+   matcher does not target. The matcher reads only the 1.x decoder: a named function whose
+   `for` loop calls `charCodeAt(0)` directly. 1.x support is best-effort and unvalidated.
+   On 2.1.3 input the pass can only decline, so its loop search stops at the `charCodeAt`
+   call's own function and requires a named decoder. Without that, a DeadCode template calling
+   `charCodeAt` inside any `for` body reached the enclosing function, matched its ordered
+   character template and crashed on an anonymous one;
+   `test/jsconfuser/dead-code-string-compression.js` pins the decline.
 10. **[StringConcealing](../visitors/jsconfuser/string-concealing.md)**
    (`string-concealing.js`, `deStringConcealingInit` — evaluated in an isolated-vm
    sandbox, not structurally parsed). Positioned here (before
@@ -282,7 +288,7 @@ Then generate with `comments: false, jsescOption: { minimal: true }`.
 Every js-confuser transform is covered, and each has its own decoder-side page. The table
 maps the encoder's own `Order` enum (`encoder/js-confuser/src/order.ts`) onto the visitor
 that reverses it — the mapping
-[encoder-decoder-method.md](../../encoder-decoder-method.md)'s T1 asks you to have before
+[P1](../../encoder-decoder-method.md#p1-work-in-reverse-encoder-stage-order-each-stage-placed-by-its-last-write) asks you to have before
 deciding what to fix first, since the fix order is the *encoder's* order reversed and not
 this plugin's pipeline order above. A "none" row is a transform with nothing to reverse;
 its page says why.
@@ -315,18 +321,19 @@ its page says why.
 
 `string-compression.js` and `anti-tooling.js` have no `Order` of their own, and are
 **unverified: not active in js-confuser 2.1.3**. `stringCompression` was a 1.1.2 option
-(LZW-compressed string blobs) and `antiTooling` a 1.1.8 one; neither survived the 2.0.0
-Babel rewrite, and no transform or option of either name exists anywhere in the pinned
-encoder's source. Both are kept for real-world legacy samples (items 9 and 3 above), so
-nothing exercises either against encoder-generated output — `anti-tooling.js` has
-hand-written fixtures, `string-compression.js` has none.
+(LZW-compressed string blobs) and `antiTooling` a 1.1.8 one. AntiTooling did not survive the
+2.0.0 Babel rewrite; StringCompression survived as a different LZString implementation until
+2.1.2 (item 9). No transform or option of either name exists anywhere in the pinned encoder's
+source. Both are kept for real-world legacy samples (items 9 and 3 above), so nothing
+exercises either decode against encoder-generated output. `anti-tooling.js` has hand-written
+fixtures; `string-compression.js` has only a 2.1.3 fixture pinning its decline (item 9).
 
 **Two covered passes have no population at all on the current corpus, and that is a property
 of the corpus rather than of either pass.** The stage breadcrumb
 ([probes.md](../probes.md)) reports a zero byte delta and no structural-column movement for
 both the `lock` and `rgf` stages across every one of their own samples. A zero delta cannot
 discriminate — it reads identically whether the work was already done by an earlier pass or the
-pass declines on everything ([encoder-decoder-method.md](../../encoder-decoder-method.md) T6,
+pass declines on everything ([D3](../../encoder-decoder-method.md#d3-instrument-one-real-failure),
 which is why it says to establish a population *inside* the pass before working it). Both
 outputs are source-sized and runtime-correct, which points at the first, but that is an
 inference, not a measurement. **The consequence each doc records is that no gate inside either
@@ -338,7 +345,7 @@ population", never as correct — see [lock.md](../visitors/jsconfuser/lock.md) 
 table was being filled in** — `string-concealing.js`, `global-concealing.js` and
 `duplicate-literal.js`, each silently, each already marked covered, and `opaque-predicates.js`
 was a fourth of the same kind. The general rule that came out of it is
-[encoder-decoder-method.md](../../encoder-decoder-method.md)'s T8: an inline `// StageName`
+[D2](../../encoder-decoder-method.md#d2-verify-claims-before-acting-on-them): an inline `// StageName`
 label, a code comment, or a "covered" status describes intent at the time it was written and
 is never evidence that a matcher still matches current source. The narratives below are kept
 because each names the *shape* the encoder replaced, which is what a legacy sample still
@@ -410,7 +417,7 @@ by `DeadCode`. Judging output size without accounting for these reads a correct 
 failed one.
 
 **Orphaned helpers to watch for** when applying
-[encoder-decoder-method.md](../../encoder-decoder-method.md)'s S3: a CFF
+[M2](../../encoder-decoder-method.md#m2-measure-residue-what-an-encoder-stage-added-and-the-decode-left): a CFF
 `cff_hash`/`cff_sum`/`cff_xor`/`cff_slice`/`cff_sequence` function, a string-concealing lookup
 table, a duplicate-literals array, and **the `getGlobal` sniffer plus the `bufferToString`
 chain it feeds** — the last of these was missing from this list until the two of them turned

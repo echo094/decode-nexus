@@ -25,8 +25,11 @@ records only the encoder material from which a boundary is read.
 
 ## Generated builder contract
 
+The placeholder `<encoder-workspace>` below denotes a caller-supplied ephemeral workspace. It is
+regenerable staging only and must not be referenced by durable skills or documentation.
+
 The builders are deliberately generated for a reconstruction run and are not retained. The next
-clean-room run must generate these five files under `sandbox-tests/encoders/` (the names and
+clean-room run must generate these five files under `<encoder-workspace>/encoders/` (the names and
 interfaces are part of this recipe):
 
 | Generated file | Required interface |
@@ -38,7 +41,7 @@ interfaces are part of this recipe):
 | `build-nested-robust.cjs` | `node build-nested-robust.cjs`; builds the inner controls and outer-option samples described under [The robustness variant](#the-robustness-variant--fix-the-inner-layer-vary-the-outer), and never overwrites an existing target. |
 
 All five builders must resolve an encoder as `jso-<version with dots replaced by hyphens>` from
-the single `sandbox-tests/encoders/node_modules` install. The package manifest and lockfile must
+the single `<encoder-workspace>/encoders/node_modules` install. The package manifest and lockfile must
 contain an exact npm alias for every version in the [Version matrix](#version-matrix), and the
 builder must fail before writing output when an alias is missing or its package version is not the
 requested version. A fresh reconstruction may install the aliases with exact npm specs and must
@@ -524,7 +527,7 @@ Its one focused set, `class-logical`, is exactly:
 ```
 
 The clean-room builder resolves the exact `jso-2-19-0` npm alias from
-`sandbox-tests/encoders/node_modules`, verifies its package version is `2.19.0`, and validates
+`<encoder-workspace>/encoders/node_modules`, verifies its package version is `2.19.0`, and validates
 these option names against the installed upstream typings before encoding. It writes exactly
 `out/2.19.0/class-logical__class-logical.js` and adds exactly that path to `out/manifest.json`.
 Before appending it must validate every pre-existing manifest entry and output digest; a rerun
@@ -802,7 +805,7 @@ reason rather than a preference — nothing can exercise them here, and nothing 
 ## Nested cells — a source encoded twice
 
 A separate, smaller set answering a different question: what does the encoder emit when its
-**input is already its own output**? Built into `sandbox-tests/out-nested/`, never into the frozen
+**input is already its own output**? Built into `<encoder-workspace>/out-nested/`, never into the frozen
 `out/` — a nested cell is a different kind of cell, and the freeze rule forbids disturbing an
 existing column.
 
@@ -914,10 +917,10 @@ because a set that silently reports nothing looks identical to a set that report
 
 ## Layout
 
-Everything below lives in the gitignored sandbox and is regenerable from this page.
+Everything below lives in the external ephemeral workspace and is regenerable from this page.
 
 ```
-sandbox-tests/
+<encoder-workspace>/
   fixtures/<fixture>.js                          the four inputs, verbatim above
   encoders/                                      one npm-alias install providing every version
   out/<version>/<fixture>__<optionset>.js        encoded samples

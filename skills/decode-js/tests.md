@@ -34,8 +34,9 @@ its output compared to either the input itself (no-op expected) or a `.fix.js` g
 
 **What a run executes, and what Vitest's timer cannot stop.** There are no `pretest`/`posttest`
 scripts, setup files or include overrides, so default discovery picks up every `*.test.js` under
-`test/`. The one exclude added to Vitest's defaults is `sandbox-tests/`, the ignored workspace
-holding encoder checkouts fetched for qualification, whose own suites are not decoder tests. Three entries launch `src/main.js` as a child process — `integration/cli.test.js` and
+`test/`. The one exclude added to Vitest's defaults is the ignored qualification workspace that
+[fetch-encoder.mjs](../../decoder/decode-js/scripts/qualify-jsconfuser-vm/fetch-encoder.mjs)
+clones encoder checkouts into; their own suites are not decoder tests. Three entries launch `src/main.js` as a child process — `integration/cli.test.js` and
 `integration/sequential.test.js` with no subprocess timeout, `integration/integration.test.js`
 with 30 s — and `test/scripts/render-vm-switch.test.js` launches the render script, also without
 one. Vitest's per-test timer cannot interrupt synchronous decoder work, a direct `Function` call,

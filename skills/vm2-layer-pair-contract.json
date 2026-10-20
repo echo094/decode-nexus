@@ -80,7 +80,7 @@
   },
   "decoderBaseline": {
     "repositoryPath": "decoder/decode-js",
-    "revision": "55bdb8b45d362b46c54c02ae464f8179dc16af66",
+    "revision": "14c28dbbe6f614a4836ddb25b1e215dc1df03e5c",
     "outerTarget": "jsconfuser",
     "directVmTarget": "jsconfuser-vm",
     "proposedSequentialTarget": "jsconfuser-vm-sequential"

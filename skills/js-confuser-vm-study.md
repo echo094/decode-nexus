@@ -13,7 +13,7 @@ The plugin's goal is recovery of any valid file produced by the pinned JS-Confus
 release, regardless of source program, encoder option vector, or randomized emission.
 The reference spine is tag `0.1.5`, encoder revision
 `20c5b96bf57337c568579352758d7685358650de`, with optional hardening disabled. The historical
-decoder baseline reference is revision `66f79bd3b6335e2b002a94ddefca919305ea19dd`; the current
+decoder baseline reference is revision `9885dc709d3fba53dc2a7e8cf07574d0074a53c8`; the current
 decoder's finite minified-class qualification boundary is in the
 [test index](decode-js/tests.md#finite-minified-class-qualification). The baseline is a
 starting representation, not the goal's boundary. The current decoder also has source-defined

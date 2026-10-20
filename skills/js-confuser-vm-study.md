@@ -57,7 +57,7 @@ Broader stacks and other source/release domains need their own evidence. A tool 
 The tool is the decoder's own [qualifier](../decoder/decode-js/scripts/qualify-jsconfuser-vm/qualify.mjs), run from the decoder root: the
 question it answers is whether the decoder recovers what the encoder emits. It reaches the encoder
 through `JSCONFUSER_VM_ENCODER`, any checkout of it, or else through a clone that
-[fetch-encoder.mjs](../decoder/decode-js/scripts/qualify-jsconfuser-vm/fetch-encoder.mjs) makes into the decoder's ignored `sandbox-tests/`
+[fetch-encoder.mjs](../decoder/decode-js/scripts/qualify-jsconfuser-vm/fetch-encoder.mjs) makes into the decoder's ignored qualification
 workspace. Its `PIN` must equal the hub's encoder pin, and every snapshot refuses a checkout at
 another commit or with a dirty worktree.
 

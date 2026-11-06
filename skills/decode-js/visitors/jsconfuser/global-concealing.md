@@ -103,12 +103,11 @@ Measured per stage on a `high` sample, the *candidate* shape first exists after
 StringConcealing's second visit and the full match only after that fold — so the second
 visit is scheduled there, and anywhere earlier is another pass with a zero population.
 
-**A fourth pass had to change before the body gate cleared, and it is the one that unmasks
-the rest param.** Restoring a single identifier parameter is not the whole of what
-VariableMasking owes this matcher: the stack it unmasks arrives from the CFF decode as a
-bare `var stk;` plus a separate `[...stk] = rest;`, and un-masking used to remove only the
-assignment. The declaration then stood as a second statement ahead of the switch, so
-`body.length !== 1` declined the samples that had cleared every other gate. The fix is
+**The body gate relies on the pass that unmasks the rest param.** Restoring a single
+identifier parameter is not the whole of what VariableMasking owes this matcher: the stack it
+unmasks arrives from the CFF decode as a bare `var stk;` plus a separate `[...stk] = rest;`, and
+un-masking removes both. A declaration left standing ahead of the switch would make
+`body.length !== 1` decline samples that clear every other gate. That removal lives
 in the pass that emits the deadness ([variable-masking.md](variable-masking.md) item 4),
 not a relaxation here — this matcher is one of several consumers of that declarator, and
 teaching each of them to look past it is the same fix re-paid per consumer
@@ -190,7 +189,7 @@ None currently open.
 
 ## Source
 
-[`src/visitor/jsconfuser/global-concealing.js`](https://github.com/echo094/decode-js/blob/6c974fb5720518fac9c6b3d4cf558ba90ef9f8e7/src/visitor/jsconfuser/global-concealing.js), wired into
+[`src/visitor/jsconfuser/global-concealing.js`](https://github.com/echo094/decode-js/blob/6c974fb5720518fac9c6b3d4cf558ba90ef9f8e7/src/visitor/jsconfuser/global-concealing.js), whose default export `deGlobalConcealingInit` is wired into
 [plugin/jsconfuser.js](../../plugins/jsconfuser.md) **twice** — both slots forced, for the
 reasons in item 4.
 

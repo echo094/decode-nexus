@@ -55,9 +55,9 @@ passes as the agent, which is exactly the failure mode [F2](../../../encoder-dec
 finished output cannot affect any of them, and equally cannot unblock anything: nothing in
 this pipeline waits on this shape.
 
-**This doc used to claim `Minify` mostly self-heals it, and measurement disproves that.** The
-reasoning was that Minify's own `a["key"] → a.key` rewrite (Order 28, see
-[minify.md](../../../js-confuser/transforms/minify.md)) flips the access back whenever the key
+**`Minify` does not self-heal it under a string-concealing preset.** Minify's own
+`a["key"] → a.key` rewrite (Order 28, see
+[minify.md](../../../js-confuser/transforms/minify.md)) flips the access back only when the key
 is still a plain valid-identifier string. Under `high` it almost never is: StringConcealing
 (Order 17) has already replaced the key with a call by the time Minify runs, so Minify sees
 nothing it can rewrite, and our own string layer only resolves it back to a StringLiteral long
@@ -93,8 +93,8 @@ in every decoded file that contains the construct.
 
 **A gap being genuine is not an argument that it blocks anything.** Which of these gets done,
 and when, is a priority decision rather than something to assume in either direction
-([P1](../../../encoder-decoder-method.md#p1-work-in-reverse-encoder-stage-order-each-stage-placed-by-its-last-write)). The member-access item
-that used to sit here is the worked example, and it is now item 4: real, measured, attributable
+([P1](../../../encoder-decoder-method.md#p1-work-in-reverse-encoder-stage-order-each-stage-placed-by-its-last-write)). The member-access
+residue (item 4) is the worked example: real, measured, attributable
 entirely to the encoder, and still not worth doing — recording that judgement is what lets it
 be made once rather than re-litigated from a fresh site count.
 

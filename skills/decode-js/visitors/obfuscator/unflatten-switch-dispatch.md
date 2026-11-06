@@ -126,13 +126,11 @@ that work lands inside anti-tamper machinery the strip removes wholesale, so on 
 **no observable effect on final output**. It reads *inert* to any instrument measuring the pipeline
 through its output, and that is a true reading of those cells rather than a broken probe.
 
-**That inertness used to hold corpus-wide, and no longer does — the prediction this paragraph made
-has been met.** It said: *a sample whose program blocks are flattened outside a stripped helper is
-the case the corpus does not contain, and it is the one this pass exists for.* The corpus gained a
-fourth input, and `directives__cff` is exactly that sample — a flattened **program** function, not
+**The inertness does not hold corpus-wide: `directives__cff` is the sample this pass exists for.**
+Its program blocks are flattened outside a stripped helper — a flattened **program** function, not
 a helper. Removing this pass from the pipeline changes that cell's final output at every column
-where it exists, so the pass is measurably load-bearing there and the attribution ladder's `-` no
-longer describes the whole matrix.
+where it exists, so the pass is measurably load-bearing there and the attribution ladder's `-`
+does not describe the whole matrix.
 
 **The lesson is about the instrument, not the pass.** An inert reading was correct, stable across
 twenty-two option sets and ten columns, and was a fact about **what those three inputs contain**

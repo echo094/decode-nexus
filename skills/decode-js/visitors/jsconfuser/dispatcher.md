@@ -334,8 +334,8 @@ the emitter:
 
 - **The body's tail.** Addressing the three branch roles from the *end* of the body is forced
   (item 2), so a trailing statement that is not a role breaks every application at once. The
-  reconstruction used to close each body with a `return;` / `return undefined;` — the graph's
-  own record of "and then it ends" — which put the roles one slot from where this matcher
+  reconstruction therefore closes no body with a `return;` / `return undefined;` (the graph's
+  own record of "and then it ends"): one would put the roles one slot from where this matcher
   reads them.
 - **The call site's callee.** `matchCallSite` starts from a *reference* to the dispatcher in
   callee position. ControlFlowFlattening wraps a rewritten direct call as `(1, scope.a.b)()`
@@ -457,7 +457,7 @@ what, and this pass has paid for that confusion three times.
 
 ## Source
 
-[`src/visitor/jsconfuser/dispatcher.js`](https://github.com/echo094/decode-js/blob/6c974fb5720518fac9c6b3d4cf558ba90ef9f8e7/src/visitor/jsconfuser/dispatcher.js), wired into
+[`src/visitor/jsconfuser/dispatcher.js`](https://github.com/echo094/decode-js/blob/6c974fb5720518fac9c6b3d4cf558ba90ef9f8e7/src/visitor/jsconfuser/dispatcher.js), whose default export `deDispatcherInit` is wired into
 [plugin/jsconfuser.js](../../plugins/jsconfuser.md) right after RGF, before Flatten —
 needs `variable-masking.js`'s `deVariableMasking` (run twice, earlier in the pipeline) to
 have already reversed VariableMasking's rest-param masking on the dispatcher function's

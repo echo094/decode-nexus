@@ -27,8 +27,8 @@ Consumed by the `sojson`, `sojsonv7`, and `obfuscator` plugins. This is the
 ## Known Gaps
 
 **Three of these are not fail-closed incompleteness — they corrupt or crash.** That is unusual for
-a decoder pass and is stated first for that reason. Each was built as a minimal case and run
-(2026-08-14); the first two produce wrong output *silently*, which no residue census can catch
+a decoder pass and is stated first for that reason. Each reproduces on a minimal case; the first
+two produce wrong output *silently*, which no residue census can catch
 because the residue is gone.
 
 | Input | Result |

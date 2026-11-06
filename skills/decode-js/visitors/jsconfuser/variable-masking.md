@@ -82,8 +82,8 @@ function carrying a rest param already reports `0`, so restoring `len` can only 
 back toward the original. All-or-nothing like `unmaskStack`, and it declines on the same
 `arguments` grounds.
 
-**Two bounds on un-masking, neither of them closable.** Both used to sit under Known Gaps,
-which framed a limit as outstanding work.
+**Two bounds on un-masking, neither of them closable.** They are limits of what the input
+carries, not incompleteness, so they live here rather than under Known Gaps.
 
 **A function the encoder judged "predictable" carries no truncation statement, and
 `unmaskStack` has no other source of an exact length.** The gate is
@@ -191,11 +191,9 @@ someArray;` in one step. Both cases recrawl from
 `getProgramParent()`, not just the function's own scope, after relocating the original
 right-hand-side expression, since it can reference an outer-scope binding (a closed-over
 variable, an enclosing function's own param) — a narrower `binding.scope.crawl()` would
-leave that outer binding's reference count stale. `processAssignLeft`'s original
-`if (right.isBinaryExpression())` early-invalidate branch was removed entirely so a
-binary-expression right-hand side (`var x = a + b;`, arguably the single most common local
-initialization shape in real code) falls through to this same fallback rather than being
-invalidated on sight.
+leave that outer binding's reference count stale. `processAssignLeft` has no early
+invalidation for a binary-expression right-hand side: `var x = a + b;`, arguably the single
+most common local initialization shape in real code, falls through to this same fallback.
 
 **`processArrayPatternAssign` rewrites the promoted slots' other references itself, in the
 same call, rather than leaving them to the cache — and reports whether it rewrote.** Both
@@ -321,10 +319,9 @@ are why this pass runs three times rather than once.
 
 ## 5. Known Gaps
 
-None currently open. The two bounds that used to sit here — the predictable-function arity
-limit and the `RestElement` decline — are in item 2: neither is incompleteness meant to
-close, and framing a limit as outstanding work invites someone to "fix" it. The
-`RestElement` one has already cost that once.
+None. The predictable-function arity limit and the `RestElement` decline are bounds, stated in
+item 2: neither is incompleteness meant to close, and framing a limit as outstanding work
+invites someone to "fix" it.
 
 **The `fns`-entry population that also sat here is gone**, and both halves of it closed
 without this file changing: the entries that stayed masked because their dispatcher declined

@@ -184,10 +184,9 @@ this pass keeps both — the layer decodes, and the inlining still happens after
 
 **`matchWrapper` reads the wrapper's *last statement*, so anything that wraps it is fatal.** The
 gate requires `return <call>` at `body[body.length - 1]`.
-[prune-if-branch.js](../prune-if-branch.md) used to replace a constant-test `IfStatement` with
-its surviving `BlockStatement`, leaving a bare `{ … }` around that return — transparent to
-execution, fatal to this match. Fixed at that producer by splicing the block into the parent
-statement list. **The general point is worth more than the instance:** a statement-position
+[prune-if-branch.js](../prune-if-branch.md) therefore splices a constant-test `IfStatement`'s
+surviving block into the parent statement list: a bare `{ … }` left around that return is
+transparent to execution and fatal to this match. **The general point is worth more than the instance:** a statement-position
 gate is defeated by any pass that plants a block where a statement stood, and such a pass
 leaves output that runs identically, so nothing but this matcher's decline records it.
 
@@ -198,7 +197,7 @@ incompleteness in this matcher.
 
 ## Source
 
-[`src/visitor/jsconfuser/flatten.js`](https://github.com/echo094/decode-js/blob/6c974fb5720518fac9c6b3d4cf558ba90ef9f8e7/src/visitor/jsconfuser/flatten.js), wired into
+[`src/visitor/jsconfuser/flatten.js`](https://github.com/echo094/decode-js/blob/6c974fb5720518fac9c6b3d4cf558ba90ef9f8e7/src/visitor/jsconfuser/flatten.js), whose default export `deFlatten` is wired into
 [plugin/jsconfuser.js](../../plugins/jsconfuser.md) after the ControlFlowFlattening decode
 step — Flatten runs earliest on the encode side (`Order.Flatten = 2`), so its output is
 exposed to every later transform; decoding it as late as possible in the pipeline gives the

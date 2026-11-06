@@ -33,7 +33,7 @@ positions as they get added, rather than a strict reversal:
    runs *last* on the encode side (`Order.Integrity = 37`), so its output is never
    reshaped by anything else on the encode side — decoding it first gives it the
    least-processed input.
-3. **AntiTooling** (`anti-tooling.js`) — targets a **legacy, pre-2.0, removed**
+3. **AntiTooling** (`anti-tooling.js`, default export `deAntiTooling`) — targets a **legacy, pre-2.0, removed**
    transform (merged-`ExpressionStatement`s via a call to an always-*empty*
    top-level function), not the current `Lock` family — and not the same shape as
    AstScrambler below either, despite the superficial resemblance (both merge
@@ -45,19 +45,12 @@ positions as they get added, rather than a strict reversal:
    no trace of the merged-call shape remains in the pinned source. **Present through 1.7.3,
    gone from 2.0.0 on** — so it shipped in released versions, which is what justifies
    keeping the decoder.
-   Its guard conditions had two bugs, fixed 2026-07-23: `!x === y` instead of
-   `x !== y` (operator precedence - `!` binds before `===`, so the check was
-   always false) on both the callee-position check and the body-position
-   check, the latter compounded by checking the wrong path's `listKey`
-   (`call.listKey`, always `undefined`, instead of `call.parentPath.listKey`).
-   Together these made the matcher unsafe on arbitrary code containing an
-   unrelated empty no-op function referenced as a plain value (not a callee) -
-   `deAntiToolingCheckFunc`'s shape match is generic enough to fire on any
-   such function, and the broken guards let extraction proceed anyway,
-   silently deleting the call site that referenced it. Fixing precedence
-   alone regresses the genuine merge case to a permanent no-op, since
-   `call.listKey` is never `'body'` either way - both bugs needed fixing
-   together. See `test/visitor/jsconfuser/anti-tooling/` for both cases.
+   Its guards test `x !== y` on the callee position and on the body position, reading the
+   body position from `call.parentPath.listKey`. They keep the matcher off an unrelated
+   empty no-op function referenced as a plain value (not a callee):
+   `deAntiToolingCheckFunc`'s shape match is generic enough to fire on any such function,
+   and extraction would then delete the call site that references it. See
+   `test/visitor/jsconfuser/anti-tooling/` for the merge case and that negative.
 4. **[AstScrambler](../visitors/jsconfuser/ast-scrambler.md)** (`ast-scrambler.js`) —
    the *current* (2.0+) version of the same "merge statements into a no-op call"
    idea AntiTooling targeted historically, now with a self-nulling helper instead of
@@ -70,10 +63,8 @@ positions as they get added, rather than a strict reversal:
 5. **[Minify](../visitors/jsconfuser/minify.md)** — no dedicated decode step; a comment at
    this pipeline position explains why (literal shortenings and `var` merging are already
    covered by the generic `calculate-constant-exp.js`/`split-variable-declaration.js`
-   passes elsewhere, everything else is destructive-or-already-clearer). Formerly ran
-   `deMinifyArrow` here, removed as dead code once confirmed it matched nothing against the
-   current pinned encoder — kept as a numbered position so later "step N" cross-references
-   in this file don't shift.
+   passes elsewhere, everything else is destructive-or-already-clearer). It stays a numbered
+   position so later "step N" cross-references in this file don't shift.
 6. **[MovedDeclarations](../visitors/jsconfuser/moved-declarations.md)** (shared
    `visitor/split-variable-declaration.js` + `moved-declarations.js`) — split
    `var a, b, c` back into separate declarations, and reverse the transform's
@@ -85,9 +76,7 @@ positions as they get added, rather than a strict reversal:
    `movedDeclarations` and failed the whole block closed while staying
    runtime-correct.
 7. **[DuplicateLiteralsRemoval](../visitors/jsconfuser/duplicate-literal.md)**
-   (`duplicate-literal.js`) — rewritten 2026-07-22, same failure mode as the
-   StringConcealing/GlobalConcealing/OpaquePredicates findings below (found while
-   verifying Calculator, fixed in its own later pass): resolves `{ph}_dlrArray`'s
+   (`duplicate-literal.js`) — resolves `{ph}_dlrArray`'s
    static contents and inlines them at every indexed read. Placed right after
    MovedDeclarations, before everything else jsconfuser-specific, since this stage
    runs after almost every other optional encode-side transform and its output can
@@ -102,41 +91,34 @@ positions as they get added, rather than a strict reversal:
    still ahead of Lock/RGF/Dispatcher/Flatten's own literal-key matchers. The array
    is matched in **two spellings**: its own `var arr = [...]`, and the hoisted
    `var arr;` + `arr = [...]` pair MovedDeclarations (Order 25, later still) splits
-   that into. Only accepting the first left every `high` sample carrying the split
-   spelling — and every VariableMasking key inside its array — entirely undecoded.
+   that into. Accepting only the first leaves every sample carrying the split spelling —
+   and every VariableMasking key inside its array — undecoded.
 8. **[VariableMasking](../visitors/jsconfuser/variable-masking.md)**
    (`variable-masking.js` + `function-length.js`) — run **three times**:
    `variable-masking.js` again after StringConcealing/StringSplitting below, since
-   resolving concealed/split strings can unblock rest-param cache lookups that were
-   previously unreadable; and a third time immediately after
+   resolving concealed/split strings can unblock rest-param cache lookups that stay
+   unreadable before it; and a third time immediately after
    DuplicateLiteralsRemoval's late pass at step 16. That third pass exists because
    DuplicateLiteralsRemoval (Order 22) extracts VariableMasking's (Order 20) own mask
    keys, so until the array resolves a slot reads `stk[arr[4]]` — unmatchable to every
    matcher in the file, truncation statement included, which leaves the whole enclosing
-   function masked rather than partly decoded (added 2026-07-27). Split 2026-07-22 out of a single combined `stack.js`
-   file (decode-js's own pre-2.0 name for this transform) into two files along a
+   function masked rather than partly decoded. The transform is two files along a
    real seam: `variable-masking.js` holds the rest-param/slot-alias reversal itself
    (`processStackParam` and its helper chain, exported for reuse); `function-length.js`
-   holds the separate, cross-cutting reversal of the shared `preserveFunctionLength`
+   (an anonymous default visitor factory) holds the separate, cross-cutting reversal of the shared `preserveFunctionLength`
    wrapper (`{ph}_fnLength(fn, length)`) any of Dispatcher/Flatten/RGF/VariableMasking
    can produce — it imports `processStackParam` from `variable-masking.js` once it
    unwraps a wrapper and learns the target function's real param count that way
-   instead. `function-length.js`'s matcher had two bugs fixed while verifying
-   [RGF](../visitors/jsconfuser/rgf.md) against real `preserveFunctionLength` output
-   (see that doc's "Known gap" section, from before the split); a third, deeper gap
-   (functions using `preserveFunctionLength` *without* a rest-masked param at all -
-   e.g. RGF's own zero-param `return {ph}[0].apply(...)` stub) crashed
-   `checkStackInvalid` until fixed 2026-07-23 with a `hasRestParam` guard in
-   `function-length.js` that skips the `processStackParam` handoff (the wrapper
-   itself still gets stripped either way).
-   **Fully covered as of 2026-07-22** — three more gaps found and fixed while finishing
-   this transform's own worklist item: a real correctness bug in alias-collapsing when
-   a masked param is reassigned after being aliased, a length-discovery fallback for
-   the common "predictable" case (no truncation statement to read the real param count
-   from), and a negative-integer-mask-key blind spot in the shared `safeGetName`. See
-   [variable-masking.md](../visitors/jsconfuser/variable-masking.md)'s own "Known
-   gaps" section for the two narrower gaps still open from that pass.
-9. **StringCompression** (`string-compression.js`) — an LZW-style compressor, removed from
+   instead. A function using `preserveFunctionLength` *without* a rest-masked param
+   (RGF's own zero-param `return {ph}[0].apply(...)` stub, say) has no param for
+   `checkStackInvalid` to check: a `hasRestParam` guard in `function-length.js` skips the
+   `processStackParam` handoff, and the wrapper itself is stripped either way.
+   Alias collapsing handles a masked param reassigned after being aliased; length
+   discovery falls back for the common "predictable" case (no truncation statement to read
+   the real param count from); and the shared `safeGetName` reads negative-integer mask
+   keys. [variable-masking.md](../visitors/jsconfuser/variable-masking.md) gives the bounds
+   that remain.
+9. **StringCompression** (`string-compression.js`, default export `deStringCompression`) — an LZW-style compressor, removed from
    the encoder at
    [`309adba`](https://github.com/MichaelXF/js-confuser/commit/309adba); no current-version
    equivalent, and no `StringCompression`/`Shuffle`/compression-template trace remains
@@ -288,7 +270,7 @@ Then generate with `comments: false, jsescOption: { minimal: true }`.
 Every js-confuser transform is covered, and each has its own decoder-side page. The table
 maps the encoder's own `Order` enum (`encoder/js-confuser/src/order.ts`) onto the visitor
 that reverses it — the mapping
-[encoder-decoder-method.md](../../encoder-decoder-method.md)'s T1 asks you to have before
+[P1](../../encoder-decoder-method.md#p1-work-in-reverse-encoder-stage-order-each-stage-placed-by-its-last-write) asks you to have before
 deciding what to fix first, since the fix order is the *encoder's* order reversed and not
 this plugin's pipeline order above. A "none" row is a transform with nothing to reverse;
 its page says why.
@@ -333,7 +315,7 @@ of the corpus rather than of either pass.** The stage breadcrumb
 ([probes.md](../probes.md)) reports a zero byte delta and no structural-column movement for
 both the `lock` and `rgf` stages across every one of their own samples. A zero delta cannot
 discriminate — it reads identically whether the work was already done by an earlier pass or the
-pass declines on everything ([encoder-decoder-method.md](../../encoder-decoder-method.md) T6,
+pass declines on everything ([D3](../../encoder-decoder-method.md#d3-instrument-one-real-failure),
 which is why it says to establish a population *inside* the pass before working it). Both
 outputs are source-sized and runtime-correct, which points at the first, but that is an
 inference, not a measurement. **The consequence each doc records is that no gate inside either
@@ -345,7 +327,7 @@ population", never as correct — see [lock.md](../visitors/jsconfuser/lock.md) 
 table was being filled in** — `string-concealing.js`, `global-concealing.js` and
 `duplicate-literal.js`, each silently, each already marked covered, and `opaque-predicates.js`
 was a fourth of the same kind. The general rule that came out of it is
-[encoder-decoder-method.md](../../encoder-decoder-method.md)'s T8: an inline `// StageName`
+[D2](../../encoder-decoder-method.md#d2-verify-claims-before-acting-on-them): an inline `// StageName`
 label, a code comment, or a "covered" status describes intent at the time it was written and
 is never evidence that a matcher still matches current source. The narratives below are kept
 because each names the *shape* the encoder replaced, which is what a legacy sample still
@@ -353,50 +335,20 @@ carries.
 
 ## Shapes the current encoder replaced
 
-What each silently-dead matcher was actually written against, kept because a real-world
-sample predating the 2.0 rewrite still carries these shapes.
+Three decoders match the pinned encoder's shape where earlier matchers targeted a shape it
+replaced; each visitor doc gives the mechanism.
 
-**`string-concealing.js` and `global-concealing.js` were both found completely
-non-functional against the pinned encoder** (silently, no test coverage existed for
-either). Both were rewritten 2026-07-22 (see their own docs for what changed and why); `global.js`, a
-shared helper both used, was deleted as dead code superseded by the rewrite — nothing
-else referenced it, and its own matcher didn't match the current source either, so there
-was nothing left worth preserving for legacy-sample support.
+| Decoder | Pinned shape matched | Replaced shape |
+|---|---|---|
+| [`string-concealing.js`](../visitors/jsconfuser/string-concealing.md), [`global-concealing.js`](../visitors/jsconfuser/global-concealing.md) | the pinned templates | the earlier templates, whose shared helper `global.js` is gone |
+| [`opaque-predicates.js`](../visitors/jsconfuser/opaque-predicates.md) (`dePredicateGenInit`) | `PredicateGen` predicates ([`fbe3449`](https://github.com/MichaelXF/js-confuser/commit/fbe3449)) | a "Control Object" predicate mechanism |
+| [`duplicate-literal.js`](../visitors/jsconfuser/duplicate-literal.md) | `const {ph}_dlrArray = [lit, lit, ...]`, every occurrence (the first included) a computed `{ph}_dlrArray[i]` read | the array behind a getter function, each reference routed through an "array warp function" |
 
-**Same failure mode found again, 2026-07-22, this time in `opaque-predicates.js`.** Its
-existing code matched a "Control Object" predicate mechanism that
-js-confuser replaced with the much simpler `PredicateGen` (`fbe3449`, 2024-11-10) — the
-encoder-side skill docs ([opaque-predicates.md](../../js-confuser/transforms/opaque-predicates.md),
-[predicate-gen.md](../../js-confuser/utils/predicate-gen.md)) already correctly described
-the *current* mechanism, but the decoder code had never been updated to match its own
-docs, so OpaquePredicates was silently non-functional against the pinned commit — verified
-empirically (real `opaquePredicates: true` output round-tripped unchanged) before writing
-anything. Investigated while checking whether `dead-code.md`'s own hypothesis ("the
-existing OpaquePredicates/Calculator/prune-if-branch pipeline already eliminates DeadCode's
-dead branches for free, no new decoder needed") held up — it didn't, for the same root
-cause: DeadCode's dead-guard predicate is generated by the exact same `PredicateGen`.
-Fixed both together: `opaque-predicates.js` gained `dePredicateGenInit` (current
-mechanism); a new `dead-code.js` visitor was added; and the shared
-`calculate-constant-exp.js` gained a `LogicalExpression` short-circuit fold
-(`true && x` -> `x`, etc.) needed to unwrap the `PREDICATE && test` shape both
-OpaquePredicates and DeadCode's own OpaquePredicates-wrapped guard leave behind. See
-[opaque-predicates.md](../visitors/jsconfuser/opaque-predicates.md) and
-[dead-code.md](../visitors/jsconfuser/dead-code.md) for the full mechanism and the
-pipeline-ordering interaction this surfaced.
-
-**Same failure mode found a third time, 2026-07-22, in `duplicate-literal.js` — found
-while verifying [Calculator](../visitors/jsconfuser/calculator.md), fixed in its own
-later pass the same day.** `duplicateLiteralsRemoval: true` output came back completely
-undecoded. Traced to the same root cause as the two findings above: `duplicate-literal.js`'s
-only matcher (`checkArrayName`) expected an old template — the deduplicated array hidden
-behind a getter function, each reference routed through a separate "array warp function" —
-but the current pinned encoder (`duplicateLiteralsRemoval.ts`) emits a much simpler direct
-`const {ph}_dlrArray = [lit, lit, ...]` with every occurrence (including the first)
-replaced by a computed `{ph}_dlrArray[i]` read, no wrapper functions at all. Rewritten
-around a direct, evaluation-free array lookup — see
-[duplicate-literal.md](../visitors/jsconfuser/duplicate-literal.md) for the full
-mechanism, including its interaction with Calculator and StringConcealing (both verified
-against real combined encoder output).
+DeadCode's dead-guard predicate comes from the same `PredicateGen`, so
+[`dead-code.js`](../visitors/jsconfuser/dead-code.md) and the shared `calculate-constant-exp.js`
+`LogicalExpression` short-circuit fold (`true && x` -> `x`, etc.) unwrap the `PREDICATE && test`
+shape both OpaquePredicates and DeadCode's guard leave; the two visitor docs give the
+pipeline ordering this forces.
 
 ## Working facts about this pipeline
 
@@ -417,7 +369,7 @@ by `DeadCode`. Judging output size without accounting for these reads a correct 
 failed one.
 
 **Orphaned helpers to watch for** when applying
-[encoder-decoder-method.md](../../encoder-decoder-method.md)'s S3: a CFF
+[M2](../../encoder-decoder-method.md#m2-measure-residue-what-an-encoder-stage-added-and-the-decode-left): a CFF
 `cff_hash`/`cff_sum`/`cff_xor`/`cff_slice`/`cff_sequence` function, a string-concealing lookup
 table, a duplicate-literals array, and **the `getGlobal` sniffer plus the `bufferToString`
 chain it feeds** — the last of these was missing from this list until the two of them turned

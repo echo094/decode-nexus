@@ -107,7 +107,7 @@ rather than here, because a count of them dies with the corpus.
 way as the group above: disabling that pass changes the pipeline's output on **no** option profile
 of the spine column, because whatever it would fold this pass has already folded. Both slots are
 kept anyway — they cost a traversal that finds nothing, and the group is scheduled for shapes this
-encoder emits rather than for the ones it happens not to (W7). What the measurement does rule out
+encoder emits rather than for the ones it happens not to ([F7](../../../encoder-decoder-method.md#f7-a-shared-pass-needs-off-path-cases)). What the measurement does rule out
 is treating the fold slots as *evidence* of anything: a change that appears to depend on them is
 depending on something else.
 
@@ -148,7 +148,7 @@ reversal or change the fixpoint's order.
 
 ## Source
 
-- `src/visitor/obfuscator/normalize-converting.js` — the scheduling
+- `src/visitor/obfuscator/normalize-converting.js` — the scheduling (default export `normalizeConverting(ast, maxRounds)`)
 - `src/visitor/atomic/uncompute-member.js`, `uncompute-property-key.js`,
   `collapse-property-shorthand.js` — the new single-purpose rewrites
 - `src/visitor/calculate-constant-exp.js` — imported unchanged

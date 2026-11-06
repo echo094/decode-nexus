@@ -170,7 +170,7 @@ after DeadCode's second visit. Two properties of that arrangement are load-beari
 - **The failure it fixes is invisible on every signal this project uses.** A declining
   *matcher* leaves an obfuscated shape; a declining *sweep* leaves a syntactically ordinary
   helper at zero references, which reads as the encoder's own dead code
-  ([encoder-decoder-method.md](../../../encoder-decoder-method.md) S3). Nothing distinguishes
+  ([M2](../../../encoder-decoder-method.md#m2-measure-residue-what-an-encoder-stage-added-and-the-decode-left)). Nothing distinguishes
   the two without asking whether it was live in the *input*.
 - **A pooled path can outlive its own subtree.** Entries now collected at one slot are
   re-examined many stages later, and `path.removed` only reports a path Babel removed

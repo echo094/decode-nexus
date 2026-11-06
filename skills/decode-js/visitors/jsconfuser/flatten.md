@@ -54,9 +54,9 @@ The census keys on a `(obj, [pattern])` signature with at least one computed `ob
 access — a severed function surviving with no wrapper, which a wrapper/inner *pair* census is
 blind to by construction. The cause was established by an encode-side A/B: the same source
 with the function *called* produces no such residue. Both are rebuildable from
-[probes.md](../../probes.md); read the A/B's counts with S5 in hand, since Flatten is
+[probes.md](../../probes.md); read the A/B's counts with [M3](../../../encoder-decoder-method.md#m3-freeze-the-corpus) in hand, since Flatten is
 probability-gated under `high`.
-**This is [encoder-decoder-method.md](../../../encoder-decoder-method.md) S3's first caveat in
+**This is [M2](../../../encoder-decoder-method.md#m2-measure-residue-what-an-encoder-stage-added-and-the-decode-left)'s leftover-helper caveat in
 its sharpest form:** the residue is zero-reference scaffolding, it looks exactly like a
 cleanup this decoder failed to perform, and the only thing telling them apart is whether it
 was ever live in the input. Here it never was.
@@ -141,7 +141,7 @@ brackets when the expression it resolves to a string sits in a key position, gua
 the two keys where that would change meaning (see
 [string-concealing.md](string-concealing.md)). Teaching this gate one more spelling would have
 been the same fix re-paid at the next matcher
-([encoder-decoder-method.md](../../../encoder-decoder-method.md) T9 case 1); `safeReplace` is
+([D4](../../../encoder-decoder-method.md#d4-fix-the-producer-not-the-consumer) case 1); `safeReplace` is
 shared by six visitors, so every one of them stops emitting the spelling at once.
 
 **`readFlatObjectProps`' `kind: 'method'` branch demands `body.length === 1`, and a cleanup
@@ -157,7 +157,7 @@ dead bare `var` at the head of the method:
 | `"k"(...a) { return _inner(...a); }` | the sweep reached the slot | accepted |
 | `"k"(...a) { var flag; return _inner(...a); }` | the sweep declined on sequence width | **declined** — and one such method fails the property, the object, and the whole wrapper |
 
-**Fixed at the producer** again, for the same T9 case-1 reason as the computed-key entry: the
+**Fixed at the producer** again, for the same [D4](../../../encoder-decoder-method.md#d4-fix-the-producer-not-the-consumer) case-1 reason as the computed-key entry: the
 sweep now keeps the whole tail of a wrap of any width. Loosening `body.length` here would have
 meant deciding, in this matcher, which leading statements are safe to discard — a question the
 pass that *created* the dead statement can answer exactly and this one cannot.
@@ -174,12 +174,12 @@ literal into every forward reference and then deletes the binding, which turns t
 | `get "k"(){ return outer }` | the encoder, and what survives when the inliner runs later | accepted |
 | `get "k"(){ return "value" }` | the inliner reached the getter first | **declined** — one property fails the object and the whole wrapper |
 
-**Fixed by rescheduling the producer**, not by growing a `literal` kind here (T9 case 2). The
+**Fixed by rescheduling the producer**, not by growing a `literal` kind here ([D4](../../../encoder-decoder-method.md#d4-fix-the-producer-not-the-consumer) case 2). The
 variable is not scaffolding — the affected sources declare it — so a `literal` kind would have
 had to substitute a value where the correct decode restores a reference, and it could never be
 safe opposite a paired `set "k"(v){ outer = v }`: that setter names the binding, and a getter
 reduced to a literal makes one entity read as two
-([encoder-decoder-method.md](../../../encoder-decoder-method.md) W5). Deferring the inliner past
+([F2](../../../encoder-decoder-method.md#f2-resolve-completely-or-not-at-all)). Deferring the inliner past
 this pass keeps both — the layer decodes, and the inlining still happens afterwards.
 
 **`matchWrapper` reads the wrapper's *last statement*, so anything that wraps it is fatal.** The

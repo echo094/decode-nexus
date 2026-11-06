@@ -214,7 +214,7 @@ which is where the combination bugs live —
 pre-obfuscation source it was generated from. `helper.js` does not read it — it is what
 makes a fixture reviewable for decode *quality* (is the output readable, or merely
 self-consistent?) rather than only for equality, and it is what keeps
-[encoder-decoder-method.md](../encoder-decoder-method.md)'s S1 size ratio computable later.
+[M2](../encoder-decoder-method.md#m2-measure-residue-what-an-encoder-stage-added-and-the-decode-left) size ratio computable later.
 A fixture frozen while its gap is still open certifies a passthrough as expected output, so
 freeze only once size and structural counts show the decode actually fired.
 
@@ -255,7 +255,7 @@ live one, and it is worth running directly whenever a decode is in question:
 1. **Encode with the real encoder** — `encoder/js-confuser`'s built `dist/index.js`
    `obfuscate`, or its CLI. Its output is randomized per run and many transforms are
    probability-gated, so repeat any verdict you intend to act on
-   ([encoder-decoder-method.md](../encoder-decoder-method.md) S5).
+   ([M3](../encoder-decoder-method.md#m3-freeze-the-corpus)).
 2. **Decode with the plugin** — `PluginJsconfuser` imported directly, or `node src/main.js
    -t jsconfuser`.
 3. **Run the decoded output and compare its runtime result to the original source's.**

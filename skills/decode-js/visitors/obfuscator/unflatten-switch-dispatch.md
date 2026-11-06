@@ -171,7 +171,7 @@ declines them and the prune deletes them as unreachable), and **`unlock-env` del
 regions wholesale**, taking any dispatch inside them with it. On one maximal cell that is 3 clones
 pruned and 1 resolved dispatch sitting inside machinery the strip removes.
 
-**That is not an argument for deleting it**, and the distinction is W7's: the measurement is
+**That is not an argument for deleting it**, and the distinction is [F7](../../../encoder-decoder-method.md#f7-a-shared-pass-needs-off-path-cases)'s: the measurement is
 evidence about this encoder's corpus, not about the pass. It would be load-bearing wherever
 flattening lands on live code that survives both — which these fixtures do not produce, and which
 nothing guarantees a real sample will not. The pass's own coverage is its fixtures, not the corpus.

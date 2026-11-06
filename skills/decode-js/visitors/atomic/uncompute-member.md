@@ -13,7 +13,7 @@ no dotted spelling, so they are declined and stay computed — rewriting them wo
 does not parse. The same gate doubles as a check on the layer beneath: a decoded string sitting in a
 member key that is *not* a valid identifier is evidence the string was decoded wrongly, because the
 encoder put a real property name there. That is
-[encoder-decoder-method.md](../../../encoder-decoder-method.md)'s W5 check, obtained for free.
+[M4](../../../encoder-decoder-method.md#m4-a-control-must-reach-its-mechanism) check, obtained for free.
 
 **No key needs excluding here, unlike a property *key*.** `o["__proto__"]` and `o.__proto__` are the
 same accessor, and there is no member-read analogue of the object-literal `__proto__` special case
@@ -49,7 +49,7 @@ What checks it today, all of it transitive:
 |---|---|---|
 | the rewrite fires | `literals-and-members` under [normalize-converting](../obfuscator/normalize-converting.md), which asserts the member-read axis reads zero **on the tree** rather than in the text | it bundles five reversals, so a regression here is not distinguishable from one in a sibling |
 | the identifier gate declines | the corpus-wide U4 census — a non-identifier key left computed is what keeps the axis honest | no committed case, so a gate that started accepting `o["foo bar"]` would emit unparseable code and fail nothing until a corpus run |
-| the W5 side-effect: a decoded string in key position that is not an identifier means the layer beneath decoded wrongly | `string-array`'s `guard-rotator-removed` case, which is where that check actually bites | it is pinned as a *string-array* claim, so nothing records that this pass is the instrument |
+| the [M4](../../../encoder-decoder-method.md#m4-a-control-must-reach-its-mechanism) side-effect: a decoded string in key position that is not an identifier means the layer beneath decoded wrongly | `string-array`'s `guard-rotator-removed` case, which is where that check actually bites | it is pinned as a *string-array* claim, so nothing records that this pass is the instrument |
 
 **A text-level assertion is not the way to close this**, and the first `literals-and-members`
 proved it: `/0x[0-9a-f]/i` fails on a correct decode, because renaming leaves `_0x185301`

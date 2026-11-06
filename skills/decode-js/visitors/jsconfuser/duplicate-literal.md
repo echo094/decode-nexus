@@ -31,7 +31,7 @@ to be assigned at most once — an array whose contents can change has no fixed 
 a read to resolve to, and substituting the initializer's element anyway would be wrong
 output, not merely undecoded.
 
-**Substitution is all-or-nothing per declarator**, the project's own [T2](../../../encoder-decoder-method.md#t2--w5-hold-matchers-to-two-contracts--shape-keyed-and-all-or-nothing) contract
+**Substitution is all-or-nothing per declarator**, the project's own [F2](../../../encoder-decoder-method.md#f2-resolve-completely-or-not-at-all) contract
 applied here: a reference that can't be resolved (a write, or an index that doesn't resolve
 to a number yet) bails the *whole array*, never just that one site. An index resolves when it
 is a plain number, or a read of this same array whose slot holds an integer: the encoder can
@@ -39,7 +39,7 @@ deduplicate its own index literals into `arr[arr[j]]` (see item 3), and that inn
 a slot of the array being resolved, so it is readable now. Substituting only the
 readable share is worse than substituting nothing — a half-resolved array manufactures two
 spellings of one slot
-([W5](../../../encoder-decoder-method.md#t2--w5-hold-matchers-to-two-contracts--shape-keyed-and-all-or-nothing)),
+([F2](../../../encoder-decoder-method.md#f2-resolve-completely-or-not-at-all)),
 which downstream matchers that key on spelling then read as two unrelated entities.
 
 **Wired twice**, and neither slot is optional — item 4 has why.
@@ -133,7 +133,7 @@ constant fold behind it collapses them to plain numbers.
 **The early pass cannot simply move late.** Calculator, StringConcealing and GlobalConcealing
 all run before the CFF decode and need these literals already resolved by then, so deleting the
 early slot would break three passes to simplify one. The bail-as-a-unit is what makes running
-twice safe: a half-substituted array is exactly the W5 hazard item 2 opens with, and it is what
+twice safe: a half-substituted array is exactly the [F2](../../../encoder-decoder-method.md#f2-resolve-completely-or-not-at-all) hazard item 2 opens with, and it is what
 made VariableMasking read one slot under two spellings and split a single object in two.
 
 **One pass downstream is scheduled around this one.** A third `VariableMasking` visit is wired

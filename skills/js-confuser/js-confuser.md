@@ -54,9 +54,9 @@ skills/js-confuser/
                           the transform pipeline itself
 ├── tests.md              summary of encoder/js-confuser/test/ — Jest project structure,
                           directory breakdown, cross-links back into transforms/ + utils/
-├── transforms/           AST pattern each transform produces, and (where
-                          non-trivial) how one would go about inverting it — see
-                          Pipeline Order below for the full list, in execution order
+├── transforms/           AST pattern each transform produces; reversal belongs in the
+                          paired decoder package — see Pipeline Order below for the full
+                          list, in execution order
 │   └── <name>.md
 ├── templates/            what one templates/*.ts file provides and which
                           transform(s) consume it (xorStringTemplate.ts and

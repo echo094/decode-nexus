@@ -34,6 +34,23 @@ its output compared to either the input itself (no-op expected) or a `.fix.js` g
   against the limit. A test that needs a limit to fire passes its own to the code under test
   (the string-array pass's evaluation limit, the harness test's own bound).
 
+**What a run executes, and what Vitest's timer cannot stop.** There are no `pretest`/`posttest`
+scripts or include overrides, so default discovery picks up every `*.test.js` under `test/`. One
+global setup runs first: it regenerates the committed fixtures' encoded VM inputs ([generated
+fixture inputs](#generated-fixture-inputs)), so a run needs the pinned encoder checkout and, for
+minify cells, a JDK on `PATH`. The one exclude added to Vitest's defaults is the ignored
+qualification workspace that
+[fetch-encoder.mjs](../../decoder/decode-js/scripts/qualify-jsconfuser-vm/fetch-encoder.mjs) clones
+encoder checkouts into; their own suites are not decoder tests. Child processes: the
+`public-entry-points/` files `cli.test.js` and `sequential.test.js` launch `src/main.js` with no
+subprocess timeout and `integration.test.js` with 30 s; `test/scripts/render-vm-switch.test.js`
+launches the render script without one; the cells generate through the qualifier's worker, 65 s
+per cell. Vitest's per-test timer cannot interrupt synchronous decoder work, a direct `Function`
+call, an `isolated-vm` `evalSync` without its own limit, or a Node VM call before `scriptTimeout`
+ends it. A supervised run therefore needs an outer process-group deadline; a test summary on stdout
+without an observed process exit earns no credit. To keep the CLI/backend entries out, pass those
+three `public-entry-points/` paths to `--exclude`.
+
 Run with `npm test` (`vitest --config vitest.config.js`) or `npx vitest run`. **To read
 the pass/fail tally, run `npx vitest run --coverage.enabled=false`** — with coverage on, a
 stray non-JS file under `src/` (a `.DS_Store` will do it) makes the reporter throw while
@@ -78,6 +95,21 @@ So a fixture directory pairs `name.js` with an optional `name.fix.js`; the test'
 flag encodes whether a transformation is expected.
 
 ## Directory breakdown
+
+### `test/scripts/` — command-line script tests
+
+`render-vm-switch.test.js` exercises the source-input form of
+[`scripts/render-vm-switch.mjs`](vm/switch/vm-switch-emit.md#inspecting-the-switch-handoff).
+It checks the generated switch text, compares the encoded and step-one arithmetic programs
+under the same host bindings, and refuses to overwrite an existing artifact. Tests for
+`src/utility/` remain in `test/utility/`.
+
+`qualify-jsconfuser-vm/` tests the [VM qualifier](vm/jsconfuser-vm/qualify-jsconfuser-vm.md#finite-minified-class-qualification) in
+`scripts/qualify-jsconfuser-vm/`: its lossless codec, output-structure and replay oracles,
+option-effect and damage controls, publication/recovery boundaries and generation journal, all
+without generating encoder output. `replay.test.js` runs retained known-source fixtures in a fresh
+Node VM context. The qualifier's Python capture and evidence-retention helpers keep their
+`unittest` tests beside them (`python3 -m unittest discover -s scripts/qualify-jsconfuser-vm`).
 
 ### `test/sojsonv7/` — end-to-end plugin test
 
@@ -256,6 +288,236 @@ builder for a fixture triple encodes, decodes, runs both and compares `TEST_OUTP
 optional: the first run of one compared `undefined` against `undefined` and reported a pass.
 Build it per [probes.md](probes.md)'s conventions; it needs the encoder's `dist/`.
 
+### `test/vm/` — VM recovery
+
+The VM tests are of three kinds, and each kind has its own place:
+
+| Kind | Tests | Input | Where |
+|---|---|---|---|
+| Unit | One decoder component | Hand-written records or source; **no compiler input** | `single-component/` |
+| Stage | The compiler plus one encoder stage | Generated cells | a suite under `generated-cells/` |
+| Combination | The compiler plus several stages | Generated cells | a suite under `generated-cells/` |
+
+**A unit test has no compiler in it, whatever it calls.** Its input is written by hand in the test:
+a boot whose words hold `window.TEST_OUTPUT = 1 + 2`, a minified handler pair, a typed switch
+model. A test that feeds a component the encoder's output is a stage or combination test, whichever
+component it calls, and is written as a suite. The public entry points (`public-entry-points/`:
+plugin, CLI, sequential target, debugger policy) are tested over committed fixture inputs.
+
+```text
+test/vm/
+├── fixture-recipes.js, materialize-fixtures.js    regenerate fixtures' encoded inputs (below)
+├── fixture-recipes.test.js                        the ignore list equals the recipe set
+├── switch/single-component/                       unit: the shared backend on typed models
+└── jsconfuser-vm/
+    ├── generated-cells/<suite>/                   one folder per suite
+    │   ├── suite.js                               the suite's definition
+    │   └── <file>.test.js                         one per entry in suite.js `files`
+    ├── sources/<name>/source.js                   programs the cells encode (oracle.json if needed)
+    ├── stage-effect/<suite>.test.js               one per stage suite: the stage changes the program
+    ├── support/                                   cell runner, cross-suite checks, harness, oracle
+    ├── single-component/                          unit: numeric frontend components
+    ├── public-entry-points/                       plugin, CLI and sequential behaviour
+    └── fixtures/                                  committed inputs of the entry-point, readability
+                                                   and qualifier tests
+```
+
+Name files and folders for the behaviour they test, never for a task ID, sequence number or trial
+attempt. Nothing under `test/vm/` carries a hash of tracked bytes
+([Git identifies tracked bytes](../doc-conventions.md#where-facts-live)).
+
+#### Suites
+
+A suite is one folder, `generated-cells/<suite>/`, holding its own definition in `suite.js`.
+Nothing defines a suite elsewhere, and suites are never merged: each scenario and each chain is its
+own suite. `support/cells.js` collects the folders only for what crosses suites (the cache and the
+distinctness checks below).
+
+```js
+// generated-cells/<suite>/suite.js (explanatory shape)
+export default {
+  name,               // the folder name
+  protects,           // what a red case means; ends "Proved: …" once a break has shown it
+  files: {            // one test file per key: <key>.test.js
+    [file]: [{ sources, profile, seeds }],  // sources × seeds, all under one profile
+  },
+  cases,              // optional: protects text per source, where sources protect different things
+  proofs,             // optional: [{ claim, file, code }], the decoder code a break turned red
+  indicators,         // optional: per source, form indicators its decode must share with it
+  inertControls,      // optional: sources the stage must leave unchanged
+}
+```
+
+A profile is `baseline` or `+`-joined option names over the qualifier's explicit-false baseline
+(`name=N` sets a number). A test file is three lines: it imports its `suite.js` and calls
+`defineCellTests(suite, '<file>')` from `support/cell-tests.js`. A real example, `try-arm-exits`:
+
+```js
+export default {
+  name: 'try-arm-exits',
+  protects:
+    "A try that never completes normally inside a conditional arm leaves through the arm with no label. Proved: the try end in a conditional's arm in vm-switch-statements.",
+  files: { cells: [{ sources: ['try-arm-exits'], profile: 'baseline', seeds: [1] }] },
+  proofs: [
+    {
+      claim: 'try-arm-exits',
+      file: 'src/vm/switch/vm-switch-statements.js',
+      code: 'reached.get(fallthroughId).has(tryEnd) &&',
+    },
+  ],
+}
+```
+
+Its cell `try-arm-exits/cells/try-arm-exits/baseline/1` encodes `sources/try-arm-exits/source.js`
+with every option off at seed 1, decodes it, and runs source, encoded and decoded programs.
+Deleting the condition the proof names changes the decoded program and turns the case red; that
+break is what earned the Proved line.
+
+**What a suite holds.** A test stays only if a break in decoder code turns it red; reaching code
+is not proof, and a break whose decoded output is unchanged proves nothing. `proofs` records the
+code each break named, and a Proved line in `protects` or `cases` says it in words. A scenario
+keeps the old test's scenario, never its encoded bytes. The suites by shape:
+
+| Suite | Shape |
+|---|---|
+| `compiled-forms` | One test file per JavaScript form family (control, expressions, functions, data, host effects), plain compiled code |
+| `compiled-forms-canonical-opcodes` | One representative per form family under the baseline options, opcodes unrandomized |
+| `single-payload-stage` | One test file per payload stage, the fewest sources that reach its decoder step |
+| `single-payload-stage-conditions` | One test file per stage: sources each built for one condition of that stage's decoder |
+| `<stages>-chain` | Several stages in encoder order over the compiled-forms representatives, seeds 251-253 |
+| `<rewrite>-over-<stage>` | An interpreter rewrite (handler table, class rewrite, minify) over one opcode stage |
+| `all-stages-together` | Every option at once, one test file per source |
+| `interpreter-rewrite-fixed`, `-seeded` | A rewrite of the interpreter alone; the decode must equal the plain decode |
+| One scenario | A single decoder rule on its own source and seed (`try-arm-exits`, `anti-macro-route`, …) |
+| `open-decoder-gaps` | What is red today, one test file per open issue |
+| `whole-programs` | Two whole programs under randomized opcodes |
+
+`open-decoder-gaps` cases are ordinary tests that stay red until their issue is fixed; they carry no
+`test.fails` or expected-decline marking. A fixed case moves to its natural suite. A gap that a red
+check finds becomes a suite of the chain's shape.
+
+#### What every cell checks
+
+```text
+defineCellTests(suite, file), for each cell (suite, file, source, profile, seed):
+  beforeAll: generate the missing cells                 # pinned encoder, ignored cache
+  if suite is single-payload-stage:
+    run that stage's decoder step alone on the encoded input; it must remove its stage
+  test "decodes with the source behaviour: <protects>":
+    generation succeeded
+    public decode (inspectCurrent) accepts
+    the qualifier's output checks pass; the input AST is unchanged
+    source behaviour equals oracle.json's expectation, where the source has one
+    encoded behaviour equals source behaviour
+    decoded behaviour equals source behaviour
+    interpreter-rewrite suites: decoded output equals the plain cell's decoded output
+  if suite.indicators names this source:
+    test "reads as its source": each named form indicator of the decode equals the source's
+```
+
+Behaviour is what the program leaves in `window.TEST_OUTPUT`, run by `support/oracle-runner.js` in a
+browser-like host (`window`/`self`, `performance`, `atob`/`btoa`) under the shared script limit. The
+plain cell of a cell is the same source and seed under `randomizeOpcodes` alone: the stage-free
+program a stage step and an interpreter rewrite are compared with. A source whose encoded program
+does not behave as the source under a suite's profile is no cell of that suite: the encoder's own
+failure leaves the encoded-equals-source check nothing to compare, so the cell is dropped, never
+exempted.
+
+`support/distinct-cells.test.js` checks what crosses suites, decoding nothing: every `files` key has
+its test file and every test file a key; every cell says what it protects; every `proofs` entry's
+code still stands in its file (re-prove a protection when its code changes); no two cells encode
+the same text; an inert control's payload equals its plain cell's; and every stage suite
+(`single-payload-stage` and the payload chains) has its `stage-effect/<suite>.test.js` and every such
+file a stage suite.
+
+`stage-effect/<suite>.test.js` calls `defineStageEffectTests(suite)` from `support/stage-effect.js`:
+each of that suite's cells must have a payload, the container's words and constant pool, unlike its
+plain cell's. The check has one file per stage suite so Vitest spreads it over its workers and no
+single test carries every stage cell under the global time limit.
+
+#### Sources and the cell cache
+
+A cell's program is `sources/<name>/source.js`; while a corpus fixture of that name still exists,
+`fixtures/` supplies it, and `sources/` wins where both do. `oracle.json` beside a source is needed
+only for a special host or a committed expectation.
+
+```text
+cellKey = sha256(PIN, encoder lock, Node major, JDK major if minify, sha256(source), options, seed)
+sandbox-tests/vm-cells/<cellKey>/
+  cell.json        generation record: options, seed, pin, toolchain, ok or the error
+  raw.js           encoder output with its instruction listing
+  encoded.js       the input a cell decodes (listing comment removed)
+  decoded.js       the last run's decode
+  result.json      the last run's diagnostic, first refusing reader, checks, opcodes, sizes, behaviour
+```
+
+A failed generation is not cached, so a timeout or a missing JDK is retried. `decoded.js` and
+`result.json` are rewritten by every run, a run over broken decoder code included: decode afresh
+when measuring. `VM_FRESH_SEEDS=N` adds N random seeds, recorded in each `cell.json`; a fresh cell
+the decoder fails is kept by adding its seed to the suite, and one whose encoded program fails is
+dropped as above. `VM_CELLS=<regexp>` runs the cells whose id
+matches.
+
+**Quick runs** use one suite file (`npx vitest run test/vm/jsconfuser-vm/generated-cells/<suite>`)
+or `VM_CELLS`; `npm test` is the full suite and the one to pass before a commit.
+
+#### Unit, entry-point and support tests
+
+| Folder | Tests |
+|---|---|
+| `jsconfuser-vm/single-component/` | `extract-container`, `read-wordcode`, `validate-references`, `partition-functions` and the numeric handoff on a hand-written boot: refusal of ordinary or malformed input, an unchanged input and deeply frozen output; `handler-effects` on a hand-written minified handler pair |
+| `switch/single-component/` | The shared backend on supplied typed models: `DEBUGGER` emission, copy coalescing, refusal of work after a handler pop, a dispatch-free emission and a retained catch dispatch |
+| `jsconfuser-vm/public-entry-points/` | The plugin's independence from a debug comment, CLI output and sidecar paths, the registered CLI against direct diagnosis, the sequential target's rollback and publication, and the debugger policy |
+| `jsconfuser-vm/support/` | `harness.test.js` proves the harness's residue, derived-state and debug-comment detectors can fail; `readability.test.js` reads the readability fixtures' metrics against their baseline |
+
+#### Generated fixture inputs
+
+The entry-point, readability and qualifier tests read committed fixtures under `fixtures/`. Their
+encoded inputs are generated, not committed: a fixture keeps its source and the recipe its own
+metadata records, and the global setup regenerates the bytes with the pinned encoder before any
+test reads them.
+
+```text
+setup (test/vm/materialize-fixtures.js), before any test file:
+  for each recipe in fixtureRecipes():              # test/vm/fixture-recipes.js
+    if recipe.file is absent:
+      take the cell for (source, options, seed) from the cell cache, generating it if missing
+      copy encoded.js (listing comment stripped) or raw.js (listing kept) to recipe.file
+```
+
+A real example: `fixtures/corpus/raw/f-expression-values/` commits `source.js` and `oracle.json`.
+Its recipe is that source with the baseline options, which draw no randomness; setup writes
+`encoded.js` from the cached cell.
+
+| Metadata a fixture directory carries | Recipe it yields |
+|---|---|
+| `qualification.json`, `qualification-N.json` | `source.js` with the record's options and seed, to `encoded[-N].js` |
+| `generation.json` `cells` / `files` | each cell's or file's source, options (over the encoder options) and seed; `listing` keeps the comment |
+| `provenance.json` `records` / `fixtureRows` | each row's encoded file from its source or qualifier case, options and seed |
+| `readability/manifest.json` | each case's `source.js` with the manifest options, listing kept |
+| a corpus `source.js` | baseline options |
+
+Ownership is explicit: `test/vm/.gitignore` lists exactly the generated paths (rewrite it with
+`node test/vm/materialize-fixtures.js --write-ignore`), and `fixture-recipes.test.js` fails when the
+list drifts or an encoded input has neither a recipe nor a place in its short committed list (the
+second encoder's layered outputs and one ordinary non-VM input). A file already present is left
+alone; deleting it regenerates it. A fixture stays only while a test reads it.
+
+The encoder comes from
+[fetch-encoder.mjs](../../decoder/decode-js/scripts/qualify-jsconfuser-vm/fetch-encoder.mjs), which
+clones the pin and installs from the committed `encoder-lock.json` with `npm ci`: the encoder tracks
+no lockfile and its dependencies are ranges, so without it a fresh clone could encode differently.
+`JSCONFUSER_VM_ENCODER` names another checkout; either is refused at another commit or with a dirty
+worktree. Node and the JDK are not pinned; their major versions are in the key.
+
+#### Where a claim's evidence lives
+
+This file is not a claim index. An owner doc's `## Fixtures` names the suites whose cases pin its
+claims, and each suite's `proofs` names the code a break turned red. A claim no suite holds says
+so there. Behaviour alone does not tell decoding from passthrough; the output checks do: they
+refuse a decode that keeps the source's word array, a dispatch over a numeric stream or an opaque
+state, or a name of the encoder's runtime.
+
 ## Testing against real encoder output
 
 The fixtures above are frozen samples; the loop that *finds* the bugs they then guard is a
@@ -277,6 +539,14 @@ details are required for the comparison to be valid at all:
   one the decoded program reaches, and the capture comes back silently empty.
 - **parse decoded output with `allowReturnOutsideFunction: true`.** The `pack` wrapper
   leaves a legitimate top-level `return` behind.
+
+## Retired document-first verifiers
+
+The VM docs in this package cite *retired* frozen, immutable or bounded verifiers. Each was a
+one-off document-first reconstruction, built from these docs before source consultation to test
+whether they sufficed, and was retired once its accepted findings graduated into the docs. A claim
+citing one is a historical result: nothing re-runs it and its retained inputs are not available.
+Only the committed tests indexed here are maintained evidence.
 
 ## What the suite still does not cover
 
@@ -320,5 +590,9 @@ was not. **A regression baseline's only job is to catch a change.**
 
 "Unit Tests" runs on push / PR to `main`: Node **26** with npm cache, `npm ci` with
 `npm_config_build_from_source: true` (so `isolated-vm`'s native module builds reliably),
-`npx vitest run` (with `always()` so a report posts even on failure), then
-`davelosert/vitest-coverage-report-action` publishes the coverage summary as a PR comment.
+a JDK (`actions/setup-java`) for minify cells, the encoder checkout and `sandbox-tests/vm-cells`
+restored from `actions/cache` (a cell whose key did not change is reused from any earlier entry),
+`npx vitest run` with `VM_FRESH_SEEDS=1` (with `always()` so a report posts even on failure), then
+`davelosert/vitest-coverage-report-action` publishes the coverage summary as a PR comment, and the
+generated cells (source, encoded, `cell.json`, decoded, `result.json`) upload as the `vm-cells`
+artifact, kept 90 days.

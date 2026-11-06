@@ -87,6 +87,7 @@ re-bracing can leave.
 ## Source
 
 - [`src/visitor/obfuscator/normalize-statements.js`](https://github.com/echo094/decode-js/blob/6cacb633ceedf0812fe31f951ba8f41ffb431ca1/src/visitor/obfuscator/normalize-statements.js)
+  (default export `normalizeStatements`)
 - Wired as the first pass of the `obfuscatorx` plugin. Why that position is forced is item 1.
 
 ## Fixtures

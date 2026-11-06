@@ -121,7 +121,7 @@ None currently open.
 
 ## Source
 
-[`src/visitor/jsconfuser/dead-code.js`](https://github.com/echo094/decode-js/blob/6c974fb5720518fac9c6b3d4cf558ba90ef9f8e7/src/visitor/jsconfuser/dead-code.js), wired into
+[`src/visitor/jsconfuser/dead-code.js`](https://github.com/echo094/decode-js/blob/6c974fb5720518fac9c6b3d4cf558ba90ef9f8e7/src/visitor/jsconfuser/dead-code.js), whose default export `deDeadCodeInit` is wired into
 [plugin/jsconfuser.js](../../plugins/jsconfuser.md) right after
 [OpaquePredicates](opaque-predicates.md) — item 2 has why that order is forced.
 

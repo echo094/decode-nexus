@@ -188,7 +188,7 @@ population", never as correct** — a declaration-form gate was investigated on 
 
 ## Source
 
-[`src/visitor/jsconfuser/lock.js`](https://github.com/echo094/decode-js/blob/6c974fb5720518fac9c6b3d4cf558ba90ef9f8e7/src/visitor/jsconfuser/lock.js), wired into
+[`src/visitor/jsconfuser/lock.js`](https://github.com/echo094/decode-js/blob/6c974fb5720518fac9c6b3d4cf558ba90ef9f8e7/src/visitor/jsconfuser/lock.js), whose default export `deLockInit` is wired into
 [plugin/jsconfuser.js](../../plugins/jsconfuser.md) **late**: after
 [StringConcealing](string-concealing.md)'s second visit,
 [GlobalConcealing](global-concealing.md)'s second visit, the ControlFlowFlattening decode and

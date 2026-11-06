@@ -9,3 +9,9 @@
 [submodule "decoder/decode-js"]
     path = decoder/decode-js
     url = https://github.com/echo094/decode-js.git
+[submodule "encoder/js-confuser-vm"]
+    path = encoder/js-confuser-vm
+    url = https://github.com/MichaelXF/js-confuser-vm.git
+[submodule "decoder/claude-vs-js-confuser"]
+	path = decoder/claude-vs-js-confuser
+	url = https://github.com/MichaelXF/claude-vs-js-confuser.git

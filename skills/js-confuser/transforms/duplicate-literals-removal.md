@@ -62,6 +62,20 @@ Key points, all confirmed against the pinned source (not inferred):
   ([`duplicateLiteralsRemoval.ts#L110-L132`](https://github.com/MichaelXF/js-confuser/blob/31c5a47a79f97e4b4c2d4b2a8552c11a8b548fb0/src/transforms/extraction/duplicateLiteralsRemoval.ts#L110-L132))
   and left as a plain literal until (if ever) a duplicate shows up. A value used
   exactly once anywhere in the program is never touched.
+- **The retroactive rewrite of a first occurrence is not skipped, so its own index can be
+  deduplicated.** On a value's second sighting the recorded first occurrence is replaced with
+  `{ph}_dlrArray[index]`
+  ([`duplicateLiteralsRemoval.ts#L117-L125`](https://github.com/MichaelXF/js-confuser/blob/31c5a47a79f97e4b4c2d4b2a8552c11a8b548fb0/src/transforms/extraction/duplicateLiteralsRemoval.ts#L117-L125)),
+  but only the current occurrence is skipped
+  ([`#L139-L140`](https://github.com/MichaelXF/js-confuser/blob/31c5a47a79f97e4b4c2d4b2a8552c11a8b548fb0/src/transforms/extraction/duplicateLiteralsRemoval.ts#L139-L140)).
+  Babel visits the replacement only while the list holding it is still being traversed, that
+  is, when the first occurrence and the duplicate are direct siblings in one argument or
+  element list. Its `NumericLiteral` index is then scanned like any literal: if that number has
+  already been seen, it becomes a read too, producing `{ph}_dlrArray[{ph}_dlrArray[j]]`.
+  `f(0, 0)` gives `f(arr[arr[0]], arr[0])` with `arr = [0]`, while `f(0); f(0);`, `f([0], 0)`
+  and `f(g(0), 0)` do not nest. The value is unchanged at runtime because slot `j` holds the
+  index number. A long numeric array literal (a VM word array, say) nests this way almost
+  surely, because small numbers repeat among its direct elements.
 - **`Identifier` nodes are only ever collected for one specific case**: a
   referenced (non-binding) `undefined` with no local binding shadowing it
   ([`duplicateLiteralsRemoval.ts#L61-L81`](https://github.com/MichaelXF/js-confuser/blob/31c5a47a79f97e4b4c2d4b2a8552c11a8b548fb0/src/transforms/extraction/duplicateLiteralsRemoval.ts#L61-L81)).
@@ -118,4 +132,5 @@ Three later encoder stages reshape this transform's own output before the file i
 
 ## 5. Known Quirks
 
-None currently documented.
+- **Nested reads.** An index literal can itself be extracted, giving
+  `{ph}_dlrArray[{ph}_dlrArray[j]]`; item 3 states the sibling-list condition.

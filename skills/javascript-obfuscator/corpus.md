@@ -16,7 +16,7 @@ keep that true, so it carries only what the encoder alone can answer.
 |---|---|
 | which versions are built, and the encoder-side reason each column exists | what any consumer of the samples found in them, or the state of its repairs |
 | which option sets, seeds and targets a column carries, and which sets a version can accept at all | another project's pass names, censuses, runtime tallies — or its commit ids, which a rebuild of that project silently invalidates |
-| the inputs verbatim, and the shapes they can and cannot reach | a measured value with nothing behind it: record the axis and the census that reads it, per `SKILL.md`'s Measured Figures Are Diary |
+| the inputs verbatim, and the shapes they can and cannot reach | a measured value with nothing behind it: record the axis and the census that reads it, per [Measured Figures Are Diary](../doc-conventions.md#where-facts-live) |
 | emitted-shape facts read off the samples — what differs between two columns, what a cell does when run | the study reasoning that selected a version, which is [versions.md](versions.md)'s |
 | the freeze, manifest and append rules that keep two builds comparable | anything that would have to be re-checked when a downstream consumer changes |
 

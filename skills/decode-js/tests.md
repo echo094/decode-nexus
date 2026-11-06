@@ -12,18 +12,27 @@ its output compared to either the input itself (no-op expected) or a `.fix.js` g
 - **Coverage** — enabled by default (`@vitest/coverage-v8`), scoped to `src`, with
   `text` + `json` + `json-summary` reporters and `reportOnFailure: true`.
 - `passWithNoTests: true`.
-- **`testTimeout`, raised well above Vitest's 5s default.** The jsconfuser combination
-  fixtures below are whole-pipeline decodes of real encoder output, and the largest inputs run
-  to six figures of obfuscated source bytes — one full decode per case, with v8 coverage
-  instrumenting every visitor the decode walks. They are the only cases in the suite whose
-  cost is measured in seconds rather than milliseconds, and the default left the heaviest
-  of them too little margin: it **passed on a dev machine and timed out on a shared CI
-  runner**, whose per-case times run several times slower across the whole file, not just
-  on that one case. Read a timeout here as a host-speed artifact until proven otherwise —
-  a decode regression changes the *output*, and shows up as a `.fix.js` mismatch on a fast
-  machine too. The axis to check if it recurs is the per-case time of the heaviest
-  fixtures against the configured limit (`npx vitest run --reporter=verbose`), never a
-  remembered figure.
+- **`testTimeout`, one generous global limit and no per-test overrides.** The jsconfuser
+  combination fixtures and the heavier VM cases are whole-pipeline decodes of real encoder output,
+  the largest running to six figures of obfuscated source bytes. Their per-case time grows
+  several-fold under v8 coverage and full parallel load, and a lower limit that passed alone or
+  with coverage off **timed out on a shared CI runner and again in a full coverage run**. Read a
+  timeout here as a host-speed artifact until proven otherwise — a decode regression changes the
+  *output*, and shows up as a `.fix.js` or oracle mismatch on a fast machine too. Keep the limit in
+  the config rather than on individual tests: a per-test value below the global one silently caps
+  it. The axis to check if a timeout recurs is the per-case time of the heaviest cases under
+  coverage (`npx vitest run --reporter=verbose`) against the configured limit, never a remembered
+  figure.
+- **`scriptTimeout`, one generous limit for every script a test runs in a Node VM context.**
+  [`test/helper.js`](../../decoder/decode-js/test/helper.js) exports it, and every
+  `runInNewContext`/`runInContext` in `test/` and the integration harness's behavioral-oracle
+  bound take it; no test and no oracle fixture carries its own. It is a different setting from
+  `testTimeout`, and the only one that stops a synchronous hang in target code, so it stays finite.
+  It is generous for the same reason: an encoded program interpreted under stacked control-flow
+  options runs for seconds on its own, and a short per-file limit that passed alone failed under
+  full parallel load. The axis if one recurs is that script's own time in the same context
+  against the limit. A test that needs a limit to fire passes its own to the code under test
+  (the string-array pass's evaluation limit, the harness test's own bound).
 
 Run with `npm test` (`vitest --config vitest.config.js`) or `npx vitest run`. **To read
 the pass/fail tally, run `npx vitest run --coverage.enabled=false`** — with coverage on, a

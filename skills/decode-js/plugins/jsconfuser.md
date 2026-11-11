@@ -140,10 +140,16 @@ positions as they get added, rather than a strict reversal:
    the encoder at
    [`309adba`](https://github.com/MichaelXF/js-confuser/commit/309adba); no current-version
    equivalent, and no `StringCompression`/`Shuffle`/compression-template trace remains
-   anywhere in the pinned source. **Present through 2.0.1, gone from 2.1.2 on** — so it
-   shipped in released versions for roughly eighteen months, which is what justifies keeping
-   the decoder. Unlike AntiTooling above it was not removed by the 2.0 rewrite; it survived
-   into 2.x and was cut separately.
+   anywhere in the pinned source. **Present through 2.0.1, gone from 2.1.2 on.** Unlike
+   AntiTooling above it was not removed by the 2.0 rewrite, but 2.0.x re-implemented it on an
+   embedded LZString library (`decompressFromUTF16`, then a delimiter `split`), which this
+   matcher does not target. The matcher reads only the 1.x decoder: a named function whose
+   `for` loop calls `charCodeAt(0)` directly. 1.x support is best-effort and unvalidated.
+   On 2.1.3 input the pass can only decline, so its loop search stops at the `charCodeAt`
+   call's own function and requires a named decoder. Without that, a DeadCode template calling
+   `charCodeAt` inside any `for` body reached the enclosing function, matched its ordered
+   character template and crashed on an anonymous one;
+   `test/jsconfuser/dead-code-string-compression.js` pins the decline.
 10. **[StringConcealing](../visitors/jsconfuser/string-concealing.md)**
    (`string-concealing.js`, `deStringConcealingInit` — evaluated in an isolated-vm
    sandbox, not structurally parsed). Positioned here (before
@@ -315,11 +321,12 @@ its page says why.
 
 `string-compression.js` and `anti-tooling.js` have no `Order` of their own, and are
 **unverified: not active in js-confuser 2.1.3**. `stringCompression` was a 1.1.2 option
-(LZW-compressed string blobs) and `antiTooling` a 1.1.8 one; neither survived the 2.0.0
-Babel rewrite, and no transform or option of either name exists anywhere in the pinned
-encoder's source. Both are kept for real-world legacy samples (items 9 and 3 above), so
-nothing exercises either against encoder-generated output — `anti-tooling.js` has
-hand-written fixtures, `string-compression.js` has none.
+(LZW-compressed string blobs) and `antiTooling` a 1.1.8 one. AntiTooling did not survive the
+2.0.0 Babel rewrite; StringCompression survived as a different LZString implementation until
+2.1.2 (item 9). No transform or option of either name exists anywhere in the pinned encoder's
+source. Both are kept for real-world legacy samples (items 9 and 3 above), so nothing
+exercises either decode against encoder-generated output. `anti-tooling.js` has hand-written
+fixtures; `string-compression.js` has only a 2.1.3 fixture pinning its decline (item 9).
 
 **Two covered passes have no population at all on the current corpus, and that is a property
 of the corpus rather than of either pass.** The stage breadcrumb

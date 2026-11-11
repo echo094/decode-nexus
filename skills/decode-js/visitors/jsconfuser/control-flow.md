@@ -171,8 +171,15 @@ identifier — safe to treat as plain-string either way only because this runs *
 per-node (the same `(scopeProperty, varName)` pair is read from multiple blocks and must
 resolve to the same identifier everywhere), so naming goes through one shared cache for
 the whole walk — keeping the encoder's own generated replacement name rather than
-inventing a fresh one, falling back to a numeric suffix only when two independently-named
-scopes' generated names happen to collide.
+inventing a fresh one. It falls back to a numeric suffix (`name_2`, `name_3`, …) when the name
+is already taken: by another pair in this recursion, by a binding visible at the reference
+site, or by a binding the function being replaced owns or inherits. The last two matter
+because the graph still holds ordinary lexical bindings from helpers never moved into the
+scope object; an introduced `var` spelled like one would capture its references or be
+captured by them. The function's names are snapshotted before its body is replaced, since
+the graph paths are already detached from that scope by then.
+`test/jsconfuser/control-flow-flattening-scope-capture.js` pins it by running the decoded
+output.
 
 **`unwrapThisGuardCallee(path)`** runs on each chain the rewrite just dissolved and removes
 the guard the encoder wrapped around it. Moving a variable into the scope object re-spells
@@ -766,7 +773,7 @@ author or the encoder wrote.
 ## Source
 
 [`src/visitor/jsconfuser/control-flow.js`](https://github.com/echo094/decode-js/blob/6c974fb5720518fac9c6b3d4cf558ba90ef9f8e7/src/visitor/jsconfuser/control-flow.js) (literal entanglement) +
-[`src/visitor/jsconfuser/control-flow-graph.js`](https://github.com/echo094/decode-js/blob/6c974fb5720518fac9c6b3d4cf558ba90ef9f8e7/src/visitor/jsconfuser/control-flow-graph.js)
+[`src/visitor/jsconfuser/control-flow-graph.js`](https://github.com/echo094/decode-js/blob/43bfddc7f062c12ea7636a983d7c376a640daced/src/visitor/jsconfuser/control-flow-graph.js)
 (everything else), wired into
 [plugin/jsconfuser.js](../../plugins/jsconfuser.md).
 

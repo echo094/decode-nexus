@@ -83,16 +83,17 @@ env-unlock). It is the only full-plugin fixture in the suite.
 
 | test file | visitor | cases (valid → `.fix.js`, invalid → no-op) |
 |-----------|---------|--------------------------------------------|
-| `split-assignment.test.js` | [split-assignment](visitors/split-assignment.md) | `call-valid-1`, `if-assignment-valid`, `if-member-valid`, `member-valid-1`, `variable-valid` (valid); `if-invalid`, `variable-invalid` (no-op) |
+| `split-assignment.test.js` | [split-assignment](visitors/split-assignment.md) | `call-valid-1`, `if-assignment-valid`, `if-member-valid`, `member-valid-1`, `assignment-member-name-valid`, `variable-valid` (valid); `if-invalid`, `variable-invalid` and eight behaviour-gate cases (no-op), listed in its [Fixtures](visitors/split-assignment.md#fixtures) |
 | `split-variable-declarator.test.js` | [split-variable-declarator](visitors/split-variable-declarator.md) | `init-valid-1` (valid); `parent-invalid`, `init-invalid` (no-op) |
 | `parse-control-flow-storage.test.js` | [parse-control-flow-storage](visitors/parse-control-flow-storage.md) | `object-invalid-1` (no-op); `nested-delegating-wrapper-outer-first` pins the current outer-first traversal dependency and one binary resolving path |
 | `merge-object.test.js` | [merge-object](visitors/merge-object.md) | ObjectPattern/ArrayPattern declarators (no-op); Identifier declarator merge (valid) |
 
 Concrete examples of what the fixtures pin down:
 
-- **split-assignment `call-valid-1`** — hoists assignments buried in a computed
-  member/callee chain into ordered statements (`d = _; b = d[d("1")]("2"); x[…] = …`),
-  exactly the [split-assignment](visitors/split-assignment.md) `getInsertPath` behavior.
+- **split-assignment `call-valid-1`** — hoists an assignment buried in a computed
+  member/callee chain (`b = d[(d = _)("1")]("2"); x[…] = …`) and keeps the inner `d = _` in
+  place, because the member object `d` is read before it runs: exactly the
+  [split-assignment](visitors/split-assignment.md) `getInsertPath` behavior.
 - **split-variable-declarator `init-valid-1`** — `let a = (() => {}, function(){})` →
   `() => {}; let a = function(){}`. Note this visitor is otherwise
   [wired into no plugin](visitors/split-variable-declarator.md) — the test is its only

@@ -145,7 +145,7 @@ src/
     │   └── parse-control-flow-storage.js obfuscatorx fork with numeric entries
     ├── prune-if-branch.js            fold if() on constant tests
     ├── remove-control-flow-ob.js     unflatten switch-based control flow
-    ├── split-assignment.js           split compound/sequence assignments
+    ├── split-assignment.js           hoist an assignment out of an expression
     ├── split-sequence.js             split SequenceExpressions into statements
     ├── split-variable-declaration.js split multi-declarator `var a,b,c`
     └── split-variable-declarator.js  split a single declarator's chained init

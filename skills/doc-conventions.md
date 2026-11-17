@@ -1,357 +1,399 @@
 # Doc Conventions
 
-The specifications `SKILL.md`'s Standing Rules point at: how a package is laid out, how a
-transform doc inside it is structured, and how a reference crossing between the hub and a
-submodule is written. Read this before writing or editing any transform doc. Standing Rules
-keeps the invariants that apply to *every* change; this file keeps the detail you only need
-while writing one.
+Read this before writing or editing any skill doc. It says what a package contains (boundaries,
+layout, eras), what a doc contains (the three layouts and their sections), and how docs are
+written and kept (where facts live, references, revising). `SKILL.md` holds the one-line forms of
+these rules; this file holds their detail.
+
+## Project Boundaries
+
+**Project Independence.** Each skill package documents exactly one submodule, in isolation: a
+skill file reads the same whichever other submodules exist here, and never cross-references,
+assumes or depends on another project's code, coverage or status.
+
+- **One exception: a decoder package may link the encoder it decodes,** since a decode capability
+  means something only in terms of what it reverses. It needs a real link; name-only text is not a
+  workaround. An encoder package never references a decoder, and decoder↔decoder or
+  encoder↔encoder references are forbidden across packages. Sibling docs within one package link
+  freely.
+- **Comparisons live in a hub study** that hosts every project compared: capability comparisons,
+  algorithm-transfer or adoption lineage, readability conclusions, benchmark summaries, and
+  statements that one project informed, outperformed or was generalized into another.
+- **Reversal lives only in the decoder.** An encoder transform doc never says how to reverse
+  itself, because the rule above stops it from ever citing the decoder that would correct the
+  claim.
+- **A corpus is bounded prior art.** Its experiment-specific scripts are re-derived into an editable
+  decoder only after transfer evidence and that decoder's own acceptance gates.
 
 ## Package Layout
 
-**Every encoder has its own file-layout habit; they have the same components.** Order,
-options, transforms, templates. So a package's layout is designed around *those*, and it is
-**ours** — never a mirror of whichever directory tree the submodule happens to ship. Where the
-two need relating, that is a mapping (below), not a naming convention.
+The layout is ours, built around what the submodule does, and never mirrors its directory tree.
 
-This is settled practice rather than a new idea: `skills/js-confuser/` converged on it with no
-rule telling it to — the root file carries the pipeline order, `options.md` and
-`validate-options.md` the option surface, `transforms/<name>.md` one per transform,
-`templates/<name>.md` plus `template-engine.md` the templates. Its own Skill Layout section
-already justifies *departing* from the source tree, noting that `options.md` is "cross-cutting,
-not scoped to a single transform, so it isn't under transforms/" and that `validate-options.md`
-"runs once, so it isn't under utils/ alongside the per-file helper docs."
+| Part | Encoder package | Decoder package |
+|---|---|---|
+| Root file `<skill>.md` | parser/AST foundation, a "Skill Layout" section, the pipeline order, an execution-flow diagram | foundation, a "Skill Layout" section, the source layout, the roster of entries |
+| Order | in the root file | one doc per entry under `plugins/`; a [pipeline map](#pipeline-map-layout) under `pipelines/` for a target built from modules and transforms |
+| Options | `options.md`, `validate-options.md` | none |
+| Transforms | `transforms/<name>.md`, one [transform doc](#transform-doc-layout) each | one transform doc per pass or recovery, in a folder per group |
+| Modules | helper folders (`utils/`, `templates/`), as [module docs](#module-doc-layout) | `<module>.md` and `<module>/`, beside the transforms that cite them |
+| Tests | `tests.md`, where the package has its own fixtures | `tests.md`: how inputs are generated and what the suites prove |
 
-- **Docs are named for the transform or shape, never for a source file.** Same rule as naming
-  a strategy by shape rather than version, and citing era IDs rather than ranges: never key a
-  doc on something that drifts. A doc named after a source file has to be renamed, split or
-  duplicated the first time the encoder moves the concept — one obfuscator's rotate function is
-  *only* a code helper at 2.9.6 and becomes a code helper **plus** a transformer in a different
-  directory by 2.19.0. One concept, one file at one era and two at another.
-- **Source-tree mirroring applies only inside large helper folders** — `utils/<name>.md`,
-  `templates/<name>.md`, one file per source file, flat and distinctly named, against the
-  pinned commit. That is a navigability rule for bulk, and it was never a mandate that the
-  package's top level follow the submodule's directories.
-- **Structural drift and shape drift are independent axes**, which is what makes a file-keyed
-  layout actively wrong rather than merely inconvenient. The axis to measure is the **file
-  set** — what a file-keyed layout tracks — against **file contents**, which is where a shape
-  lives; the two answer differently at the same boundary, in both directions. Measured on one
-  obfuscator (`git diff --name-status --diff-filter=ADR <a> <b> -- src` for the first,
-  `--diff-filter=M` for the second): across `2.15.3 → 2.15.4` the file set does not move at
-  all — nothing added, removed or renamed — while every modified file is a string-array
-  calls-wrapper helper or template, and a decoder distinguishes two wrapper shapes across
-  exactly that boundary. So an era boundary can have **no structural footprint at all**. And
-  across `2.18.1 → 2.19.0` the file set moves in three places, none of them string-array (two
-  self-defending helpers consolidate into one, plus an added tsconfig), while the string-array
-  transformers, storages and templates are all modified in place. A file-keyed doc tree would
-  have churned on the self-defending rename and stayed silent through both string-array
-  changes. **Beware the shorthand that reads "changes zero files"** — an earlier statement of
-  this measurement said exactly that, meaning the file set, and it reads as "nothing in the
-  source changed", which was false and would have retired the boundary from study.
-- **A file moving is never a reason to split a doc.** A relocation is implementation-level, so
-  it is an era-tagged row; what earns a new file is an algorithm divergence, decided by reading
-  the shape rather than the path. Both are specified under "Documenting Multiple Eras."
+The root file carries the workflow, not the plumbing: plugin APIs, constants, helpers and result
+types move into their own files once they would bloat it.
 
-### The source map, where one is necessary
-
-`source-map.md` in the package: one row per submodule source file, the doc that claims it, and
-the era where those differ. **Required only when the reverse lookup is otherwise hard** — a
-package documenting more than one era, or one where a concept spans directories. A single-era
-package whose layout tracks its source closely needs none.
-
-It is not a duplicate of the per-doc `## Source` sections, because it answers what they
-structurally cannot:
-
-- **The reverse direction.** "Which doc covers this source file?" is unanswerable from docs
-  keyed the other way without grepping the whole package.
-- **The coverage gap** — which source files *no* doc claims. This is the same question the
-  fixture table is required to answer ("which claim nothing tests") and the spellings table
-  ("which spelling nobody implemented"), one axis over. A map that lists only what is
-  documented reproduces exactly the failure those two rules exist to prevent.
-
-**Anti-drift discipline:** each doc keeps its own `## Source` exactly as specified below, and
-the map is **verified by grep against those sections in both directions**, never maintained
-independently. A map that can drift silently is worse than no map, for the same reason a stale
-probe is worse than no probe.
-
-## Transform Doc Layout
-
-An encoder transform doc and its paired decoder doc share one numbered structure, so matching
-numbers make a pair easy to cross-check. A section left blank for lack of knowledge is fine;
-an invented one is not.
-
-- **1. Target** — the requirement: what the transform is meant to achieve. Encoder: the
-  protection it adds. Decoder: what decoding it means to produce.
-- **2. Algorithm** — the solution-level design, kept high enough to survive a re-read
-  without the source open. On the decoder side this is the *only* place a reversal
-  strategy is ever asserted — see `SKILL.md`'s "Reversal Lives Only in the Decoder."
-  This is also the level at which an era divergence becomes a **separate doc and file**
-  rather than a section — see "Documenting Multiple Eras."
-- **3. Implementation** — the granular design: which functions, which AST node shapes,
-  line citations, data structures. Whatever a doc puts under a heading like "Stage
-  1/2/3" beyond the high-level approach belongs here, not in Algorithm. Where an era
-  differs only here, it is a tagged row, not a second doc.
-- **4. Later Stages (encoder) / Input Shapes (decoder)** — one slot and one principle,
-  mirrored: **where a shape this pass handles comes from, or goes to, outside the pass.**
-  The two halves record one interaction from opposite ends, each named for what it holds:
-  an encoder doc says what later stages do to its output; a decoder doc says what its
-  input holds that it did not make.
-  - **Encoder — Later Stages.** What a *later* encoder stage does to this
-    transform's own output, derived from the stage order
-    (`encoder-decoder-method.md`'s W1) rather than discovered only after a decoder breaks
-    on it. Harvest an existing decoder-doc bug writeup first (rename-proofing, minify
-    compatibility, moved-declarations spelling, …) before re-deriving one from scratch.
-    **The stage order is itself era-dependent**, so derive it per era rather than once:
-    an order is rarely a flat list to read off, and where it is assembled from per-stage
-    dependencies a reordering leaves no trace in a changelog. One such change rewrites
-    this item for many transforms at once, which is why it is carried as rows.
-  - **Decoder — Input Shapes.** Every shape in this pass's input that the pass did not
-    make: what encoder stages left there (and what later encoder stages made of it), and
-    what an *earlier decoder pass* emitted; each row names its producer. A decoder pass
-    is not only a consumer of encoder output: it emits shapes of
-    its own, and every pass scheduled after it inherits them. Reading the encoder's stage
-    order tells you which *encoder* residue is still in your input; it says nothing about
-    what your own pipeline put there, and that has repeatedly been the actual blocker —
-    a reconstructed function given a rest parameter unconditionally, a restored
-    declaration left shadowed by the parameter slot it was packed into, a call re-spelled
-    `(1, f)()`. Each defeated a later pass that was reading for the encoder's spelling,
-    and each was found only after that pass was wrongly blamed on an encoder stage.
-  - **Home rule, split by what each side knows.** The *affected* pass owns the
-    dependency and what its own gates do with it — that is where a decline is debugged
-    from, so an empty section there costs a re-derivation. The *producing* pass owns one
-    inventory of the shapes it emits, since one producer feeds many consumers and the
-    mechanism restated per consumer drifts per consumer. The affected side links to it
-    rather than repeating it. Encoder-side, only the first half applies: an encoder stage
-    is pinned and never coordinates for our benefit.
-  - **List the spellings, don't describe the intent.** A matcher reading one construct
-    through several spellings records them as a table — spelling, producing pass, ours
-    vs. the encoder's, and **the era it applies to** once a package documents more than
-    one. A sentence like "keyed on the binding, not on the shape" is a claim
-    about the accepted set wearing the clothes of a summary, and it hides the only thing
-    worth knowing: which spelling nobody implemented. The era column answers the same
-    question along the other axis — which era nobody covered. Write the row when the
-    branch is written. Worked example and its incident:
-    [decode-js/visitors/jsconfuser/dispatcher.md](decode-js/visitors/jsconfuser/dispatcher.md).
-  - **Fixing one is a different decision from documenting it.** An encoder is read-only,
-    so a Later Stages entry can only ever be worked around. An input shape our own pass
-    emits has a second option the encoder side lacks: change the pass that *emits* it. Prefer
-    that when the shape is ours — it fixes every pass the shape defeats at once, whereas
-    teaching each affected matcher to tolerate it is the same fix re-paid per consumer
-    (`encoder-decoder-method.md`'s T1, "fix it at the pass that produces it").
-- **5. Known Quirks (encoder) / Known Gaps (decoder)** — open items only, different
-  names because they're different in kind. Each entry names the era it applies to once a
-  package documents more than one: an entry scoped to a superseded era can never close,
-  because nothing will be released against that era again, while the same words about a
-  current era describe live work. An unscoped entry silently claims to be both. An
-  encoder is pinned and read-only, so its
-  quirks are permanent, descriptive, non-actionable oddities (an upstream-doc
-  discrepancy, a dead code path) — never a bug to fix. A decoder's gaps are usually
-  fail-closed incompleteness, not wrongness, and are meant to close eventually. Once a
-  gap closes, it leaves this section — the durable fact it revealed graduates into
-  Algorithm, Implementation, or item 4 (Later Stages on the encoder side, Input Shapes
-  on the decoder side), whichever level it actually sits at. A closed decoder gap
-  lands in item 4 more often than it looks: if what blocked the pass was a shape another
-  of our passes emits, the durable fact is that dependency, not the matcher tweak that
-  absorbed it. The discovery narrative (dates, how it was found, before/after numbers)
-  does not move into the doc at all, and doesn't need parking anywhere else either —
-  `checkpoint.md` is scratch, disposed of once the work it tracks is done, and a commit
-  message isn't durable once a release rebuild rebases history down to something concise.
-  Once the fact itself has migrated, the narrative around discovering it has done its job
-  and can simply go.
-- **Then two unnumbered closing sections, in this order: `## Source`, then
-  `## Fixtures`.** They sit outside the numbering because they are pointers, not levels of
-  the design — but they are not optional, and they are not one section. `## Source` is the
-  file path plus where the pass is wired, and it cites the numbered item that explains
-  *why* that position is forced rather than restating the reason; a scheduling argument
-  living here is the same misplacement as mechanism living here. `## Fixtures` maps each
-  committed fixture to **the claim it pins**, naming the fixture so the mapping can be
-  checked by grep in both directions, as a table once there are more than a few — a bare
-  list of names records what exists while hiding the only thing worth knowing, which is
-  which claim nothing tests. A fixture pins a claim **at an era**, so the table carries an
-  era column once a package documents more than one; without it a claim looks covered when
-  only one of its eras is, which is the same omission one axis over. Where a pass has no
-  fixtures, say so and say why; an absent
-  section reads as an oversight, and "none, and here is why" does not. Both halves were
-  unwritten convention until they drifted: twenty-one docs had bundled the two into
-  `## Source`, one had `## Fixtures` and no source path at all, and the fixture lists had
-  decayed into name inventories that omitted real fixtures — including ones backing claims
-  their own doc already made.
-
-## Marking something done
-
-**Marking a step done means re-reading every place that names it.** A status lives in more than one
-place by design — a step table, a summary line, an action list, a pointer table — and updating the
-one you are looking at leaves the others asserting the opposite. This is the most frequently
-repeated mistake in this repository: it has been recorded, and then made again in the same session
-that recorded it, more than once. The cheap guard is a grep for the step's own identifier before
-the commit, not a memory of where it was mentioned.
-
-The same applies one level up: **a fact that graduates out of scratch into a skill doc has to leave
-the scratch copy behind**, or the two drift and the stale one is indistinguishable from the fresh
-one. Prune in the same commit that graduates.
-
-**And it applies to open questions, not only to answers — which is the direction that gets
-missed.** A worklist item is a status too, so it decays the same way, except that nothing ever
-re-reads it: an answered question left standing in scratch reads exactly like an unanswered one and
-is re-opened at full price. The recorded instance is a residue axis carried as "the emitter is
-unidentified, start by reading the encoder" for several sessions, while the package's own transform
-doc opened by naming the emitter, calling it ungated, and quoting its character class — the item was
-answerable from two paragraphs of a doc the same study had written. **So before working an open
-item, grep the packages for its subject.** That is the doc-side face of the rule that a matcher
-already doing the job beats a probe
-([encoder-decoder-method.md](encoder-decoder-method.md)'s T8): the cheapest source of an answer is
-the one already written down, and it is checked last precisely because a worklist reads as the
-authority on what is unknown.
-
-## A Doc That Replaces an Artifact
-
-Where a doc stands in for working artifacts — probes, instruments, tooling — **write it as a build
-recipe and then rebuild from it cold, in the same change**. Inputs, naming contracts,
-prerequisites, and above all the failure modes that report success: an inventory of what exists is
-not a recipe, and a doc nobody has rebuilt from is unverified. Doing the rebuild here found five
-gaps in a freshly written page, four of which would have produced a confidently wrong answer
-rather than an error, one of them a defect the original scripts had carried all along. A preserved
-script silently stops matching the code it targets, while a recipe stays true — which is why the
-recipe is the artifact worth keeping.
-
-**A script that is run rather than rebuilt is the exception, and it is a checked-in executable, not
-a fenced code block.** The two are decided by whether anything executes the thing: a probe is
-rebuilt per session from its recipe and belongs in prose, while a tool that must run unchanged
-belongs in `tools/` where it can be run and corrected in place. Code fenced in a document is never
-executed, so nothing tests it, and a defect in it survives every reading — which is how one
-extractor shipped globbing a filename pattern its harness does not emit, and its replacement
-shipped double-counting every input total.
+- **Name files and folders for what they own, never for the task that created them.** Task IDs,
+  phase numbers and chronology mislead once work moves between tasks. Use a number in a name only
+  when it is part of the subject (a protocol version, an opcode) and say so in the doc. A letter
+  code is no name either. A rename
+  updates executable references and links in the same change.
+- **Name a doc for the transform, shape or responsibility, never for a source file.** One concept
+  can be one file at one era and two at another, and a file-keyed tree churns where nothing moved
+  and stays silent where the shape did. A relocated file is an era-tagged row; only a divergent
+  algorithm earns a new doc. The exceptions are stated under
+  [Module Doc Layout](#module-doc-layout).
+- **One file-to-doc table, where the reverse lookup is hard** (more than one era, or a concept
+  spanning directories): `source-map.md`, or the Code layout of a pipeline map where the target has
+  one, never both for the same files. It answers which doc covers a source file and which files no
+  doc claims. It is generated from the docs' Source sections, or checked against them by grep in
+  both directions, never maintained independently.
 
 ## Documenting Multiple Eras
 
-An encoder changes what it emits over time, and samples in the wild keep being produced by
-older releases — so a package often has to describe more than one shape. An **era** is a
-maximal version range over which some named thing about the encoder holds still. Emitted
-output can never identify an exact version, only an era, which is why eras rather than
-versions are the unit throughout.
+An **era** is a maximal version range over which some named thing about an encoder holds still.
+Output can identify an era, never an exact version, so eras are the unit.
 
-- **Change arrives at two levels, and they need different numbers of axes.**
-  - **Global** — the pipeline itself: which stages run, in what order, how transforms are
-    grouped into traversals. One change here moves every transform at once, so no component
-    owns it and there is nothing to split it by. **One axis, for the whole encoder.**
-  - **Local** — one transform's algorithm being rewritten. Transforms are rewritten
-    independently, so **one axis per component**. A single global shape timeline would take a
-    boundary wherever *any* component moved, and a doc citing it would see its era shift for
-    a reason having nothing to do with its own subject — the same dilution that makes a
-    file-keyed layout track the wrong thing.
+- **Eras belong to encoder packages.** An encoder package keeps them so that older versions stay
+  documented. A decoder package has no eras of its own: it reflects only the decoder repository
+  at its pinned commit, and cites an encoder era where that code handles one.
+- **The era registry is the single definition.** A package documenting more than one era has a
+  `versions.md`; how axes, rows, commits and IDs work is stated at the head of that file.
+- **Docs cite era IDs, never inline version ranges.** One registry edit then corrects every citation.
+- **An era ID names the signature** (`P-rotate-helper`, `E-fn-wrapped`), never a position (`P1`) or a
+  version (`P2.9.6`).
+- **Where divergence resolves:**
 
-  Assume every transform has its own history until someone has read it. A component with no
-  axis is one nobody has studied, never one that held still, and the two must not be recorded
-  as the same thing.
-- **Per-component axes are what let a verdict be partial.** A sample whose option was off
-  carries no evidence about that transform, so its era is *unknown* from that sample rather
-  than wrong. A global axis cannot express that: it has to name one era for the whole file on
-  evidence that covers part of it. The version range a sample came from is the **intersection**
-  of its per-component verdicts, computed from them rather than fingerprinted whole.
-- **The era registry is the single definition.** A package documenting more than one era
-  carries a `versions.md` with one table per axis and one row per era: **era ID, version
-  range, verified commit SHA, signature.** Required only once a second era is documented — a
-  single-era package needs nothing. A row never spans axes, and a coincidence between two
-  axes' boundaries is a finding written in prose, never a merged row.
-- **A registry row is a claim in one direction, and a detector reads it in the other.** The
-  registry states `version → shape`, which is a function. A decoder observes a shape and needs
-  `shape → version`, which is **not**: a shape can recur non-contiguously, because an encoder can
-  revert a change. So a detector's per-axis verdict is the **set** of ranges consistent with what
-  it matched — a union — never one era ID chosen from several, and the version range for the whole
-  sample is the intersection of those unions across axes.
-  - **Two same-shape eras therefore stay separate rows**, precisely so the union is computable.
-    Merging them forces the row's range to be either a hull, which is a *false* claim about every
-    version in the gap, or a disjoint set, which is not a range and breaks the row's own shape.
-    The maximal-range definition already forbids the merge; this is why the definition is right.
-  - **The era-ID naming rule is the tripwire.** Two eras cannot honestly share a signature name,
-    so a would-be collision is a prompt rather than a shrug: either the shapes differ in a way the
-    signature has not captured — find it, and the detector gains a discriminator — or the axis
-    genuinely cannot separate them and the verdict must say so.
-  - **The mapping is documentation, not code.** A shape-first detector needs no era at runtime,
-    since matching is a union over shapes and the era is read off whichever matched. Keeping the
-    correspondence in the decoder's own doc, as item 3 rows, is what lets the registry gain rows
-    without the matcher changing — and it must be grep-checkable in both directions, like
-    `source-map.md`: every registry row appears in the decoder's table or is listed as uncovered,
-    and every era ID in that table resolves to a row.
-- **Docs cite era IDs, never inline version ranges.** Twenty docs saying `≥ 2.19.0` is
-  twenty edits and some misses the day the boundary turns out to have been 2.18.0; twenty
-  docs saying `E-fn-wrapped` is one edit, in the registry. The registry row is also the
-  only place a range and its SHA are stated together, so a citation can be checked.
-- **An era ID names the era's signature, never its position or its version.** `P-rotate-helper`
-  and `E-fn-wrapped`, not `P1`/`E1` and not `P2.9.6`. Both rejected forms defeat the rule
-  above rather than merely reading worse. An **ordinal** ID is stable only while the era list
-  is complete, and no era list is: ranges between sampled versions are unread by construction,
-  so an era slotting *between* two existing ones is the expected result of narrowing one — and
-  it renumbers every era above it, in the registry and in every doc that cites one. A
-  **version-derived** ID reintroduces the inline range through the back door, and lies as soon
-  as the boundary moves, since the version in the name is a reading the registry is free to
-  correct. Signature names cost width in any table that spans eras; that is the price of the
-  registry being the only thing an insertion edits. Lay the registry out in version order and
-  say so, so that a span `A–B` has a defined meaning.
-- **An era's SHA is the commit its claims were verified against**, not whatever the pin
-  happens to be. A recorded claim always names the commit that proved it, so the SHA does
-  not drift when the pin moves; it moves when someone re-verifies. This is what lets a
-  package document an era whose shapes the *current* source no longer contains — the row
-  points into submodule history, and a pinned checkout stops being the limit of what can
-  be described.
-- **Where era divergence resolves depends on which numbered item it hits**, and only the
-  first answer is a new file:
-
-  | Item | If it differs by era |
+  | Section | If it differs by era |
   |---|---|
-  | 1. Target | never diverges — if the purpose changed it is a different transform |
-  | 2. Algorithm | **split into a separate doc and code file** |
-  | 3. Implementation | era-tagged table rows |
-  | 4. Later Stages / Input Shapes | era column on the spellings table |
-  | 5. Known Quirks / Known Gaps | era-scoped entry |
-  | `## Fixtures` | era column |
+  | Target | Never; a changed purpose is a different transform |
+  | Algorithm | Separate doc and code file |
+  | Implementation | Era-tagged rows |
+  | Later Stages | Era column in the spellings table |
+  | Known Quirks | Era-scoped entry |
+  | Fixtures | Era column |
 
-  Item 2 is the hinge, and it is the doc-side face of one rule: a **different algorithm**
-  earns its own file, **different parameters** stay in one. Everything below item 2 stays
-  in a single doc as rows.
-- **Rows, never prose duplicated per era.** This is the same principle item 4's spellings
-  table already rests on: prose hides the case nobody covered. A doc that repeats a
-  section per era hides *which era nobody covered*, and drifts per copy besides.
+  A different algorithm earns its own file; different parameters stay in one, as rows, never as
+  prose duplicated per era.
+
+## Transform Doc Layout
+
+A transform doc specifies one pipeline item, a step that reverses or reads an encoder step. Encoder
+and decoder docs share this structure so a pair is easy to cross-check. Each section is defined
+under [Doc Sections](#doc-sections).
+
+1. Target
+2. Algorithm
+3. Implementation
+4. Later Stages (encoder) / Input Shapes (decoder)
+5. Known Quirks (encoder) / Known Gaps (decoder)
+6. Source
+7. Fixtures
+
+## Module Doc Layout
+
+Code that several transforms use and that reverses or adds no encoder step itself (a VM decoder's
+reading of the word stream, an encoder's AST helpers) forms a **module**: a set of files with one
+responsibility. A module gets module docs that the transform docs cite. In a good design each
+module is kept in its own folder; a folder is not thereby a module. "File" means one source
+file. The transforms themselves are not a module and have no module doc.
+
+- **Stated once.** A fact about a module's record or export lives in the module's doc; a transform
+  doc links it.
+- **Head doc and sub-docs.** The head doc is `<module>.md`. A module with several parts has one
+  sub-doc per part under `<module>/`; the head doc then holds sections 1 and 4 and an index, and
+  each sub-doc sections 2, 3 and 5 to 7 for its part.
+- **What a sub-doc is keyed on.** Where we own the code layout (an editable decoder), the
+  responsibility; a sub-doc is never named for a file. In a read-only package, a helper folder
+  (`utils/`, `templates/`) is documented as one module although we cannot regroup it by
+  responsibility, so its sub-docs are keyed on the source file, against the pinned commit.
+
+1. Target
+2. Algorithm
+3. Implementation
+4. Dependencies
+5. Known Gaps
+6. Source
+7. Fixtures
+
+This is the transform layout with Dependencies in place of Input Shapes: a module receives its
+callers' arguments, not shapes from an encoder stage or an earlier pass.
+
+## Pipeline Map Layout
+
+A decoder target built from modules and transforms has a pipeline map, `pipelines/<target>.md`:
+the decoder's architecture, how it maps to the encoder steps it reverses, and the index of its
+docs. The map owns what holds across docs: the layers, the code layout, the order the drivers run,
+the records that cross docs and the refusal protocol. A transform or module doc owns its mechanism
+and links the map for the rest, a transform doc from its first line:
+`Pipeline stage: <stage> ([map](<path to the map>))`.
+
+| Term | Meaning |
+|---|---|
+| Layer | One side of the model. The frontend needs knowledge of the encoder: it admits the input, undoes the encoder's steps and converts the program into the model. The backend reads only that model. |
+| Driver | A function that decides which pipeline stages run and in what order, and passes records between them. |
+| Pipeline stage | One step a driver runs, named in kebab-case for what it does (`read-program`, `recover-control`). Stage names are hub labels; the source names its own functions, and the map's order tables give the function behind each stage. |
+| Transform, module | The two kinds of doc below the map, labeled by the doc's filename in backticks (`read-wordcode`); never called a stage, never labeled by a letter. |
+| Record | The data one doc's code hands another's, with a named shape. The producer's doc owns the shape; the map lists producer and consumers. |
+| Encoder step | One numbered row of the encoder's order table, cited by its number and the name the encoder's code gives the pass (`4 controlFlowFlattening`). |
+
+1. **Target.** What the decoder takes and produces, what it refuses, and its entries.
+2. **Layers.** One chart of the whole decode: entries, drivers, layers and the model between them;
+   what each layer may know.
+3. **Code layout.** The mapping between the hub's names and the code's, naming every file once:
+   a modules table (Module | Reads and provides | Sub-docs | Files | Called through), a transforms table
+   (Pipeline stage | Transform | Files | Modules used | Called through) and the entries and
+   drivers. Then the chart of the
+   folders' imports and the rules lint checks on them. Every later section uses these names.
+4. **One order section per driver.** The driver's calls in their real order as explanatory
+   pseudocode, using the code's names, where stages nest or interleave. Then one chart, a box per
+   pipeline stage: solid arrows are the path every input takes, dashed arrows runs that depend on
+   a shape, each labeled with its trigger. Then a table, one row per stage in call order: the
+   stage, the function behind it, when it runs, what it does and what happens when it cannot.
+5. **Records.** Record | Producer | Consumers, one row per record that crosses a doc.
+6. **Refusals.** The protocol, the owners, and which codes reach the public result.
+7. **Encoder steps each doc undoes or reads.** Pipeline stage | Doc | Undoes | Reads, in pipeline
+   order. *Undoes*: removes what the step added. *Reads*: needs the step's output to interpret the
+   program. Steps nothing reads are named in prose.
+8. **Reversibility by encoder step.** # | Encoder step | Reversal | How, or what is lost. The
+   verdict is `reversible` (restored through the named doc, whose Undoes cell lists the step),
+   `discarded` (the step changes only the interpreter or decoration, which the decoder drops),
+   `irreversible` (information no decoder can restore; "in part" names the part) or `unverified`
+   (not yet derived from source).
+9. **Doc index.** Doc | Owns, one row per doc of the target.
+
+Each mapping and verdict is derived from the encoder source and the decoder's docs and code
+([D2](encoder-decoder-method.md#d2-verify-claims-before-acting-on-them)), never copied from a
+doc's claim. Which populations have been shown to recover is evidence, kept in the suites; the map
+states only what each step permits.
+
+## Doc Sections
+
+The sections the two layouts above are built from. Both kinds of doc are design specifications:
+the intended result, the main algorithm, its components and contracts, and the evidence that would
+accept an implementation. They record durable decisions, never task ownership, status or a diary.
+
+A doc stands on its own, without the implementation at hand. It is:
+
+- **Understandable.** It explains the purpose, the main steps and why they preserve behaviour, with
+  a readable explanation before the exact specification; precise tables alone do not teach.
+- **Behaviourally complete.** It gives the result and the refusal for every documented input form,
+  including state effects.
+- **Sufficient for reconstruction.** It states every consequential decision, though not source
+  text or helper layout. An omitted equation that changes the result is a defect; missing
+  knowledge is stated explicitly, never left blank or filled with an invented mechanism.
+
+State the reader's prerequisites, link the package's shared parser/AST and scope foundations
+instead of re-teaching them, and explain transform-specific terms in context. Label fenced
+pseudocode as explanatory; never put untested runnable code or a copy of the live implementation
+in a doc. Where a doc stands in for probes, tools or an implementation that are unavailable, write
+it as a build recipe: inputs, naming and interface contracts, prerequisites, and the failure modes
+that can falsely report success.
+
+**A record is a code block.** A record shape or literal that is nested or has five or more fields
+goes in a fenced block, one field per line where a field carries a note (the note as a comment); the
+sentence or table cell names the record rather than spelling it. Short flat records stay inline, and
+so do field lists in a table built to compare rows (per-opcode or per-kind fields, outcome matrices),
+where a block would break the comparison.
+
+### Target
+
+Lead with the purpose and observable result:
+
+- **Encoder:** the protection added and the behaviour it preserves. Describe the output in the
+  encoder's own terms (admission, decline and fixture vocabulary is decoder framing) and, with no
+  encoder-local fixture, say so rather than citing decoder evidence.
+- **Decoder:** what decoding produces and how that differs from passthrough.
+- **Module:** what it reads, what it provides to its users, and what it never does (the limits
+  they rely on: "never reads the word stream", "never executes the target").
+
+State the input and output boundaries and the important exclusions, and distinguish a verified
+contract from a proposal.
+
+### Algorithm
+
+Explain the solution as a causal progression: what each step learns, why the next needs it, and why
+the restrictions preserve semantics. On the decoder side this is the only place a reversal strategy
+is asserted. An era divergence here earns a separate doc (Documenting Multiple Eras).
+
+Include an annotated worked example from input through its meaning to output, explaining the
+significant operands and intermediate values; mark a synthetic example and what it omits. Use
+diagrams where execution, data flow, capture or stage relationships carry the reasoning, and explain
+them in prose. One reasoning unit per paragraph; tables for comparisons, with short cells.
+
+### Implementation
+
+The granular design beneath the algorithm: components, input/output contracts, representations and
+consequential decisions, enough to derive units, order and tests. A component
+need not match a source file. Where the transform uses a [module](#module-doc-layout), name the
+module and link the record or export read; the module's doc owns their description. Name every
+export another module, test or script imports, verbatim, beside the component it implements, so a
+search for a code name finds its doc; internal helpers need not be listed. An export nothing
+imports is not interface: in an editable decoder, stop exporting it; in a read-only encoder, leave
+it unnamed. Name AST forms to aid verification. Era differences here are tagged rows.
+
+- **Components and representations.** What each consumes and produces, which invariants its consumer
+  relies on, and why the order matters. Define fields, operands, indexes, units, numeric
+  interpretation and binding/capture relationships where they affect the result. The normative chain
+  closes in docs and declared contracts, never only in code.
+- **Decisions and boundaries.** Pseudocode and equations for nontrivial recognition, recovery and
+  emission. Exact constants, thresholds, operand and update order, coercions, widths. "Mix the
+  state" is not enough when different formulas give different programs. Explain each restriction.
+  Tabulate supported and rejected input forms with AST spellings, eras, reasons and behaviour. Never
+  infer broad option or version coverage from one success.
+- **Atomicity.** A matched unit recovers completely or stays untouched ([F2](encoder-decoder-method.md#f2-resolve-completely-or-not-at-all)). State when retry is
+  possible and how intermediate mutations are avoided or rolled back; define any partial boundary.
+  Distinguish no candidate, recognized-but-unsupported, and recovered where a caller acts on the
+  difference; uncertain recognition stays a hypothesis.
+- **Output, state and cleanup.** Define the emitted output and the derived state later components
+  read, which operation updates it and the invariant restored ([F3](encoder-decoder-method.md#f3-keep-tree-and-derived-state-consistent)); which consumed helpers are
+  removed, what survives, and when cleanup is safe.
+
+### Dependencies
+
+What the module imports, and the one-way rule it keeps.
+
+### Later Stages (encoder) / Input Shapes (decoder)
+
+Where a shape this pass handles comes from, or goes to, outside the pass. The two sides record one
+interaction from opposite ends: an encoder doc says what later stages do to its output; a decoder
+doc says what it receives that it did not make.
+
+- **Encoder, Later Stages:** what later encoder stages do to this transform's output (a minifier
+  moving a store this transform wrote, say), derived from the stage order per era
+  ([P1](encoder-decoder-method.md#p1-work-in-reverse-encoder-stage-order-each-stage-placed-by-its-last-write)).
+  Record interactions as rows.
+- **Decoder, Input Shapes:** every shape in this pass's input that the pass did not make: what
+  encoder stages left there (and what later encoder stages made of it), and what our earlier passes
+  emitted. Each row names its producer, encoder stage or our pass. Encoder order says which encoder
+  residue remains, not which shapes our own pipeline emits. State the interface and gate each
+  shape affects, and explain any forced schedule in the numbered design.
+- **Home rule.** The affected pass owns the dependency and what its gates do with it; the producing
+  pass owns one inventory of emitted shapes that consumers link to.
+- **Spellings table.** Accepted spellings, producing pass, whether ours or the encoder's, and era.
+  Write the row when the branch is written. Example:
+  [decode-js/visitors/jsconfuser/dispatcher.md](decode-js/visitors/jsconfuser/dispatcher.md).
+- **Remedy is a separate decision.** An encoder's effects can only be accommodated. For a shape our
+  own pass emits, prefer fixing the producer ([D4](encoder-decoder-method.md#d4-fix-the-producer-not-the-consumer)).
+
+### Known Quirks (encoder) / Known Gaps (decoder)
+
+Unresolved limitations, with their era once there is more than one. A superseded encoder era's quirk
+is permanent and descriptive. A decoder gap is usually fail-closed incompleteness and can close:
+state its boundary and missing evidence without turning a guess into a mechanism. When a gap closes,
+move its lasting fact into the Algorithm, Implementation or Input Shapes section (if another
+pass's shape blocked it, the lasting fact is the producer dependency) and delete the gap. No dates, discovery narrative or before/after figures.
+
+### Source
+
+The file paths, code references and where the pass is wired, citing the section that explains a
+forced position. Code references verify the spec; they never hold the only copy of a mechanism.
+
+### Fixtures
+
+The evidence, as one table keyed by scenario: the scenario, its expected result and oracle, and
+the committed fixture or control that pins it, named so the mapping greps both ways (an era column
+where needed). A scenario with no fixture keeps its row with the cell empty, so the table shows
+which claim has no evidence; with no fixtures at all, say so and why.
+
+- **What to cover.** Supported variants, real combined producer output, refusals and negative
+  controls, atomicity, cleanup and derived state.
+- **What counts.** A decoder recovery assertion must fail for passthrough. A negative control must
+  reach the decision it claims to test
+  ([M4](encoder-decoder-method.md#m4-a-control-must-reach-its-mechanism)). Synthetic examples test
+  the mechanism and real encoder output qualifies admission; neither stands in for the other.
+- **A pinned decline is a boundary, not coverage.** A test that expects a valid encoder-produced
+  form to decline passes for as long as the decoder fails. Name it in the owning doc's Known Gaps
+  with its cause; a change that handles the form first flips the test to expect recovery, so it
+  fails before the fix. Damage controls and inputs outside the encoder's grammar keep declining.
+- **Before adding a fixture,** search the Fixtures tables and the test tree for one targeting the
+  same input and decision, and extend it instead of adding a second.
+
+## Where Facts Live
+
+`SKILL.md` states these rules (gates 5 and 6, the hub rules); this section holds only their detail.
+
+**Durable facts live in skill docs,** in the owning section's own text, never in a parallel
+task-documentation tree: a history rebuild rewrites commit messages, and the checkpoint is scratch.
+A maintained regression's encoder input is regenerated, not committed: its fixture commits the
+source, options and seed, and the test setup regenerates the bytes from the pinned encoder (the
+package's `tests.md` says how). Only an input no checked-in recipe reproduces is a committed
+fixture, laid out as `tests.md` specifies, with a row in the owning doc's `## Fixtures`. Nothing
+outside skill docs, committed tests and tools is cited or depended on, and a claim whose support
+is gone is narrowed to a historical result. A fact graduating from scratch into a skill doc leaves
+the scratch copy behind in the same change. Before a practice graduates into a cross-project doc,
+ask what input made it right here and whether a new project would have that input; the half that
+depended on this project's circumstances stays out.
+
+**Executable tools are checked-in files.** A runnable tool lives in the repository of the project
+it exercises; a decoder's harness lives in the decoder even when it drives the encoder. The hub
+carries specifications, not code; only a tool no single submodule can own (one comparing two
+decoders) lives at the hub.
+
+**Task status is not a fact.** Accepted, pending, reviewed, authorized, qualified-by-whom: these
+describe a task and live only in `checkpoint.md`. A skill doc states the mechanism, its boundary
+and the fixtures that pin it.
+
+**Measured figures are diary.** A number from running something over a corpus (a byte count, a
+ratio, "N of M samples") is void once the corpus regenerates; so are counts of the tree itself
+(test files, cases, lint errors). Record the axis and the census that reads it: "this census
+should read zero" survives, a byte total decays. Where a decision relies on a figure, cite its
+recipe with the value (seed, checked-in tool, reachable encoder, decoder and tool commits,
+toolchain); for an outcome over a population, prefer a committed census test. A corrected figure
+carries the live caveat (a column not comparable with its neighbour, say), not the story of its
+correction.
+
+**Git identifies tracked bytes.** No hash sidecar, no hash field in a record describing a tracked
+file, and no test, tool or doc comparing a tracked file to a stored digest, inside Git or kept
+outside it; identify such inputs by commit and a clean `git status`. A record beside a tracked
+file carries only what Git cannot: seed, options, pin, toolchain and observations. A digest is
+legitimate only for bytes Git does not hold: a comparison within one run (output against input),
+or an untracked artifact's own bytes.
+
+**No machine-local paths.** Name a file relative to its repository root or the citing file. A tool
+finds a toolchain through `PATH` or an argument and makes its paths relative before writing a
+tracked record; a record names a toolchain by name and version.
 
 ## Reference Direction and Form
 
-The hub and a submodule are read by different people, so a reference that crosses between
-them has one legal direction and one legal shape.
-
-- **Submodule source never references the hub.** Not a path, not a doc name, not a section
-  title, not a worklist label. A submodule ships as its own repository, so every such
-  pointer is unresolvable for the only people who will read it — and it rots invisibly,
-  because nothing in either repo checks it. This was worth 46 removals in one pass across
-  `decoder/decode-js`: development issue labels (`checkpoint gap #2`), citations into
-  `skills/`, and the hub's own doc-layout conventions quoted inside shipped code. Five
-  of them pointed at a section deleted long before, and two described work as
-  "not-yet-built" that had since been built. A comment that needs the hub to make sense is
-  a comment saying the wrong thing: state the invariant locally, or move it to the doc and
-  drop it from the code.
-- **A hub doc referencing *frozen* submodule source uses a commit-pinned permalink, never a
-  line number.**
-  [`calculator.ts#L26-L58`](https://github.com/MichaelXF/js-confuser/blob/31c5a47a79f97e4b4c2d4b2a8552c11a8b548fb0/src/transforms/calculator.ts#L26-L58)
-  — the form the `js-confuser` package uses throughout. **The pin is the SHA of the era the
-  passage describes, never whatever the local checkout happens to be at.** For a
-  single-era package that SHA is the hub's `main`-branch gitlink for the submodule, which
-  is what existing packages already cite; once a package documents more than one era, each
-  era's SHA comes from its registry row. A bare
-  `file.js:42` drifts on the next edit to that file and is wrong with no signal; a pinned
-  permalink stays true permanently, which is the same reason the encoder is pinned at all.
-  Verify each one resolves before committing
+- **While a target is still edited, a hub doc cites it by plain relative path;** a permalink into a
+  moving tree breaks on the next commit.
+- **Once the source is frozen, a hub doc cites it by commit-pinned permalink, never a line number.**
+  Example:
+  [`calculator.ts#L26-L58`](https://github.com/MichaelXF/js-confuser/blob/31c5a47a79f97e4b4c2d4b2a8552c11a8b548fb0/src/transforms/calculator.ts#L26-L58).
+  The pin is the SHA of the era the passage describes: for a single-era package the hub `main`
+  gitlink, otherwise the era's registry row. A passage citing the live gitlink describes one commit
+  and points at another after the next pin bump. Verify each link resolves before committing
   (`curl -s -o /dev/null -w '%{http_code}'` → `200`).
+- **A permalink can only be written once its commit is final.** Where history will be rebuilt:
+  rebuild the submodule, take its settled commit IDs, update the hub's references, then rebuild the
+  hub.
+- **Submodule source never references the hub:** no path, doc name, section title or worklist
+  label. A submodule ships alone, so such pointers are unresolvable and rot unseen. State the
+  invariant locally, or move it to the doc.
 
-  **There is no "current era" exemption.** Citing the newest era through the live gitlink
-  rather than through its own recorded SHA reads as correct right up to the next pin bump,
-  at which point the doc describes one commit and points at another — with nothing edited
-  and nothing to notice. "Current" is a fact about when a passage was written, not about
-  what it says, so it is never what a reference is keyed on.
-- **While a target is still actively edited, plain relative paths are the correct form** —
-  a permalink into a moving tree is a promise the next commit breaks. So a decoder
-  documenting its own live source links relatively, and converts to permalinks only once
-  that source is frozen at a release commit. The two halves of this rule are one rule about
-  *whether the target can still move*, not a preference about link style.
-- **A permalink can only be written once its target commit is final.** Where a submodule's
-  history is going to be rebuilt, the order is forced: rebuild the submodule, take its
-  settled commit ids, update the hub's references, then rebuild the hub — the hub rewrite
-  absorbs its own reference-update commit. Writing the links first pins them to commits the
-  rebuild destroys.
+## Revising a Doc
+
+**Revise by evolution, not addition.** A new incident changes an existing item, across files as
+well as within one: sharpen it, merge two, or supersede one. State a point once and cite it
+elsewhere; drop an entry once its incident teaches nothing the survivors don't. When a doc is long
+but nothing in it is redundant, separate what is read every session from what is read only when a
+rule is challenged, keyed on the same labels.
+
+**A changed mechanism is rewritten whole.** Its section, or the doc, is written again as one
+procedure in execution order, to the layout under [Doc Sections](#doc-sections), never as
+amendments in the order they were made. The text alone answers what one step does, in what order,
+and why it terminates.
+
+**After a restructure, derive before revising.** When folders, architecture or protocols change,
+derive the doc layout from the code as if nothing were documented, compare it with the existing
+docs, then revise doc by doc. Fixing links, renamed names and stale rows is the end check; alone,
+it leaves the docs describing the old relationships.

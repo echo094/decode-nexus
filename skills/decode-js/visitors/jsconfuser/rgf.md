@@ -9,9 +9,13 @@ params/body back onto the original function.
 
 ## 2. Algorithm
 
-The recursive decode (`decodeJsconfuser`, a direct import of
-[plugin/jsconfuser.js](../../plugins/jsconfuser.md)'s own default export, called on each
-extracted string) is what makes this tractable: RGF's sub-program was obfuscated by
+The recursive decode is what makes this tractable. It runs in three steps so that no module
+imports its importer: `findRgf(ast)` returns the RGF array, its `eval` wrapper, the integrity
+variable and each function's code string (`codes`); [plugin/jsconfuser.js](../../plugins/jsconfuser.md)
+decodes each string with its own pipeline (`decodeRgf`: `found.codes.map(decodeJsconfuser)`); and
+`applyRgf(found, decodedCodes)` puts each function's params and body back (a null decode leaves that
+function as it is) and removes the array, the wrapper and the integrity check once nothing reads
+them. RGF's sub-program was obfuscated by
 (almost) the entire encoder pipeline, so reversing it is *exactly* the same problem as
 reversing the outer program, just smaller. This also means whatever the sub-program's own
 nested transforms produced — including a captured [Flatten](flatten.md) proxy shape, if
@@ -131,7 +135,7 @@ That is why this visitor is scheduled as late as it is rather than beside the ot
 literal-key matchers: it needs both of those passes behind it. The dependency is on our own
 schedule, so a decline here would read as a defect in `isPropertyAccess` or the index check
 while the actual cause sat two passes upstream — the case
-[encoder-decoder-method.md](../../../encoder-decoder-method.md) T9 exists for.
+[D4](../../../encoder-decoder-method.md#d4-fix-the-producer-not-the-consumer) exists for.
 
 ## 5. Known Gaps
 
@@ -146,8 +150,8 @@ population", never as correct** — the same applies to every shape gate reached
 
 ## Source
 
-[`src/visitor/jsconfuser/rgf.js`](https://github.com/echo094/decode-js/blob/6c974fb5720518fac9c6b3d4cf558ba90ef9f8e7/src/visitor/jsconfuser/rgf.js), wired into
-[plugin/jsconfuser.js](../../plugins/jsconfuser.md) right after the Lock decode step and
+[`src/visitor/jsconfuser/rgf.js`](https://github.com/echo094/decode-js/blob/6c974fb5720518fac9c6b3d4cf558ba90ef9f8e7/src/visitor/jsconfuser/rgf.js), exports `findRgf` and
+`applyRgf`, which [plugin/jsconfuser.js](../../plugins/jsconfuser.md)'s `decodeRgf` runs right after the Lock decode step and
 before Flatten — running late lets the earlier `calculateConstantExp` passes fold the call
 site's array index back into a plain numeric literal first.
 

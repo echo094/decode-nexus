@@ -107,12 +107,12 @@ worked instance is
   - a storage read sitting beside an unsupported **write** is inlined to the pre-write value:
     `var s={x:"p"}; s.x="OVERWRITTEN"; return s.x` becomes `return "p"`. The replacements land
     before `不完整使用` is decided, so the log reassures while the output has already changed.
-    This is T2 · W5's all-or-nothing contract, unmet.
+    This is [F2](../../encoder-decoder-method.md#f2-resolve-completely-or-not-at-all)'s all-or-nothing contract, unmet.
 
   **Neither is fixed here, and the reason is evidence rather than effort:** the repair is only safe
   if it holds for `sojson` and `sojsonv7`, and no corpus, encoder or field sample for either exists
   in this tree — so it would be verified against `javascript-obfuscator` output and shipped to two
-  consumers that output says nothing about, which is what W7 forbids. Same standing as the frozen
+  consumers that output says nothing about, which is what [F7](../../encoder-decoder-method.md#f7-a-shared-pass-needs-off-path-cases) forbids. Same standing as the frozen
   `obfuscator` entry's defects: a permanent description of what a consumer of this visitor
   experiences.
 

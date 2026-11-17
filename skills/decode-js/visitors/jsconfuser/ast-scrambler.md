@@ -27,8 +27,7 @@ stage's own decoder then pattern-matches against a shape this visitor just disso
 invariant this forces: any matcher downstream of this visitor must be partition-agnostic**
 — the information needed to distinguish the cases is destroyed on the encode side, so a
 matcher that accepts only one partition will fail on the other. This is the same family of
-rule as [encoder-decoder-method.md](../../../encoder-decoder-method.md)'s
-[W1](../../../encoder-decoder-method.md#w1-a-later-stage-invalidates-an-earlier-matchers-assumptions):
+rule as [P1](../../../encoder-decoder-method.md#p1-work-in-reverse-encoder-stage-order-each-stage-placed-by-its-last-write):
 don't key on a structural detail a later stage is free to rewrite. It cost a real CFF
 cliff once — see [control-flow.md](control-flow.md)'s "Reading a goto whose partition
 `AstScrambler` dissolved."
@@ -133,7 +132,7 @@ None currently open.
 
 ## Source
 
-[`src/visitor/jsconfuser/ast-scrambler.js`](https://github.com/echo094/decode-js/blob/6c974fb5720518fac9c6b3d4cf558ba90ef9f8e7/src/visitor/jsconfuser/ast-scrambler.js), wired into
+[`src/visitor/jsconfuser/ast-scrambler.js`](https://github.com/echo094/decode-js/blob/6c974fb5720518fac9c6b3d4cf558ba90ef9f8e7/src/visitor/jsconfuser/ast-scrambler.js), whose default export `deAstScramblerInit` is wired into
 [plugin/jsconfuser.js](../../plugins/jsconfuser.md) right after `AntiTooling`, before the
 `Minify`/`MovedDeclarations` step.
 

@@ -30,7 +30,7 @@ outer has become an `if`. `c ? d ? a() : b() : e()` reaches
 **A conditional in value position is often one rewrite away from being convertible** — see
 [convert-conditional-assign.js](convert-conditional-assign.md), which is why that one runs first.
 
-Exports a plain visitor as default plus `createLintConditionalIf(onReverse)`.
+Exports one plain visitor as default; a caller that passes a traversal state (`traverse(ast, visitor, undefined, { changes: 0 })`) has each rewrite counted in `state.changes`.
 
 ## Source
 
@@ -68,6 +68,6 @@ position where a conditional carries a value and must come back byte-identical.
 - **It is harvested because the defect it pins is not buildable.** This visitor duplicated
   references on real output; six hand-built shapes and a sweep to 200 references all read zero
   against the pre-fix visitor, and deleting any single statement from the real function kills it
-  too. That is `W7` exactly — an isolated fixture omits the thing that breaks a matcher on combined
+  too. That is [F7](../../../encoder-decoder-method.md#f7-a-shared-pass-needs-off-path-cases) exactly — an isolated fixture omits the thing that breaks a matcher on combined
   output — and it is why the two `bound-*` cases, which *do* exercise real bindings, still did not
   reproduce it.

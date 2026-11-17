@@ -190,7 +190,7 @@ None currently open. Mechanism 1's unreversed split is a decision (item 1), not 
 
 ## Source
 
-[`src/visitor/jsconfuser/moved-declarations.js`](https://github.com/echo094/decode-js/blob/6c974fb5720518fac9c6b3d4cf558ba90ef9f8e7/src/visitor/jsconfuser/moved-declarations.js), wired into
+[`src/visitor/jsconfuser/moved-declarations.js`](https://github.com/echo094/decode-js/blob/6c974fb5720518fac9c6b3d4cf558ba90ef9f8e7/src/visitor/jsconfuser/moved-declarations.js), whose default export `deMovedDeclarationsInit` is wired into
 [plugin/jsconfuser.js](../../plugins/jsconfuser.md) early — item 2 has why it must precede
 every pass that identifies structure by declaration shape.
 

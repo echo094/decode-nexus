@@ -14,7 +14,7 @@ insert; it is skipped here and becomes eligible once
 [lint-if-statement.js](../lint-if-statement.md) has given it a block — which is why those two want
 to run in the same loop rather than once each.
 
-Exports a plain visitor as default plus `createSplitIfTestSequence(onSplit)`.
+Exports one plain visitor as default; a caller that passes a traversal state (`traverse(ast, visitor, undefined, { changes: 0 })`) has each rewrite counted in `state.changes`.
 
 ## Source
 

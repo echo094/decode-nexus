@@ -30,8 +30,8 @@ applies here — the only gate is whether the string has an identifier spelling 
 **A key that was already non-computed skips step 1 and is still eligible for step 2**, which is what
 makes the pass idempotent and safe to re-run in a fixpoint loop.
 
-Covers `ObjectProperty`, `ObjectMethod`, `ClassMethod` and `ClassProperty`. Exports a plain visitor
-as default plus `createUncomputePropertyKey(onChange)`, used by
+Covers `ObjectProperty`, `ObjectMethod`, `ClassMethod` and `ClassProperty`. Exports one plain visitor
+as default; a caller that passes a traversal state (`traverse(ast, visitor, undefined, { changes: 0 })`) has each rewrite counted in `state.changes`. Used by
 [normalize-converting.js](../obfuscator/normalize-converting.md).
 
 ## Source

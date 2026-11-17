@@ -57,8 +57,8 @@ it is reported in the log line rather than passed over.
 
 ## 3. Implementation
 
-Returns a stats object — per-rewrite counts, `rounds`, and `cappedOut` — which is what the
-`create…(onChange)` factories on the atomic visitors exist to supply. Progress goes through
+Returns a stats object — per-rewrite counts, `rounds`, and `cappedOut` — which the atomic
+visitors supply by counting each rewrite into the traversal state each one is given (`state.changes`). Progress goes through
 [`src/utility/logger.js`](../../decode-js.md), not `console.error`; individual declines are not
 logged as progress.
 
@@ -87,6 +87,7 @@ re-bracing can leave.
 ## Source
 
 - [`src/visitor/obfuscator/normalize-statements.js`](https://github.com/echo094/decode-js/blob/6cacb633ceedf0812fe31f951ba8f41ffb431ca1/src/visitor/obfuscator/normalize-statements.js)
+  (default export `normalizeStatements`)
 - Wired as the first pass of the `obfuscatorx` plugin. Why that position is forced is item 1.
 
 ## Fixtures

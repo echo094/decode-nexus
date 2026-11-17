@@ -126,13 +126,11 @@ that work lands inside anti-tamper machinery the strip removes wholesale, so on 
 **no observable effect on final output**. It reads *inert* to any instrument measuring the pipeline
 through its output, and that is a true reading of those cells rather than a broken probe.
 
-**That inertness used to hold corpus-wide, and no longer does — the prediction this paragraph made
-has been met.** It said: *a sample whose program blocks are flattened outside a stripped helper is
-the case the corpus does not contain, and it is the one this pass exists for.* The corpus gained a
-fourth input, and `directives__cff` is exactly that sample — a flattened **program** function, not
+**The inertness does not hold corpus-wide: `directives__cff` is the sample this pass exists for.**
+Its program blocks are flattened outside a stripped helper — a flattened **program** function, not
 a helper. Removing this pass from the pipeline changes that cell's final output at every column
-where it exists, so the pass is measurably load-bearing there and the attribution ladder's `-` no
-longer describes the whole matrix.
+where it exists, so the pass is measurably load-bearing there and the attribution ladder's `-`
+does not describe the whole matrix.
 
 **The lesson is about the instrument, not the pass.** An inert reading was correct, stable across
 twenty-two option sets and ten columns, and was a fact about **what those three inputs contain**
@@ -171,7 +169,7 @@ declines them and the prune deletes them as unreachable), and **`unlock-env` del
 regions wholesale**, taking any dispatch inside them with it. On one maximal cell that is 3 clones
 pruned and 1 resolved dispatch sitting inside machinery the strip removes.
 
-**That is not an argument for deleting it**, and the distinction is W7's: the measurement is
+**That is not an argument for deleting it**, and the distinction is [F7](../../../encoder-decoder-method.md#f7-a-shared-pass-needs-off-path-cases)'s: the measurement is
 evidence about this encoder's corpus, not about the pass. It would be load-bearing wherever
 flattening lands on live code that survives both — which these fixtures do not produce, and which
 nothing guarantees a real sample will not. The pass's own coverage is its fixtures, not the corpus.
@@ -190,8 +188,8 @@ decision and its evidence are recorded in
 - `src/visitor/obfuscator/unflatten-switch-dispatch.js` — the pass
 - `test/visitor/obfuscator/unflatten-switch-dispatch/` — the fixtures below
 
-Exports `createUnflattenSwitchDispatch(onChange)` plus a default instance. The `onChange` channel
-lets a caller run a pipeline to a fixpoint without re-serializing the tree, which the shared
+Exports `unflattenSwitchDispatch`, one plain visitor; a caller that passes a traversal state has each
+rewritten block counted in `state.changes`. The count lets a caller run a pipeline to a fixpoint without re-serializing the tree, which the shared
 visitor cannot offer. Wired as the **last pass of each round** of
 [`src/plugin/obfuscatorx.js`](https://github.com/echo094/decode-js/blob/6cacb633ceedf0812fe31f951ba8f41ffb431ca1/src/plugin/obfuscatorx.js)'s fixpoint
 group — after the control-flow storage pass, after constant folding and after `prune-if-branch`;
@@ -225,7 +223,7 @@ output silently, one by throwing — so a suite covering only the happy path wou
 the two implementations at all.
 
 **Each case carries two assertions, and neither substitutes for the other.** The tree comparison
-says what the pass did to the input; the `onChange` count says what it *reported*, which is the
+says what the pass did to the input; the `state.changes` count says what it *reported*, which is the
 channel a fixpoint driver schedules on. A decline case asserts both because a zero count means only
 that nothing was reported — mutate-then-decline, the shared visitor's own failure mode, reports
 nothing either. The rewriting cases additionally get the helper's reference-state comparison, which

@@ -48,7 +48,8 @@ per block to test for binding collisions).
 ## Source
 
 - [`src/visitor/prune-if-branch.js`](https://github.com/echo094/decode-js/blob/6cacb633ceedf0812fe31f951ba8f41ffb431ca1/src/visitor/prune-if-branch.js)
-- Consumed by the `obfuscator`, `sojson`, `sojsonv7` and `jsconfuser` plugins, and by
+- Consumed by the `obfuscator`, `sojson`, `sojsonv7` and `jsconfuser` plugins, the
+  `jsconfuser-vm-sequential` post-stage, and
   `obfuscatorx`, where it is scheduled inside the fixpoint group after constant folding and
   **before** [obfuscator/unflatten-switch-dispatch](obfuscator/unflatten-switch-dispatch.md).
 - **It is load-bearing three times over in that pipeline, not tidying**, and the three roles are

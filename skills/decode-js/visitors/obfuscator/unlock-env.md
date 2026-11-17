@@ -83,8 +83,8 @@ references before deletion and exclude uses inside the guard being removed.
 
 ## Source
 
-- [`src/visitor/obfuscator/unlock-env.js`](https://github.com/echo094/decode-js/blob/6cacb633ceedf0812fe31f951ba8f41ffb431ca1/src/visitor/obfuscator/unlock-env.js),
-  scheduled last by
+- [`src/visitor/obfuscator/unlock-env.js`](https://github.com/echo094/decode-js/blob/6cacb633ceedf0812fe31f951ba8f41ffb431ca1/src/visitor/obfuscator/unlock-env.js)
+  (default export `unlockEnv(ast)`), scheduled last by
   [`src/plugin/obfuscatorx.js`](https://github.com/echo094/decode-js/blob/6cacb633ceedf0812fe31f951ba8f41ffb431ca1/src/plugin/obfuscatorx.js).
 
 The protections remain in one pass because they share controller discovery, proof-before-mutation,

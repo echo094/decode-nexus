@@ -38,7 +38,7 @@ constant.
 ## Source
 
 - [`src/visitor/calculate-constant-exp.js`](https://github.com/echo094/decode-js/blob/6cacb633ceedf0812fe31f951ba8f41ffb431ca1/src/visitor/calculate-constant-exp.js)
-- Consumed by five plugins. In `obfuscatorx` it occupies **three** slots per round: one inside
+- Consumed by six plugins, `jsconfuser-vm-sequential` in its post-stage. In `obfuscatorx` it occupies **three** slots per round: one inside
   [normalize-converting](obfuscator/normalize-converting.md), and two in the plugin's fixpoint
   group either side of
   [obfuscator/inline-control-flow-storage](obfuscator/inline-control-flow-storage.md) — because

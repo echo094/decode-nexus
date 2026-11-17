@@ -39,7 +39,7 @@ other's exclusion list covers it.
 node to rewrite and nothing to detect. The generator already prints the short form, making that
 reversal free at generation time.
 
-Exports a plain visitor as default plus `createCollapsePropertyShorthand(onChange)`, used by
+Exports one plain visitor as default; a caller that passes a traversal state (`traverse(ast, visitor, undefined, { changes: 0 })`) has each rewrite counted in `state.changes`. Used by
 [normalize-converting.js](../obfuscator/normalize-converting.md).
 
 ## Source
@@ -70,5 +70,5 @@ population is empty.
 
 **The pass is kept because the atomic layer is plugin-agnostic**: an encoder that does not rename,
 or renames symmetrically, leaves the shape intact. Judging it on this corpus alone is exactly what
-`W7` warns against — one encoder's output is a narrow slice, and its regularities are invisible
+[F7](../../../encoder-decoder-method.md#f7-a-shared-pass-needs-off-path-cases) warns against — one encoder's output is a narrow slice, and its regularities are invisible
 from inside.

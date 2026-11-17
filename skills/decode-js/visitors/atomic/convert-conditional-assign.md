@@ -25,7 +25,7 @@ so the effect still happens exactly once; what changes is that it is now evaluat
 test rather than before it, which is observable where the test reads what the target writes. No
 instance has been met in this encoder's output; recorded as a property of the rewrite.
 
-Exports a plain visitor as default plus `createConvertConditionalAssign(onConvert)`.
+Exports one plain visitor as default; a caller that passes a traversal state (`traverse(ast, visitor, undefined, { changes: 0 })`) has each rewrite counted in `state.changes`.
 
 ## Source
 

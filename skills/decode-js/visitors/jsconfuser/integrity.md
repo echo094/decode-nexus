@@ -90,7 +90,7 @@ None currently open.
 
 ## Source
 
-[`src/visitor/jsconfuser/integrity.js`](https://github.com/echo094/decode-js/blob/6c974fb5720518fac9c6b3d4cf558ba90ef9f8e7/src/visitor/jsconfuser/integrity.js), wired into
+[`src/visitor/jsconfuser/integrity.js`](https://github.com/echo094/decode-js/blob/6c974fb5720518fac9c6b3d4cf558ba90ef9f8e7/src/visitor/jsconfuser/integrity.js), whose default export `deIntegrityInit` is wired into
 [plugin/jsconfuser.js](../../plugins/jsconfuser.md) immediately after Pack, before every
 other jsconfuser decode step.
 

@@ -97,7 +97,7 @@ every case test as a concatenation (`"X6lQ1n" + "\x74"`) and the matcher require
 down, which is the same before/after sandwich the early slot has.
 
 **This pass had both failures at once**, which is the case
-[encoder-decoder-method.md](../../../encoder-decoder-method.md) T6 records: "no candidates here"
+[D3](../../../encoder-decoder-method.md#d3-instrument-one-real-failure) records: "no candidates here"
 and "cannot match what is here" look identical, neither is visible in output, and a fix for one
 reads as a fix that did nothing.
 
@@ -107,7 +107,7 @@ None currently open.
 
 ## Source
 
-[`src/visitor/jsconfuser/calculator.js`](https://github.com/echo094/decode-js/blob/6c974fb5720518fac9c6b3d4cf558ba90ef9f8e7/src/visitor/jsconfuser/calculator.js), wired into
+[`src/visitor/jsconfuser/calculator.js`](https://github.com/echo094/decode-js/blob/6c974fb5720518fac9c6b3d4cf558ba90ef9f8e7/src/visitor/jsconfuser/calculator.js), whose default export `deCalculatorInit` is wired into
 [plugin/jsconfuser.js](../../plugins/jsconfuser.md) **twice**. The early slot is right after
 [StringConcealing](string-concealing.md)'s two passes, immediately before the
 "StringSplitting" `calculate-constant-exp.js` pass that finishes the fold; the second is

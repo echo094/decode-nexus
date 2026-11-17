@@ -97,7 +97,7 @@ gate 2 keeps it in place: the source indexes the old `d`, which the split would 
 **The crawl is program-scoped and runs once per traversal.** `insertBefore` re-homes the moved
 subtree and registers its references a second time, so a binding can list one live node twice; a
 later pass that deletes a binding once "every reference is resolved" would then pass that check
-with a reference unhandled ([S6](../../encoder-decoder-method.md#s6-a-passs-contract-is-output-derived-state--verify-both-halves)).
+with a reference unhandled ([F3](../../encoder-decoder-method.md#f3-keep-tree-and-derived-state-consistent)).
 The moved assignment can reference bindings of an enclosing scope, so only the program scope
 restores them. Nothing in this pass reads scope state, so deferring the crawl to `Program.exit` is
 safe.

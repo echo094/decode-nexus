@@ -23,7 +23,7 @@ encoder emitted.
 `path.stop()` would halt the entire traversal rather than the subtree, and on obfuscated input
 the declined sites outnumber the matched ones by roughly two to one.
 
-Exports a plain visitor as default plus `createLintLogicalIf(onReverse)` for a caller that needs
+Exports one plain visitor as default; a caller that passes a traversal state (`traverse(ast, visitor, undefined, { changes: 0 })`) has each rewrite counted in `state.changes`, for a caller that needs
 to know whether it fired — which [normalize-statements.js](../obfuscator/normalize-statements.md)
 does, since its fixpoint has to decide whether to run another round. Runs alongside
 [lint-conditional-if.js](lint-conditional-if.md), whose gate is the same shape.

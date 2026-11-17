@@ -86,7 +86,7 @@ fail-closed pass with no input looks exactly like one with nothing to do. The se
 after the CFF decode and before [Dispatcher](dispatcher.md). This is the same shape
 [dead-code.md](dead-code.md) records for itself (it must follow this pass at *both* slots),
 [calculator.md](calculator.md) and [global-concealing.md](global-concealing.md) — four passes,
-one cause, and [encoder-decoder-method.md](../../../encoder-decoder-method.md) T6 has why a
+one cause, and [D3](../../../encoder-decoder-method.md#d3-instrument-one-real-failure) has why a
 zero-population slot is invisible in output.
 
 **The anchor arrives in the CFF decode's spelling, not the encoder's.** `opaquePredicates.ts`

@@ -82,8 +82,8 @@ function carrying a rest param already reports `0`, so restoring `len` can only 
 back toward the original. All-or-nothing like `unmaskStack`, and it declines on the same
 `arguments` grounds.
 
-**Two bounds on un-masking, neither of them closable.** Both used to sit under Known Gaps,
-which framed a limit as outstanding work.
+**Two bounds on un-masking, neither of them closable.** They are limits of what the input
+carries, not incompleteness, so they live here rather than under Known Gaps.
 
 **A function the encoder judged "predictable" carries no truncation statement, and
 `unmaskStack` has no other source of an exact length.** The gate is
@@ -116,7 +116,7 @@ were run only after a fix had been built and had to be reverted:
   corpus-wide against a `.src.js` baseline of zero, and does. Every one of those declines is
   on an *intermediate* shape that no longer exists by the time output is generated — the
   tally measures the pipeline's interior, not its result
-  ([encoder-decoder-method.md](../../../encoder-decoder-method.md) T6).
+  ([D3](../../../encoder-decoder-method.md#d3-instrument-one-real-failure)).
 - **Accepting it breaks the decode wholesale.** Adding a `RestElement` branch to
   `readFoldedElement` (with the position and non-simple-parameter-list guards it needs)
   inflates decoded size by more than an order of magnitude, takes samples from
@@ -182,7 +182,7 @@ the pattern slot by slot, **recursing through nested `ArrayPattern` elements** �
 parameter list like `(a, [b, c])` masks to a pattern of patterns — and any single element it
 cannot resolve aborts the whole assignment rather than resolving the readable half, which
 would split one slot into two spellings
-([encoder-decoder-method.md](../../../encoder-decoder-method.md) W5). Three conditions
+([F2](../../../encoder-decoder-method.md#f2-resolve-completely-or-not-at-all)). Three conditions
 reject an element: a non-`stackName[key]` member, a key already marked invalid, and a key in
 the leading `0..len-1` range, which is an original **parameter** — promoting one to a fresh
 local silently changes the function's signature, a case a flat unpack line can never present
@@ -191,11 +191,9 @@ someArray;` in one step. Both cases recrawl from
 `getProgramParent()`, not just the function's own scope, after relocating the original
 right-hand-side expression, since it can reference an outer-scope binding (a closed-over
 variable, an enclosing function's own param) — a narrower `binding.scope.crawl()` would
-leave that outer binding's reference count stale. `processAssignLeft`'s original
-`if (right.isBinaryExpression())` early-invalidate branch was removed entirely so a
-binary-expression right-hand side (`var x = a + b;`, arguably the single most common local
-initialization shape in real code) falls through to this same fallback rather than being
-invalidated on sight.
+leave that outer binding's reference count stale. `processAssignLeft` has no early
+invalidation for a binary-expression right-hand side: `var x = a + b;`, arguably the single
+most common local initialization shape in real code, falls through to this same fallback.
 
 **`processArrayPatternAssign` rewrites the promoted slots' other references itself, in the
 same call, rather than leaving them to the cache — and reports whether it rewrote.** Both
@@ -208,7 +206,7 @@ the references that would otherwise be left addressing a stack nothing populates
 Feeding the return value into the loop's `changed` flag is the other half: an iteration
 whose only change was this rewrite would otherwise end the loop. Neither is visible from
 reading the pass — both were found by diffing one decoded sample before and after, the
-instrument [encoder-decoder-method.md](../../../encoder-decoder-method.md) T6 prescribes
+instrument [D3](../../../encoder-decoder-method.md#d3-instrument-one-real-failure) prescribes
 for a pass that succeeds and emits wrong code.
 
 **`unmaskDestructuredRest(func)`** runs first in the `RestElement` entry point and returns
@@ -280,7 +278,7 @@ are why this pass runs three times rather than once.
   4's emitted-shape table). Neither shape exists in encoder output, and reading
   the residue alone gets this backwards — the population was filed under the encoder's own
   no-length case and blamed on a masking quirk before it was measured
-  ([encoder-decoder-method.md](../../../encoder-decoder-method.md) T1). The check that
+  ([P1](../../../encoder-decoder-method.md#p1-work-in-reverse-encoder-stage-order-each-stage-placed-by-its-last-write)). The check that
   settles it is one count: absent in the `.obf.js`, present in the `.dec.js`, so it is ours.
 - **The stack copied into a separate local**, `var stk; [...stk] = rest;`, has the same
   source and is why stack resolution follows a copy rather than reading `params[0]`. The
@@ -321,10 +319,9 @@ are why this pass runs three times rather than once.
 
 ## 5. Known Gaps
 
-None currently open. The two bounds that used to sit here — the predictable-function arity
-limit and the `RestElement` decline — are in item 2: neither is incompleteness meant to
-close, and framing a limit as outstanding work invites someone to "fix" it. The
-`RestElement` one has already cost that once.
+None. The predictable-function arity limit and the `RestElement` decline are bounds, stated in
+item 2: neither is incompleteness meant to close, and framing a limit as outstanding work
+invites someone to "fix" it.
 
 **The `fns`-entry population that also sat here is gone**, and both halves of it closed
 without this file changing: the entries that stayed masked because their dispatcher declined

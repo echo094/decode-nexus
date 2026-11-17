@@ -27,8 +27,8 @@ Consumed by the `sojson`, `sojsonv7`, and `obfuscator` plugins. This is the
 ## Known Gaps
 
 **Three of these are not fail-closed incompleteness — they corrupt or crash.** That is unusual for
-a decoder pass and is stated first for that reason. Each was built as a minimal case and run
-(2026-08-14); the first two produce wrong output *silently*, which no residue census can catch
+a decoder pass and is stated first for that reason. Each reproduces on a minimal case; the first
+two produce wrong output *silently*, which no residue census can catch
 because the residue is gone.
 
 | Input | Result |
@@ -72,7 +72,7 @@ has moved a `continue` out of.
   label and an unexpected `break`. Both are signs the tree is not the shape the pass assumes, and
   continuing past them produces a rewrite nobody can check. It also removes the two control
   declarations *before* rebuilding, so there is no point at which it can still decline.
-- **No `onChange` channel**, so a caller cannot run it to a fixpoint or tell whether it fired.
+- **No change count** (`state.changes`), so a caller cannot run it to a fixpoint or tell whether it fired.
 - **No test coverage anywhere in the tree.**
 
 ## Source
@@ -89,7 +89,7 @@ that decided the fork and why three of them are worse than declining.
 **None, and the absence is the point rather than an oversight.** This visitor has no committed
 cases at all, in a repository where three plugins depend on it. What stands in for coverage today
 is one encoder's corpus, and Known Gaps above is a list of behaviours that corpus cannot reach —
-which is the shape of evidence W7 warns about: a pass validated only against one
+which is the shape of evidence [F7](../../encoder-decoder-method.md#f7-a-shared-pass-needs-off-path-cases) warns about: a pass validated only against one
 encoder's whole output is not proven sound, because the gaps are exactly the inputs that encoder
 cannot produce, so every census reads clean and the pass looks proven.
 

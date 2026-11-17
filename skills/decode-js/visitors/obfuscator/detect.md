@@ -200,6 +200,9 @@ silently accommodates it.
 ## Source
 
 - [`src/visitor/obfuscator/detect.js`](https://github.com/echo094/decode-js/blob/6cacb633ceedf0812fe31f951ba8f41ffb431ca1/src/visitor/obfuscator/detect.js)
+  (default export `detectStringArray`; `foldNumber`, the numeric fold that leaves `+` on a string
+  unfolded, and `resolveWrapperNode`, the binding-resolved wrapper lookup, are shared with
+  string-array.js)
 - Consumed by [string-array.js](string-array.md), which is where the `undeclared`,
   `foreignWrappers` and `rotators` handles above turn into outcomes.
 - Reached through `string-array.js` from

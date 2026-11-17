@@ -47,8 +47,8 @@ function outer(a) {                function outer(a, inner) {
 ```
 
 Both mechanisms push onto the **same** parameter list, so a packed slot from either one is
-frequently not the last parameter — neither a reader nor a decoder can assume the synthetic
-slots appear in any particular order, only that they follow the real parameters.
+frequently not the last parameter — the synthetic slots appear in no fixed order, only
+after the real parameters.
 
 ## 3. Implementation
 

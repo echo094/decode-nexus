@@ -8,8 +8,8 @@ Not a separate `Order` stage — a helper invoked from
 ## 1. Target
 
 Re-spell a string literal's *source text* as `\x`/`\u` escapes without changing its parsed
-value — purely a re-spelling, not real obfuscation, but (see Algorithm) not free to reverse
-either.
+value — purely a re-spelling, not real obfuscation, and one that persists through a
+parse/regenerate round trip (see Algorithm).
 
 ## 2. Algorithm
 
@@ -22,9 +22,8 @@ so the generator emits it as raw text — the identical mechanism
 [Finalizer](finalizer.md)'s own hexadecimal-numbers rewrite uses, and for the same reason:
 `"\x48\x65..."` isn't a valid identifier, so it can't be represented as a real
 string/identifier node without the generator rejecting or re-escaping it. See Finalizer's
-Implementation for why this specific trick — a synthetic `Identifier` that never survives a
-parse — is what makes reversing it require an explicit decode step rather than a plain
-re-parse/re-generate.
+Implementation for why the escaped spelling persists once that synthetic `Identifier` is
+parsed back as an ordinary literal.
 
 ## 3. Implementation
 

@@ -71,7 +71,7 @@ var {ph}_rgf = [{ph}_rgf_eval("..."), {ph}_rgf_eval("..."), ...];
 `{ph}_rgf_eval_integrity` is a real variable (not inlined by constant folding, since it's
 a function-call result): a no-op `(flag = true) => flag` unless
 [`lock.tamperProtection`](lock-integrity.md) is also enabled, in which case it's a genuine
-tamper check. Either way it's irrelevant to static decoding — nothing is ever executed.
+tamper check.
 
 The original function shrinks to:
 

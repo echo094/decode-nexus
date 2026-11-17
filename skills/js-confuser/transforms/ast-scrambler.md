@@ -88,7 +88,7 @@ one, and declarations/control flow aren't expressions at all.
 
 - **`RenameVariables` (Order 30)** renames the shared no-op helper's name, with no
   functional or structural effect — nothing about this transform's own output is
-  identified by name anywhere downstream (see the decoder doc's Algorithm).
+  identified by name anywhere downstream.
 
 ## 5. Known Quirks
 

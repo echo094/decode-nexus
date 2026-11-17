@@ -107,8 +107,8 @@ of whether any block actually dispatches a function — an empty no-op if
     and VariableMasking emits that statement only for functions lacking the flag
     ([`variableMasking.ts#L220-L229`](https://github.com/MichaelXF/js-confuser/blob/31c5a47a79f97e4b4c2d4b2a8552c11a8b548fb0/src/transforms/variableMasking.ts#L220-L229)).
     The emitted shape is therefore anonymous *and* carries no declared arity anywhere in
-    it — the count is recoverable only from this transform's own construction rule (always
-    zero), not from anything readable at the masked site.
+    it — the count follows only from this transform's own construction rule (always
+    zero), not from anything at the masked site.
   - Together with [preparation.md](preparation.md)'s `PREDICTABLE` scope note, this is the
     only way an *anonymous* function reaches Order 20 already flagged: Preparation marks
     named `FunctionDeclaration`s only, so a user-source anonymous function always keeps its

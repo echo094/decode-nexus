@@ -25,8 +25,7 @@ Both literal-respelling pieces use the identical trick: replace the literal with
 freshly-built `Identifier` node whose `.name` *is* the desired output text, flagged
 `GEN_NODE` so the generator emits that text verbatim instead of validating it as a real
 identifier. This is a **generation-time-only** trick — see Implementation's closing note
-for why it still needs an explicit decoder step despite not touching the AST's semantic
-value at all.
+for why the escaped spelling still persists in the output after a parse and regenerate.
 
 ## 3. Implementation
 
@@ -57,12 +56,12 @@ in its own right, just cleanup for a mechanism belonging to a different
 (cosmetic, unrestorable) transform — see
 [RenameVariables](rename-variables.md).
 
-### Why the literal-respelling pieces aren't "free" to reverse
+### The escaped spelling survives a round trip
 
 Both StringEncoding and hexadecimalNumbers replace a literal with a **freshly-built
 `Identifier`**, not the original literal node — `GEN_NODE` only controls how the
-*generator* prints that identifier's `.name`. By the time any decoder sees this output, it
-has gone through a full parse of generated *source text*, and `0x1a` / `"\x48\x65..."` are
+*generator* prints that identifier's `.name`. Once the output is parsed again as
+*source text*, and `0x1a` / `"\x48\x65..."` are
 both syntactically valid literal spellings in their own right — so the parser reads them
 back as an ordinary `NumericLiteral`/`StringLiteral` again, not an `Identifier`. The
 `GEN_NODE` `Identifier` never survives a parse; it exists purely to get that exact text
@@ -71,11 +70,8 @@ into the generated output in the first place.
 What *does* survive is the parser's own `node.extra.raw` — the exact source text it parsed
 the literal from — and Babel's generator prefers that raw text over re-deriving output
 from `.value` whenever it's present. So a plain re-parse/re-generate round trip, with no
-decoder pass touching the node at all, prints the hex/escaped spelling back out unchanged
-indefinitely. Reversing this requires deleting `extra` from the node before generation (or
-constructing a fresh literal node, which has no `extra` to begin with) — worth flagging
-since it's the reason a prior "nothing to build" description of both of these specifically
-was wrong, unlike most of this project's other genuinely-free cosmetic transforms.
+pass touching the node, prints the hex/escaped spelling back out unchanged indefinitely;
+only a literal node without `extra` prints from `.value`.
 
 ## 4. Later Stages
 

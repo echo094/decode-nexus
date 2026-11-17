@@ -19,8 +19,7 @@ Make the program resistant to running outside its intended environment or after 
 modified: date/domain gating, anti-debugging, a self-defense tripwire against code
 reformatting, tamper-response countermeasures, and — via Integrity — a runtime
 self-check that re-hashes a protected function's actual source immediately before
-calling it, so any change to that source (by hand, or via an incomplete
-deobfuscation) is detected and can be made to misbehave instead of run.
+calling it, so any change to that source (by hand or by tooling) is detected and can be made to misbehave instead of run.
 
 ## 2. Algorithm
 

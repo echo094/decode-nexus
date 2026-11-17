@@ -15,11 +15,11 @@ Every sub-rule is a plain `exit` visitor in a single combined visitor object; no
 depend on any other jsconfuser transform having run first. Six behavior groups, by how
 reversible each is:
 
-- **Literal shortening** — reversible, syntax-level only (same value, shorter spelling).
-- **Constant folding** — one-directional; the pre-fold form is not recoverable, but there
-  is nothing meaningful to recover since the folded value *is* the original semantics.
+- **Literal shortening** — syntax-level only (same value, shorter spelling).
+- **Constant folding** — the folded value replaces the expression and *is* its original
+  semantics; the pre-fold form does not survive.
 - **Readability-*increasing* rewrites** — makes minified output easier to read, not
-  harder; nothing to reverse.
+  harder.
 - **Statement-level cosmetics** — merges/unwraps that change spelling, not semantics.
 - **Dead code elimination** — genuinely destructive, same as any minifier's DCE pass; the
   removed code is gone.
@@ -84,7 +84,7 @@ three confirmed cases (while/for/with brace-stripping, computed-to-dot member re
 ## 5. Known Quirks
 
 **Function-length preservation is not part of this transform, despite changelog/older-fork
-association.** js-confuser's changelog and older forks' decoders associate "preserve
+association.** js-confuser's changelog and older forks associate "preserve
 `function.length`" with Minify, but in the pinned source that mechanism has moved out of
 `minify.ts` entirely — it's `PluginInstance.setFunctionLength`, a shared helper any
 transform can call (currently `flatten.ts`, `rgf.ts`, and `variableMasking.ts` do, whenever

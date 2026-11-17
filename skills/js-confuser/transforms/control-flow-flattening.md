@@ -113,11 +113,10 @@ Per-statement handling in the walk ([L664-L942](https://github.com/MichaelXF/js-
   `for`/`while`/`switch` is untouched too (verified empirically: a plain
   `if/else` nested inside a `for` loop survives with its structure fully
   intact, entangled contents aside). Combined with the loops/switches
-  discrepancy noted below (Known Quirks), **the only `if` statements this
-  decoder needs to fold back are ones that were directly in the flattened
-  function/program's top-level statement sequence** (or nested inside another
-  such `if`'s own branches) — any `if` sitting inside a loop or `switch` body
-  was never converted in the first place and needs no decoder attention at all.
+  discrepancy noted below (Known Quirks), **the only `if` statements converted
+  are ones directly in the flattened function/program's top-level statement
+  sequence** (or nested inside another such `if`'s own branches) — any `if`
+  sitting inside a loop or `switch` body keeps its original form.
 - **Last top-level expression statement** — converted to a `return` (only at
   `Program` level, for REPL/`eval()`-style final-expression-value semantics,
   L862-873).
@@ -199,12 +198,12 @@ closing over that block's own `stateValues` (`currentStateValues`):
   outer call site (Stage 3/wiring) can tell "the state machine hit a real
   `return`" apart from "the state machine reached its end label normally."
 
-**Key reversal-relevant fact:** every mangled literal's correcting constant
+**Per-block correction:** every mangled literal's correcting constant
 (`value - stateValues[i]`, or the XOR key's diff, or the boolean's comparison
 value) is computed from **that specific block's** `stateValues` vector — the
 same source-level number produces a different obfuscated expression in every
-block it appears in. There is no way to undo literal entanglement without first
-knowing each block's full state vector.
+block it appears in, so each correction is a function of that block's full state
+vector.
 
 ### Stage 3 — Switch/While assembly
 
@@ -305,8 +304,8 @@ touch the flattened bodies.
 - **`AstScrambler` (Order 29)** merges consecutive `ExpressionStatement`s into one no-op
   call, spreading any `SequenceExpression` — including this transform's own
   goto-assignment sequence — into the flat argument list. This dissolves the
-  single-statement partition this transform prints every goto as; the original partition
-  can't be recovered (the merge is many-to-one), only inferred.
+  single-statement partition this transform prints every goto as; the merge is
+  many-to-one, so the output no longer shows the original partition.
 
 ## 5. Known Quirks
 

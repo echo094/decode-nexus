@@ -26,9 +26,8 @@ Babel-visitor-shaped plugin operating on a standard Babel AST:
 
 Practically: every AST shape documented in this reference is valid, parseable
 JavaScript at every intermediate pipeline stage — there's no custom bytecode or
-intermediate representation — and any tooling built to analyze or reverse these
-transforms can lean on the same Babel APIs (`NodePath`/`Scope`/`Binding`) rather than
-re-deriving scope and reference information from scratch.
+intermediate representation — so Babel's own `NodePath`/`Scope`/`Binding` model describes
+every intermediate form.
 
 Only these four packages are runtime `dependencies` in `package.json` (pinned
 `^7.28.x`); `@babel/cli` and the rest of `devDependencies` just build js-confuser's own
@@ -54,9 +53,8 @@ skills/js-confuser/
                           the transform pipeline itself
 ├── tests.md              summary of encoder/js-confuser/test/ — Jest project structure,
                           directory breakdown, cross-links back into transforms/ + utils/
-├── transforms/           AST pattern each transform produces, and (where
-                          non-trivial) how one would go about inverting it — see
-                          Pipeline Order below for the full list, in execution order
+├── transforms/           AST pattern each transform produces — see Pipeline Order
+                          below for the full list, in execution order
 │   └── <name>.md
 ├── templates/            what one templates/*.ts file provides and which
                           transform(s) consume it (xorStringTemplate.ts and
@@ -180,8 +178,7 @@ lightest subset (calculator, deadCode, dispatcher, duplicateLiteralsRemoval, ide
 renaming, movedDeclarations, objectExtraction, stringConcealing, astScrambler);
 `medium`/`high` add controlFlowFlattening, globalConcealing, opaquePredicates,
 stringSplitting, stringEncoding, variableMasking, and `pack`. `renameVariables` and
-`renameLabels` are cosmetic (pure renaming) — never worth reversing, just re-run a
-minifier/pretty-printer over the result. For the full option surface (individual knobs,
+`renameLabels` are cosmetic: pure renaming with no structural effect. For the full option surface (individual knobs,
 not just presets), see [options.md](options.md).
 
 By far the most involved transform is

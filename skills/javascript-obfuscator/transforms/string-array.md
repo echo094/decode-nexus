@@ -98,8 +98,8 @@ and the accessor subtracts the same total back off. `indexShiftAmount` is a rand
 no-options-set sample still shows `index = index - 0xeb`), and `0` otherwise. The middle term is
 the per-scope wrapper's own offset and is `0` for the root wrapper.
 
-**The consequence for anything reading this statically:** the array as printed is rotated, and the
-rotation amount is recoverable only by running the rotator's own comparison loop. There is no
+**Consequence:** the array as printed is rotated, and only running the rotator's own comparison
+loop yields the rotation amount. There is no
 constant in the file that states it.
 
 ### Why four pages

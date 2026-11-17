@@ -15,8 +15,8 @@ this encoder hides *what* a statement says; this one hides *when* it runs. The s
 verbatim — they are moved, never rewritten — so what is destroyed is only the order, and the order
 is then restored at runtime from a string.
 
-The protection is worth naming precisely because it is narrow: a reader who recovers the controller
-string recovers the order exactly. There is no arithmetic on it, no key, and no state carried
+The protection is worth naming precisely because it is narrow: the controller string states the
+order exactly. There is no arithmetic on it, no key, and no state carried
 between cases.
 
 ## 2. Algorithm

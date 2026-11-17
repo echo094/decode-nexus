@@ -16,7 +16,7 @@ keep that true, so it carries only what the encoder alone can answer.
 |---|---|
 | which versions are built, and the encoder-side reason each column exists | what any consumer of the samples found in them, or the state of its repairs |
 | which option sets, seeds and targets a column carries, and which sets a version can accept at all | another project's pass names, censuses, runtime tallies — or its commit ids, which a rebuild of that project silently invalidates |
-| the inputs verbatim, and the shapes they can and cannot reach | a measured value with nothing behind it: record the axis and the census that reads it, per `SKILL.md`'s Measured Figures Are Diary |
+| the inputs verbatim, and the shapes they can and cannot reach | a measured value with nothing behind it: record the axis and the census that reads it, per [Measured Figures Are Diary](../doc-conventions.md#where-facts-live) |
 | emitted-shape facts read off the samples — what differs between two columns, what a cell does when run | the study reasoning that selected a version, which is [versions.md](versions.md)'s |
 | the freeze, manifest and append rules that keep two builds comparable | anything that would have to be re-checked when a downstream consumer changes |
 
@@ -25,8 +25,11 @@ records only the encoder material from which a boundary is read.
 
 ## Generated builder contract
 
+`<encoder-workspace>` below stands for a scratch directory the caller chooses. Everything in it
+is regenerable from this page, so no other doc refers to its contents.
+
 The builders are deliberately generated for a reconstruction run and are not retained. The next
-clean-room run must generate these five files under `sandbox-tests/encoders/` (the names and
+clean-room run must generate these five files under `<encoder-workspace>/encoders/` (the names and
 interfaces are part of this recipe):
 
 | Generated file | Required interface |
@@ -38,7 +41,7 @@ interfaces are part of this recipe):
 | `build-nested-robust.cjs` | `node build-nested-robust.cjs`; builds the inner controls and outer-option samples described under [The robustness variant](#the-robustness-variant--fix-the-inner-layer-vary-the-outer), and never overwrites an existing target. |
 
 All five builders must resolve an encoder as `jso-<version with dots replaced by hyphens>` from
-the single `sandbox-tests/encoders/node_modules` install. The package manifest and lockfile must
+the single `<encoder-workspace>/encoders/node_modules` install. The package manifest and lockfile must
 contain an exact npm alias for every version in the [Version matrix](#version-matrix), and the
 builder must fail before writing output when an alias is missing or its package version is not the
 requested version. A fresh reconstruction may install the aliases with exact npm specs and must
@@ -524,7 +527,7 @@ Its one focused set, `class-logical`, is exactly:
 ```
 
 The clean-room builder resolves the exact `jso-2-19-0` npm alias from
-`sandbox-tests/encoders/node_modules`, verifies its package version is `2.19.0`, and validates
+`<encoder-workspace>/encoders/node_modules`, verifies its package version is `2.19.0`, and validates
 these option names against the installed upstream typings before encoding. It writes exactly
 `out/2.19.0/class-logical__class-logical.js` and adds exactly that path to `out/manifest.json`.
 Before appending it must validate every pre-existing manifest entry and output digest; a rerun
@@ -802,7 +805,7 @@ reason rather than a preference — nothing can exercise them here, and nothing 
 ## Nested cells — a source encoded twice
 
 A separate, smaller set answering a different question: what does the encoder emit when its
-**input is already its own output**? Built into `sandbox-tests/out-nested/`, never into the frozen
+**input is already its own output**? Built into `<encoder-workspace>/out-nested/`, never into the frozen
 `out/` — a nested cell is a different kind of cell, and the freeze rule forbids disturbing an
 existing column.
 
@@ -914,10 +917,10 @@ because a set that silently reports nothing looks identical to a set that report
 
 ## Layout
 
-Everything below lives in the gitignored sandbox and is regenerable from this page.
+Everything below lives in the external ephemeral workspace and is regenerable from this page.
 
 ```
-sandbox-tests/
+<encoder-workspace>/
   fixtures/<fixture>.js                          the four inputs, verbatim above
   encoders/                                      one npm-alias install providing every version
   out/<version>/<fixture>__<optionset>.js        encoded samples

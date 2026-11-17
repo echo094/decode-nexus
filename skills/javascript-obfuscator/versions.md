@@ -112,6 +112,16 @@ the whole file on evidence covering part of it. The version range a sample came 
 **intersection** of its per-component verdicts, computed from them rather than fingerprinted
 as a whole.
 
+**The registry states version → shape; reading a sample goes shape → version, which is not a
+function,** because an encoder can revert a change. A sample's verdict on one axis is the union
+of the ranges consistent with what matched. So two same-shape eras stay separate rows: merging
+them makes a false hull or a non-range. If two eras would share a signature name, either find
+the difference the signature missed or record that the axis cannot separate them.
+
+**An era's SHA is the commit its claims were verified against,** not the current pin. It moves
+only on re-verification, which lets this package describe shapes the current source no longer
+has.
+
 An order change need not change any transform's shape, and a shape change need not change the
 order, so a `P-` boundary is **not** evidence of an `E-` boundary in either direction, nor is
 an `E-` boundary on one component evidence of one on another. Measured here in both directions:

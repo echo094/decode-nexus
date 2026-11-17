@@ -23,8 +23,8 @@ state how far to rotate.**
 ## 2. Algorithm
 
 Rotation is `push(shift())` repeated — the array is rotated left one element at a time. Every era
-does that. What separates the eras is **how the loop knows when to stop**, and that difference is
-the whole decoding difficulty.
+does that. What separates the eras is **how the loop knows when to stop**: whether the amount is
+written in the file or only implied by a comparison.
 
 **`E-sa-rotate-counter-loop` — the amount is a literal in the file.**
 
@@ -37,7 +37,7 @@ the whole decoding difficulty.
 
 The IIFE's second argument *is* the rotation amount. `rot(++times)` entered with `N+1` and
 `while (--times)` executes the body `N` times, so the array is rotated exactly `N` times.
-**Recoverable by reading**: take the literal, rotate the extracted array that many times, done.
+**The amount is stated**: the literal is the rotation count.
 
 **`E-sa-rotate-compare-loop` — the amount is not stated anywhere.**
 
@@ -68,9 +68,8 @@ Three consequences follow from the emitted loop:
   an element is missing and the access throws. The `catch` rotates and continues, so a wrong
   arrangement is indistinguishable from a thrown one — both just rotate again.
 - **It is an infinite loop if the array is wrong.** Feed it a modified or truncated array and it
-  never terminates. Anything that *executes* a sample's prelude to recover the order needs a
-  timeout for that reason alone, and this is a live hazard rather than a hypothetical one — the
-  same class of trap as `selfDefending`'s.
+  never terminates, so executing a sample's prelude on a changed array hangs — the same class
+  of trap as `selfDefending`'s.
 
 **`E-sa-rotate-compare-loop-fn-arg`** is the same loop with one structural change: the first
 parameter is no longer the array but the **array accessor function**, called once inside the IIFE

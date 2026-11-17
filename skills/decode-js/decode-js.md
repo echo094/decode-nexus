@@ -15,14 +15,18 @@ upstream obfuscator versions and issue numbers the pass was written against.
 
 ## Babel + isolated-vm Foundation
 
-decode-js is built on [Babel](https://babeljs.io/) for AST work and
-[isolated-vm](https://github.com/laverdet/isolated-vm) for safe evaluation — it has no
-custom parser or IR of its own. Every pass is a Babel-visitor-shaped object (or a
-factory returning one) applied with `traverse`:
+decode-js uses [Babel](https://babeljs.io/) for AST work and
+[isolated-vm](https://github.com/laverdet/isolated-vm) for safe evaluation. Its ordinary
+source-rewrite passes are Babel visitor objects applied with `traverse`. The
+[VM decoder](#the-vm-decoder-srcvm) is built differently: its stages take source or records
+and return records, and it writes its output as a fresh program instead of rewriting the input
+tree. It uses Babel to read the input and to build the output, and never the isolate.
 
 - **`@babel/parser`** (`parse`) parses obfuscated source into a standard Babel AST.
-  Almost every entry point passes `{ errorRecovery: true }` because obfuscated input is
-  often not cleanly parseable.
+  Ordinary AST plugin entry points commonly use `{ errorRecovery: true }` to retain imperfect
+  input. The VM decoder parses with `errorRecovery: false` everywhere (its input, the program it
+  emits and the residue check on that program), so a syntax error is a refusal, never a partial
+  tree; each parse's other options are in its owner doc.
 - **`@babel/traverse`** (`traverse`) walks the AST and applies each pass's visitor.
   `NodePath`, `Scope`, and `Binding` — used throughout for reference tracking and
   dead-code removal — are Babel's own abstractions. Passes lean heavily on
@@ -85,7 +89,7 @@ and the isolate would only add a failure mode.
 
 This package is built incrementally (per
 [Studying a new encoder/decoder pair](../encoder-decoder-newpair.md)).
-The root file below is complete; supporting files are added one plugin/visitor
+The root file below is complete; supporting files are added one plugin, visitor, or VM decoder doc
 at a time as each is studied against source.
 
 ```
@@ -96,10 +100,15 @@ skills/decode-js/
 ├── babel.md          Babel's Scope/Binding/NodePath semantics that several passes
 │                     depend on — parent-scope lookup, the three definition spellings,
 │                     name-is-not-identity, duplicate referencePaths, dead positions
+├── pipelines/        one map per target built from modules and transforms: its
+│   └── <target>.md   architecture (layers, code layout, stage order, records, refusals),
+│                     the encoder steps each doc reverses, and the index of its docs
+│                     (jsconfuser-vm)
 ├── plugins/          one file per dispatch target (obfuscator family) — the pass
 │                     pipeline it runs and the AST patterns it matches/reverses;
 │   └── <type>.md     common, obfuscator, obfuscatorx, sojson, sojsonv7, jjencode, awsc,
-│                     jsconfuser, plus eval (shared pack/unpack helper). See the roster below
+│                     jsconfuser, jsconfuser-vm, jsconfuser-vm-sequential, plus eval
+│                     (shared pack/unpack helper). See the roster below
 ├── visitors/         one file per reusable src/visitor/*.js pass — see the
 │   ├── <name>.md     Reusable Visitor Passes index below
 │   ├── atomic/       one file per src/visitor/atomic/*.js pass — single-rewrite,
@@ -111,7 +120,31 @@ skills/decode-js/
 │   │                 alongside decode-nexus's per-transform worklist
 │   └── obfuscator/   same, for src/visitor/obfuscator/*.js (the obfuscatorx entry)
 │       └── <name>.md
-├── tests.md          summary of test/ — Vitest config, harness, and fixture layout
+├── vm/               the VM decoder's docs, one folder per layer as in src/vm/. A module
+│   │                 (code several transforms use) has a head doc and sub-docs; a
+│   │                 transform (one pipeline stage item) has one doc. Each is named for
+│   │                 its responsibility, not a source file. The pipeline map indexes
+│   │                 every doc here
+│   ├── jsconfuser-vm/ frontend
+│   │   ├── source.md, source/        module: the input and the interpreter's source text
+│   │   │                             (normalize-source, container)
+│   │   ├── handlers.md, handlers/    module: each opcode's handler, found and named
+│   │   │                             (locate-handlers, identify-handlers)
+│   │   ├── wordcode.md, wordcode/    module: the word stream and its records (read-wordcode,
+│   │   │                             validate-references, partition-functions,
+│   │   │                             origin-addresses)
+│   │   ├── observe.md                module: added-opcode handlers read as definitions
+│   │   ├── standalone-decode.md, frontend-driver.md   the entry and the frontend driver
+│   │   ├── normalize-*.md, timing-checks.md           transforms: one per recovery
+│   │   └── lower-switch-model.md     transform: the lowering onto the model
+│   └── switch/       backend
+│       ├── vm-switch-boundary.md    module head: the model, the frontend/backend contract
+│       ├── vm-switch-control.md     module sub-doc: the control solve every transform reads
+│       ├── vm-switch-statements.md  transform: where each statement opens and closes
+│       ├── vm-switch-values.md      transform: which values become expressions
+│       └── vm-switch-emit.md        transform: the walk, the renderers, program assembly
+├── tests.md          summary of test/ — Vitest config, harness, fixture layout, and the
+│                     VM tests: cells, suites, proofs and the cell machinery
 └── probes.md         how to build a throwaway probe against this decoder — the two
                       datasets and their regeneration recipe, plumbing skeletons, the
                       fail-closed-matcher instrument, and the ways a probe lies
@@ -125,30 +158,39 @@ src/
 ├── plugin/                   one file per obfuscator family; each exports (code)=>code
 │   ├── common.js             default "common" — light local deobfuscation
 │   ├── obfuscator.js         javascript-obfuscator (obfuscator.io) — the largest plugin
+│   ├── obfuscatorx.js        the same obfuscator, era-aware
 │   ├── sojson.js             sojson (jsjiami) — older versions
 │   ├── sojsonv7.js           jsjiami.com.v7
 │   ├── jjencode.js           jjencode (utf-8.jp) — string-extraction + eval, not AST
 │   ├── awsc.js               fireyejs / bx-ua (225 algorithm)
+│   ├── jsconfuser.js         js-confuser — flat sequence of shape-based passes
+│   ├── jsconfuser-vm.js      js-confuser-vm — the VM decoder's entry; returns a record
+│   ├── jsconfuser-vm-sequential.js  jsconfuser, then jsconfuser-vm, then a post-stage
 │   └── eval.js               pack/unpack helper for eval-wrapped payloads (not a -t type)
-└── visitor/                  reusable Babel visitor passes shared across plugins
-    ├── calculate-constant-exp.js     constant folding
-    ├── calculate-rstring.js          resolve r-string / .repeat-style constructions
-    ├── delete-extra.js               strip node .extra (raw literal formatting)
-    ├── delete-illegal-return.js      remove top-level IllegalReturn
-    ├── delete-nested-blocks.js       flatten redundant nested BlockStatements
-    ├── delete-unreachable-code.js    drop code after return/throw/break/continue
-    ├── delete-unused-var.js          prune unreferenced bindings
-    ├── lint-if-statement.js          normalize if bodies to BlockStatements
-    ├── merge-object.js               re-merge split object definitions
-    ├── parse-control-flow-storage.js decode control-flow "storage" object dispatch
-    ├── obfuscator/
-    │   └── parse-control-flow-storage.js obfuscatorx fork with numeric entries
-    ├── prune-if-branch.js            fold if() on constant tests
-    ├── remove-control-flow-ob.js     unflatten switch-based control flow
-    ├── split-assignment.js           hoist an assignment out of an expression
-    ├── split-sequence.js             split SequenceExpressions into statements
-    ├── split-variable-declaration.js split multi-declarator `var a,b,c`
-    └── split-variable-declarator.js  split a single declarator's chained init
+├── visitor/                  Babel visitor passes applied by plugin traversals
+│   ├── calculate-constant-exp.js     constant folding
+│   ├── calculate-rstring.js          resolve r-string / .repeat-style constructions
+│   ├── delete-extra.js               strip node .extra (raw literal formatting)
+│   ├── delete-illegal-return.js      remove top-level IllegalReturn
+│   ├── delete-nested-blocks.js       flatten redundant nested BlockStatements
+│   ├── delete-unreachable-code.js    drop code after return/throw/break/continue
+│   ├── delete-unused-var.js          prune unreferenced bindings
+│   ├── lint-if-statement.js          normalize if bodies to BlockStatements
+│   ├── merge-object.js               re-merge split object definitions
+│   ├── parse-control-flow-storage.js decode control-flow "storage" object dispatch
+│   ├── prune-if-branch.js            fold if() on constant tests
+│   ├── remove-control-flow-ob.js     unflatten switch-based control flow
+│   ├── split-assignment.js           hoist an assignment out of an expression
+│   ├── split-sequence.js             split SequenceExpressions into statements
+│   ├── split-variable-declaration.js split multi-declarator `var a,b,c`
+│   ├── split-variable-declarator.js  split a single declarator's chained init
+│   ├── atomic/                       single-rewrite visitors a pipeline composes
+│   ├── jsconfuser/                   the jsconfuser plugin's own passes
+│   └── obfuscator/                   the obfuscatorx plugin's own passes
+├── vm/                       the VM decoder (below)
+│   ├── decline.js            the refusal protocol both layers share
+│   ├── jsconfuser-vm/        frontend: encoded source to the model; knows the encoder
+│   └── switch/               backend: the model to JavaScript; knows only the model
 └── utility/                  small shared helpers, imported by visitors and plugins alike
     ├── binding-def.js        resolve a binding to what it actually *defines*
     ├── check-func.js         `checkPattern` — subsequence "fingerprint" matching
@@ -156,17 +198,26 @@ src/
     └── safe-func.js          reference-count-gated deletion, literal/name reads, replace
 ```
 
+Beside `src/`, `scripts/` holds the tools the tests and reviews run
+(`jsconfuser-vm-cells/`, which generates the VM tests' encoded inputs; `render-vm-switch.mjs`,
+a review rendering of the model; `check-folder-cycles.mjs`, part of lint; `proof-census.mjs`, which applies each recorded proof's
+break to the cells it protects), and `test/` mirrors
+`src/` ([tests.md](tests.md)).
+
 `src/utility/` holds the four helpers every plugin family may draw on. `safe-func.js` is
 the one to reach for by default: `safeDeleteNode` is the reference-count-gated deletion
 idiom used for every "remove this helper once nothing calls it" cleanup, and it removes a
-declarator plus its separate write as readily as a declaration. `binding-def.js` answers
+declarator plus its separate write as readily as a declaration; beside it are `safeGetLiteral`,
+`safeGetName`, `safeReplace` and `uncomputeStringKey`. `binding-def.js` (`resolveBindingValue`,
+`resolveBindingFunction`) answers
 the complementary question — given a binding, what does it actually *define*? — for the
 three spellings a definition arrives in (a declaration, a `var X;` + `X = …` split, and a
 name hoisted onto a parameter list), which a matcher reading `binding.path` alone sees only
 the first of. `check-func.js`'s `checkPattern` does subsequence "fingerprint" matching.
 
 **`logger.js` carries the split between the two things a pass reports, and the split is the
-point.** `debugLog` is *progress* — which function a pass resolved as the string-compression
+point.** `debugLog` is *progress* (switched by `setDebugLogging`; `log` and `error` print
+unconditionally) — which function a pass resolved as the string-compression
 helper, which name Pack unwrapped — and it is off unless `-v`/`--verbose` or
 `DECODE_JS_DEBUG=1` (the env var is what lets a probe importing a plugin directly turn it on
 without a code change). It is kept rather than deleted because a fail-closed pass leaves no
@@ -187,9 +238,11 @@ cross-reference here.
 unrecognized `type` now errors out (`process.exitCode = 1`) instead of silently falling
 back to `common`; missing input files and write failures are also caught and reported
 rather than throwing or failing silently. It then reads the input file, calls the one
-matching plugin as `plugin(sourceCode)`, and writes the returned string. There is **no
-shared pipeline order** like an encoder's `order.ts`; each plugin *is* its own pipeline,
-hand-tuned to one obfuscator family.
+matching plugin as `plugin(sourceCode)`, and writes the returned string
+([Pipelines](#pipelines)). The two `jsconfuser-vm` types return a record instead of a string:
+`main.js` writes its `output` to the output file and the whole record as JSON to `--result`
+(default `<output>.result.json`), and `--no-post-stage` reaches the sequential type
+([The VM decoder](#the-vm-decoder-srcvm)).
 
 | `-t` type            | plugin | target obfuscator |
 |----------------------|--------|-------------------|
@@ -201,6 +254,8 @@ hand-tuned to one obfuscator family.
 | `jjencode`           | [jjencode](plugins/jjencode.md) | jjencode (utf-8.jp) |
 | `awsc`               | [awsc](plugins/awsc.md) | fireyejs / bx-ua (225) — not listed in README |
 | `jsconfuser`         | [jsconfuser](plugins/jsconfuser.md) | [js-confuser](../js-confuser/js-confuser.md) — flat sequence of shape-based passes, not the sandbox-assisted technique below; built incrementally, see the plugin doc for per-visitor status |
+| `jsconfuser-vm`       | [jsconfuser-vm](plugins/jsconfuser-vm.md) | [js-confuser-vm](../js-confuser-vm/js-confuser-vm.md) — the VM decoder: the program compiled into the VM is written back as JavaScript, or the input is returned with a diagnostic |
+| `jsconfuser-vm-sequential` | [jsconfuser-vm-sequential](plugins/jsconfuser-vm-sequential.md) | a js-confuser-vm program under a js-confuser outer layer — `jsconfuser`, then `jsconfuser-vm`, then a post-stage of two shared visitors; either decline returns the original input |
 
 [eval](plugins/eval.md) (`plugin/eval.js`) is not a dispatch target: it exports
 `unpack`/`pack` used by `obfuscator`, `sojson`, and `sojsonv7` to peel an
@@ -224,10 +279,108 @@ get wrong in the other direction:
   problem to reconcile. `obfuscator` stays available for anyone depending on its behaviour;
   `obfuscatorx` is free to refuse where the old one silently half-decodes.
 
+## Pipelines
+
+`main.js` has no shared pass order like an encoder's `order.ts`. Each plugin is its own
+pipeline, hand-tuned to one obfuscator family, and its plugin doc carries its exact pass order,
+fingerprints and era branches.
+
+### Plugin pipelines
+
+Ordinary plugins parse once, run ordered `traverse` passes and generate; some also drive the
+`isolated-vm` isolate for global and string decoding
+([sandbox-assisted partial evaluation](#sandbox-assisted-partial-evaluation-the-core-decode-technique)).
+`plugin/obfuscator.js` is the fullest:
+
+```mermaid
+flowchart TD
+    A["main.js: read argv (-t/-i/-o), read input file"] --> B["dispatch to plugin(sourceCode)"]
+
+    subgraph Plugin["one plugin (e.g. obfuscator.js) — (code) => code"]
+        B --> C["PluginEval.unpack(code)?\npeel eval(function(){}()) wrapper"]
+        C --> D["parse(code, { errorRecovery: true })\n(@babel/parser)"]
+        D --> E["normalize: deleteIllegalReturn,\nlintIfStatement, splitVarDeclaration,\nstrip node.extra"]
+        E --> F["decodeObject / decodeGlobal:\nlocate string-array + wrapper fns"]
+        F --> G["virtualGlobalEval(fnSource)\n(isolated-vm isolate)"]
+        G --> H["walk referencePaths, eval each call,\nreplaceWith(t.stringLiteral(result))"]
+        H --> I["purifyCode / decodeCodeBlock /\ncleanDeadCode: shared visitor passes"]
+        I --> R["generator(ast, minified) and re-parse,\nthen purifyCode again"]
+        R --> J["unlockEnv: strip self-defending /\ndebug-protection / console traps"]
+        J --> K["generator(ast).code\n(@babel/generator)"]
+        K --> L["PluginEval.pack(code)? re-wrap"]
+    end
+
+    L --> M["main.js writes output file"]
+```
+
+Lighter plugins collapse this: `common.js` is four `traverse` passes and a generate;
+`jjencode.js` skips Babel entirely, extracting the payload string and `eval`-ing it.
+
+**Decode cost is volume, not a loop — don't go looking for one.** Timed across a whole corpus of
+real `high`-preset output, decode time tracked input size almost linearly with no throws and no
+outlier; a sample once recorded as non-terminating clears in seconds. What looked like a hang was
+input size plus a sequential runner. The two constructs that would otherwise be the suspects are
+both bounded: `visitor/jsconfuser/control-flow-graph.js`'s `for (;;)` terminates on its `failed`
+set, and `visitor/jsconfuser/variable-masking.js`'s `while (changed)` re-parses the function on
+each invalidation — the latter is the first place to instrument if a real hang ever does appear.
+
+### Pipeline maps
+
+A target whose decoder is built from modules and transforms has a pipeline map,
+`pipelines/<target>.md`: the decoder's architecture, how it maps to the encoder steps it reverses,
+and the index of its docs. Today that is [`jsconfuser-vm`](pipelines/jsconfuser-vm.md). The map's
+terms and sections are the hub's
+[Pipeline Map Layout](../doc-conventions.md#pipeline-map-layout). Which populations have been
+shown to recover is evidence, kept in the suites ([tests.md](tests.md#suites)).
+
+## The VM decoder (`src/vm/`)
+
+The `jsconfuser-vm` target is not another pass in the `jsconfuser` pipeline, and not a rewrite of
+the input tree. The encoder compiles a program to numeric code and ships it with an interpreter;
+the decoder reads that code out of the source, never runs it, and writes the program again as
+JavaScript. Its [pipeline map](pipelines/jsconfuser-vm.md) is the place to start: it owns the
+architecture and indexes every module and transform doc.
+
+```text
+plugin/jsconfuser-vm-sequential.js   jsconfuser, then the entry below, then a post-stage
+plugin/jsconfuser-vm.js              input normalization, then the standalone decode
+vm/jsconfuser-vm/                    frontend: encoded source -> the model
+vm/switch/                           backend:  the model -> JavaScript
+```
+
+- **Two layers, one model between them.** The frontend knows the encoder: it finds the payload
+  and the interpreter, names each opcode by what its handler does, undoes the encoder's options
+  one by one, and lowers the result onto a model of typed operations. Its shared code is four
+  modules ([`source`](vm/jsconfuser-vm/source.md), [`handlers`](vm/jsconfuser-vm/handlers.md),
+  [`wordcode`](vm/jsconfuser-vm/wordcode.md), [`observe`](vm/jsconfuser-vm/observe.md)); each
+  recovery is a transform that uses them. The backend knows only that
+  model ([VM switch boundary](vm/switch/vm-switch-boundary.md)): it solves each function's
+  control, plans its statements and values, and emits the program. `switch/` imports nothing from
+  `jsconfuser-vm/`.
+- **All or nothing.** A stage that cannot recover its input refuses, and the refusal stops
+  the decode: the entry returns the input unchanged with a diagnostic, never a partly decoded
+  program ([F2](../encoder-decoder-method.md#f2-resolve-completely-or-not-at-all)). Every
+  file refuses through one protocol, `vm/decline.js`.
+- **Records, not strings.** Both entries return a frozen record (status, `output`, the decode's
+  result or its diagnostic), which `main.js` writes beside the output file. The
+  [`jsconfuser-vm` plugin](plugins/jsconfuser-vm.md) owns the single decode's record; the
+  [sequential plugin](plugins/jsconfuser-vm-sequential.md) owns the three-step chain, in which
+  only the outer `jsconfuser` step may execute input code.
+
+The evidence for each module and transform is in its doc's Fixtures section, which names its suites
+([VM tests](tests.md#where-a-claims-evidence-lives)).
+
 ## Reusable Visitor Passes (`src/visitor/`)
 
 The passes plugins compose. Each has its own doc under `visitors/`; the table notes which
 plugins import it (verified against source at this pin).
+
+**A Babel transform reads only the code it is handed.** A transform is one visitor, or a suite of
+visitors that together solve one kind of pattern. It takes nothing a former stage passes outside the
+code (a model, a solver's facts, a record): work that needs such a fact belongs to the stage that
+holds it, which does it before handing the code over. So the VM backend, which holds the control
+solver's reaching definitions, folds its own register temporaries; a Babel transform after it
+would have to re-derive them from text ([D5](../encoder-decoder-method.md#d5-use-what-earlier-steps-established)).
 
 **Normalization / cleanup**
 
@@ -244,9 +397,9 @@ plugins import it (verified against source at this pin).
 
 | pass | does | used by |
 |------|------|---------|
-| [calculate-constant-exp](visitors/calculate-constant-exp.md) | fold binary/unary/logical-short-circuit literal expressions | common, sojson, obfuscator, sojsonv7, jsconfuser |
+| [calculate-constant-exp](visitors/calculate-constant-exp.md) | fold binary/unary/logical-short-circuit literal expressions | common, sojson, obfuscator, sojsonv7, jsconfuser, jsconfuser-vm-sequential |
 | [calculate-rstring](visitors/calculate-rstring.md) | fold `"…".split("").reverse().join("")` | common |
-| [prune-if-branch](visitors/prune-if-branch.md) | fold `if`/`?:` on a constant test | obfuscator, sojson, sojsonv7, jsconfuser |
+| [prune-if-branch](visitors/prune-if-branch.md) | fold `if`/`?:` on a constant test | obfuscator, sojson, sojsonv7, jsconfuser, jsconfuser-vm-sequential |
 
 **Statement splitting**
 
@@ -289,7 +442,7 @@ different clothes** and is likewise avoided: it modifies a widely-depended-on pl
 help a new one. Encoder-specific logic is rewritten in the new plugin, not lifted from the old.
 
 The corollary is that a shared visitor cannot be judged by one encoder's corpus — see
-[encoder-decoder-method.md](../encoder-decoder-method.md)'s W7 — so a fork decided on
+[F7](../encoder-decoder-method.md#f7-a-shared-pass-needs-off-path-cases) — so a fork decided on
 field evidence is a legitimate outcome even when the corpus is green for both.
 
 **There is exactly one fork in this package**:
@@ -311,74 +464,6 @@ appears:
 - **Defects the fork repairs stay on the original as descriptions, not a worklist** — the evidence
   that would license fixing them there is precisely what this section says you do not have.
 
-## Matching Encoder-Emitted Structure: Never by Name
-
-Applies to every plugin's matchers, not just one obfuscator family: **identify
-encoder-emitted structure by AST shape (call/body pattern, position, argument arity) or
-by capturing a binding/path at the moment a pass first resolves it, never by a literal
-variable/function name or name suffix.** Most obfuscators ship a renaming pass late in
-their pipeline (js-confuser's `RenameVariables`/`identifierGenerator: randomized`;
-similar passes elsewhere) that reassigns *every* identifier — including the obfuscator's
-own internal runtime-helper names, not just user-authored ones — to a random string, with
-zero effect on functionality; that's the whole point of the transform. A matcher that
-keys off a fixed name or suffix (`.endsWith('_some_suffix')`, `name === 'foo'`) only
-works in combos that happen to omit that pass, and fails **silently closed** the moment
-it's added: no error, no signature to grep for, because the unmodified fallback is always
-runtime-correct. An entire mechanism can go completely undecoded this way while every
-correctness check still passes.
-
-Found the hard way in jsconfuser's CFF decoder (2026-07-25, since fixed): the now-deleted
-`findProgramConstants` (`control-flow-graph.js`) located the CFF runtime's Program-level
-helpers by literal name suffix (`_cff_sequence`, `_cff_slice`, etc.); js-confuser's
-`RenameVariables` runs after `ControlFlowFlattening` in encode order and renames them away,
-so the lookup silently returned nothing and the *entire* CFF decode for that Program failed
-closed — not just the one interpreter targeted. The fix is the general shape of the remedy
-too: resolve each helper from its own use site via `scope.getBinding()`, which renaming
-cannot invalidate because it necessarily preserves binding structure. See
-[jsconfuser/control-flow.md](visitors/jsconfuser/control-flow.md#plugin-wiring)
-for the full writeup. Treat this as a standing design constraint, not a one-off bug: a
-matcher that has only ever been exercised against a combo without a renaming pass has not
-actually been proven robust against real obfuscator output, for any plugin in this repo.
-
-## Execution Flow
-
-Every plugin follows the same skeleton — parse once, run an ordered series of
-`traverse` passes (some plugins additionally drive the `isolated-vm` isolate for
-global/string decoding), then generate. `plugin/obfuscator.js` is the fullest example:
-
-```mermaid
-flowchart TD
-    A["main.js: read argv (-t/-i/-o), read input file"] --> B["dispatch to plugin(sourceCode)"]
-
-    subgraph Plugin["one plugin (e.g. obfuscator.js) — (code) => code"]
-        B --> C["PluginEval.unpack(code)?\npeel eval(function(){}()) wrapper"]
-        C --> D["parse(code, { errorRecovery: true })\n(@babel/parser)"]
-        D --> E["normalize: deleteIllegalReturn,\nlintIfStatement, splitVarDeclaration,\nstrip node.extra"]
-        E --> F["decodeObject / decodeGlobal:\nlocate string-array + wrapper fns"]
-        F --> G["virtualGlobalEval(fnSource)\n(isolated-vm isolate)"]
-        G --> H["walk referencePaths, eval each call,\nreplaceWith(t.stringLiteral(result))"]
-        H --> I["purifyCode / decodeCodeBlock /\ncleanDeadCode: shared visitor passes"]
-        I --> J["unlockEnv: strip self-defending /\ndebug-protection / console traps"]
-        J --> K["generator(ast).code\n(@babel/generator)"]
-        K --> L["PluginEval.pack(code)? re-wrap"]
-    end
-
-    L --> M["main.js writes output file"]
-```
-
-Lighter plugins collapse this: `common.js` is just four `traverse` passes and a
-generate; `jjencode.js` skips Babel entirely, extracting the payload string and
-`eval`-ing it. Each plugin's exact pass order, fingerprints, and version-specific
-branches belong in its own `plugins/<type>.md` (built incrementally).
-
-**Decode cost is volume, not a loop — don't go looking for one.** Timed across a whole corpus of
-real `high`-preset output, decode time tracked input size almost linearly with no throws and no
-outlier; a sample once recorded as non-terminating clears in seconds. What looked like a hang was
-input size plus a sequential runner. The two constructs that would otherwise be the suspects are
-both bounded: `visitor/jsconfuser/control-flow-graph.js`'s `for (;;)` terminates on its `failed`
-set, and `visitor/jsconfuser/variable-masking.js`'s `while (changed)` re-parses the function on
-each invalidation — the latter is the first place to instrument if a real hang ever does appear.
-
 ## Working on this codebase
 
 **Progress logging is gated, warnings are not.** Per-pass tracing — which function turned out
@@ -393,15 +478,14 @@ into that failure class.
 **New per-transform visitor files are kebab-case, matching the transform's skill-doc slug**, one
 file per transform. Reuse across plugins is the exception and is decided case by case.
 
-**Never run the unscoped `npm run lint`** (`eslint --fix src`) — prettier-version drift makes it
-reformat trailing commas across unrelated files, burying the real change. Use scoped
-`npx eslint [--fix] <files>` and confirm with `git diff --stat`. **Several files carry
-pre-existing lint errors**, so a scoped run exits non-zero even on a clean change: lint the file
-*before* your edit and diff the two reports rather than trusting the exit code, check the
-reported lines are actually yours, and don't `--fix` unrelated findings as a side effect —
-`--fix` repairs them silently, so diff afterwards and revert those hunks if it did. (Don't
-record which files those are: the list has been wrong twice, and the before/after diff answers
-it in seconds. CI does not run eslint.)
+**`npm run lint` only reports; CI runs it.** It is `eslint src` followed by
+`scripts/check-folder-cycles.mjs`, and it changes no file. Beyond the recommended rules it
+checks the module dependencies over all of `src` (no import cycle between modules or between
+folders, no function handed to an imported module) and, on the VM decoder's files, the size and
+complexity limits; decode-js's `CONTRIBUTING.md` states both and how to read a violation.
+Formatting is separate (`npm run format`, Prettier's check, also in CI). **`npm run lint:fix`
+rewrites files** (`eslint --fix src`): run it on purpose, never as a check, and confirm with
+`git diff --stat` that it touched only what you meant.
 
 **Cross-check new or touched code against prior Claude-co-authored fixes**
 (`git log --all --grep='Co-Authored-By: Claude' -i`). The signal is the *fix pattern* those
@@ -411,7 +495,7 @@ commits establish, not a lint step — e.g. `insertPath.scope.crawl()` →
 
 ## Commit Scope Convention
 
-Per the hub's Commit Conventions (see root [SKILL.md](../../SKILL.md)), commits touching
+Per the hub's [commit conventions](../git-workflow.md#commit-conventions), commits touching
 this submodule use a scope more specific than the bare `decode-js` name whenever the
 change is localized to one unit:
 
@@ -424,8 +508,15 @@ change is localized to one unit:
   prefix separates two *docs*, the scope separates two *commits*, and a basename does that
   alone. **So a forked pass must not reuse the basename it forked from**, or its commits are
   indistinguishable from the original's under `git log --grep`.
+- One `src/vm/<part>/…/<name>.js` module or its matching focused test:
+  `vm/<part>/<name>`, the module's basename without its folder inside the part — for
+  example, `vm/jsconfuser-vm/read-wordcode` (`wordcode/read-wordcode.js`) or
+  `vm/switch/try-region` (`emit/try-region.js`). The part distinguishes the
+  encoder-specific frontend from the switch backend. A change spanning several modules
+  within one part uses `vm/jsconfuser-vm` or `vm/switch`; a test change confined to that
+  part follows the same scope. Use a behavior name for the subject, not a task identifier.
 - Bare `decode-js` is reserved for genuinely package-wide changes: `main.js`/CLI,
   manually-edited tooling/dependency files (`package.json`, `README.md`, lint/CI
-  config), or anything spanning multiple plugins/visitors.
+  config), or anything spanning plugins, visitors, the VM frontend, and the shared backend.
 - `build`-type commits from automated dependency bumps (e.g. Dependabot) keep their
   own generated scope (`deps`, `deps-dev`) rather than being remapped to `decode-js`.

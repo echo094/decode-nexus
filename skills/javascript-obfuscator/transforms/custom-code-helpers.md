@@ -114,7 +114,7 @@ those arms and adds `const that = typeof global === 'object' ? global : this;` f
 `service-worker` target, used by both console output and the member-qualified debug interval.
 Domain lock requests the same template in source, but its validator rejects the service-worker
 target. The default helper still has two seeded shapes at any one era on the corpus's targets
-([M3](../../encoder-decoder-method.md#m3-freeze-the-corpus)).
+([M4](../../decoding-method/with-encoder.md#m4)).
 
 The debugger body has the same structure: an eval-based form using `.constructor('debu' + 'gger')`
 for the default targets, and a literal `debugger;` form for `browser-no-eval`.

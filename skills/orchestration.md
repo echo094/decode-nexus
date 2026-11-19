@@ -49,7 +49,7 @@ the user's decision and never makes it.
 
 When a technical question exceeds Main's confidence, request a focused architect review rather than
 overruling the reasoning without evidence. Confidence or model capability is never acceptance
-evidence. A review finding that adds a guard must cite a real case ([F4](encoder-decoder-method.md#f4-keep-a-guard-only-where-a-real-case-needs-it) in code built for one encoder, [F7](encoder-decoder-method.md#f7-a-shared-pass-needs-off-path-cases) in a shared pass); a finding that
+evidence. A review finding that adds a guard must cite a real case ([F7](decoding-method/with-encoder.md#f7) in code built for one encoder, [F6](decoding-method/rules.md#f6) in a shared pass); a finding that
 widens scope goes to the user.
 
 ## Ownership
@@ -70,7 +70,7 @@ in skill docs, committed tests and tools.
 | Field | Content |
 |---|---|
 | Identity and role | Task ID; engineer or architect; for an architect, deliver or review |
-| Objective | The result, why it matters, and the decoded-output measure it should move ([P4](encoder-decoder-method.md#p4-every-work-item-names-its-output-measure)) |
+| Objective | The result, why it matters, and the decoded-output measure it should move ([P1](decoding-method/rules.md#p1)) |
 | Context | Accepted decisions, dependencies and user constraints that affect the work |
 | Starting sources | Governing instructions and useful source locations, with exact versions where material |
 | Ownership | Writable components, shared-file exclusions, integration owner |

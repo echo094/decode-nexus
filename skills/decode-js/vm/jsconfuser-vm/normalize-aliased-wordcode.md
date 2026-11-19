@@ -18,7 +18,7 @@ On a stream whose only added opcodes are aliases, the result is canonical wordco
 specialized or macro opcodes, the transform is the outermost step of a chain: it rewrites the
 aliases and hands the stream to the transform of the next family, and the result is that
 transform's. A result is published only when the whole chain ends in canonical wordcode
-([F2](../../../encoder-decoder-method.md#f2-resolve-completely-or-not-at-all)); the input
+([F1](../../../decoding-method/rules.md#f1)); the input
 container is never changed.
 
 Proving which handler is an alias, and of what, is the

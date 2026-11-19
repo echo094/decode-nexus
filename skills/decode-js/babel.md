@@ -4,9 +4,9 @@ Facts about Babel's `Scope`/`Binding`/`NodePath` model that several decode passe
 none of them owns. Each is here because a pass got it wrong first, and because stating it per
 pass produced several drifting copies of the same sentence.
 
-This is the *mechanism* half. [F1](../encoder-decoder-method.md#f1-select-what-the-program-cannot-run-without) is
+This is the *mechanism* half. [F4](../decoding-method/rules.md#f4) is
 the rule that follows from it — key on AST shape or on a resolved binding, never on name text —
-and it is cross-project. Read [F1](../encoder-decoder-method.md#f1-select-what-the-program-cannot-run-without) for what to do; read this for what Babel actually does and
+and it is cross-project. Read [F4](../decoding-method/rules.md#f4) for what to do; read this for what Babel actually does and
 which call to reach for. `decode-js.md`'s Babel + isolated-vm Foundation covers the packages
 themselves: versions, import style, what each one is for.
 
@@ -66,11 +66,11 @@ ask — *given this binding, what does it actually define?* — across all three
 a binding while leaving the pass's *deletion* gate keyed on `isFunctionDeclaration()` produces a
 failure with no decline and no log line: the layer decodes, every signal reads clean, and a dead
 helper is left behind that is indistinguishable from encoder-emitted dead code
-([M2](../encoder-decoder-method.md#m2-measure-residue-what-an-encoder-stage-added-and-the-decode-left)). Audit both in the same change.
+([M2](../decoding-method/rules.md#m2)). Audit both in the same change.
 
 ## A name is not an identity, even after resolving it
 
-Two distinct traps, both of which cost a round here. [F1](../encoder-decoder-method.md#f1-select-what-the-program-cannot-run-without) carries the rule; these are the API
+Two distinct traps, both of which cost a round here. [F4](../decoding-method/rules.md#f4) carries the rule; these are the API
 calls.
 
 - **Declaration sites are not references.** A `var x` declarator id, a `function x(…)` name, and

@@ -13,7 +13,7 @@ Built originally against **pre-2.0 js-confuser**; the inline `// StageName` comm
 next to each `traverse` call are historical labels from that era and are not reliable at
 face value against the current pinned encoder source — each stage's actual target gets
 re-verified independently as it's documented (per
-[Studying a new encoder/decoder pair](../../encoder-decoder-newpair.md)).
+[Studying a new encoder/decoder pair](../../decoding-method/with-encoder.md)).
 Confirmed correct-but-renamed so far: decode-js's old `Stack` file name was this project's
 pre-2.0 name for what the encoder now calls `VariableMasking` (the
 [VariableMasking](../visitors/jsconfuser/variable-masking.md) entry below); decode-js's own
@@ -270,7 +270,7 @@ Then generate with `comments: false, jsescOption: { minimal: true }`.
 Every js-confuser transform is covered, and each has its own decoder-side page. The table
 maps the encoder's own `Order` enum (`encoder/js-confuser/src/order.ts`) onto the visitor
 that reverses it — the mapping
-[P1](../../encoder-decoder-method.md#p1-work-in-reverse-encoder-stage-order-each-stage-placed-by-its-last-write) asks you to have before
+[P3](../../decoding-method/with-encoder.md#p3) asks you to have before
 deciding what to fix first, since the fix order is the *encoder's* order reversed and not
 this plugin's pipeline order above. A "none" row is a transform with nothing to reverse;
 its page says why.
@@ -315,7 +315,7 @@ of the corpus rather than of either pass.** The stage breadcrumb
 ([probes.md](../probes.md)) reports a zero byte delta and no structural-column movement for
 both the `lock` and `rgf` stages across every one of their own samples. A zero delta cannot
 discriminate — it reads identically whether the work was already done by an earlier pass or the
-pass declines on everything ([D3](../../encoder-decoder-method.md#d3-instrument-one-real-failure),
+pass declines on everything ([D3](../../decoding-method/rules.md#d3),
 which is why it says to establish a population *inside* the pass before working it). Both
 outputs are source-sized and runtime-correct, which points at the first, but that is an
 inference, not a measurement. **The consequence each doc records is that no gate inside either
@@ -327,7 +327,7 @@ population", never as correct — see [lock.md](../visitors/jsconfuser/lock.md) 
 table was being filled in** — `string-concealing.js`, `global-concealing.js` and
 `duplicate-literal.js`, each silently, each already marked covered, and `opaque-predicates.js`
 was a fourth of the same kind. The general rule that came out of it is
-[D2](../../encoder-decoder-method.md#d2-verify-claims-before-acting-on-them): an inline `// StageName`
+[D2](../../decoding-method/rules.md#d2): an inline `// StageName`
 label, a code comment, or a "covered" status describes intent at the time it was written and
 is never evidence that a matcher still matches current source. The narratives below are kept
 because each names the *shape* the encoder replaced, which is what a legacy sample still
@@ -369,7 +369,7 @@ by `DeadCode`. Judging output size without accounting for these reads a correct 
 failed one.
 
 **Orphaned helpers to watch for** when applying
-[M2](../../encoder-decoder-method.md#m2-measure-residue-what-an-encoder-stage-added-and-the-decode-left): a CFF
+[M2](../../decoding-method/rules.md#m2): a CFF
 `cff_hash`/`cff_sum`/`cff_xor`/`cff_slice`/`cff_sequence` function, a string-concealing lookup
 table, a duplicate-literals array, and **the `getGlobal` sniffer plus the `bufferToString`
 chain it feeds** — the last of these was missing from this list until the two of them turned

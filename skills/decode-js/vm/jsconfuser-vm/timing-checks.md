@@ -49,7 +49,7 @@ The decoder touches none of them:
 
 The result is that the decode cannot depend on the threshold. Its value (a number, or `true`
 written as 1000) is spelling to the decoder
-([F1](../../../encoder-decoder-method.md#f1-select-what-the-program-cannot-run-without)), and
+([F4](../../../decoding-method/rules.md#f4)), and
 dropping the check is the purpose of decoding, not a loss
 ([Reversibility](../../pipelines/jsconfuser-vm.md#reversibility-by-encoder-step), step 16).
 
@@ -92,7 +92,7 @@ every container record; nothing reads that field.
   decoder claims.
 - **After a trigger.** Once the check fires, the encoded program's behaviour is the
   interpreter's poisoning, which the source never had. The decode keeps the behaviour source and
-  encoded program share ([F8](../../../encoder-decoder-method.md#f8-keep-the-shared-behaviour-what-the-encoding-changed-is-free)),
+  encoded program share ([F8](../../../decoding-method/with-encoder.md#f8)),
   which is the run where the check does not fire.
 
 ### Refusals

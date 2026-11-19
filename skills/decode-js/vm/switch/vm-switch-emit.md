@@ -21,7 +21,7 @@ The output is a sloppy program in [native forms](#native-forms): the encoder car
 semantics only ([known quirks](../../../js-confuser-vm/instruction-set.md#5-known-quirks)), and
 where its handlers depart from native JavaScript the encoding changed the source, so the native
 form is correct too
-([F8](../../../encoder-decoder-method.md#f8-keep-the-shared-behaviour-what-the-encoding-changed-is-free)).
+([F8](../../../decoding-method/with-encoder.md#f8)).
 
 `emitVmSwitchProgram(model, { dispatch })` is the backend driver: it solves control, renders the
 functions from the root and assembles the program. It returns `{ output, statements,
@@ -341,7 +341,7 @@ reading tails region by region consumes the unwind exactly as the compiler built
 
 The encoder compiles a sloppy program and its handlers run sloppy ([known quirks](../../../js-confuser-vm/instruction-set.md#5-known-quirks)), so the
 decode takes its input as that program and writes each operation as a sloppy source writes it,
-inside an IIFE with no directive ([F8](../../../encoder-decoder-method.md#f8-keep-the-shared-behaviour-what-the-encoding-changed-is-free)). What the source and the encoded program share stays
+inside an IIFE with no directive ([F8](../../../decoding-method/with-encoder.md#f8)). What the source and the encoded program share stays
 bound by these forms; where a handler departs from its native form, the encoding changed the
 source's behaviour there, and the native form gives the source's.
 
@@ -713,7 +713,7 @@ review artifact; that one program does not establish general step-one native sem
 ## 5. Known Gaps
 
 - Some forms are still the interpreter's although
-  [F8](../../../encoder-decoder-method.md#f8-keep-the-shared-behaviour-what-the-encoding-changed-is-free)
+  [F8](../../../decoding-method/with-encoder.md#f8)
   frees them: a call whose callee did not fold is `Reflect.apply`.
 - Where the output follows the source and not the interpreter (a native call where the interpreter
   goes through a host callee's `apply` property, a recovered function's own `length` and prototype

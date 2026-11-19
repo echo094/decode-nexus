@@ -88,7 +88,7 @@ and the isolate would only add a failure mode.
 ## Skill Layout
 
 This package is built incrementally (per
-[Studying a new encoder/decoder pair](../encoder-decoder-newpair.md)).
+[Studying a new encoder/decoder pair](../decoding-method/with-encoder.md)).
 The root file below is complete; supporting files are added one plugin, visitor, or VM decoder doc
 at a time as each is studied against source.
 
@@ -359,7 +359,7 @@ vm/switch/                           backend:  the model -> JavaScript
   `jsconfuser-vm/`.
 - **All or nothing.** A stage that cannot recover its input refuses, and the refusal stops
   the decode: the entry returns the input unchanged with a diagnostic, never a partly decoded
-  program ([F2](../encoder-decoder-method.md#f2-resolve-completely-or-not-at-all)). Every
+  program ([F1](../decoding-method/rules.md#f1)). Every
   file refuses through one protocol, `vm/decline.js`.
 - **Records, not strings.** Both entries return a frozen record (status, `output`, the decode's
   result or its diagnostic), which `main.js` writes beside the output file. The
@@ -380,7 +380,7 @@ visitors that together solve one kind of pattern. It takes nothing a former stag
 code (a model, a solver's facts, a record): work that needs such a fact belongs to the stage that
 holds it, which does it before handing the code over. So the VM backend, which holds the control
 solver's reaching definitions, folds its own register temporaries; a Babel transform after it
-would have to re-derive them from text ([D5](../encoder-decoder-method.md#d5-use-what-earlier-steps-established)).
+would have to re-derive them from text ([D5](../decoding-method/rules.md#d5)).
 
 **Normalization / cleanup**
 
@@ -442,7 +442,7 @@ different clothes** and is likewise avoided: it modifies a widely-depended-on pl
 help a new one. Encoder-specific logic is rewritten in the new plugin, not lifted from the old.
 
 The corollary is that a shared visitor cannot be judged by one encoder's corpus — see
-[F7](../encoder-decoder-method.md#f7-a-shared-pass-needs-off-path-cases) — so a fork decided on
+[F6](../decoding-method/rules.md#f6) — so a fork decided on
 field evidence is a legitimate outcome even when the corpus is green for both.
 
 **There is exactly one fork in this package**:

@@ -17,7 +17,7 @@ and holds nothing of the interpreter.
 
 A decode is all or nothing. A step that cannot recover its input refuses, and the entry then
 returns the input unchanged with a diagnostic
-([F2](../../encoder-decoder-method.md#f2-resolve-completely-or-not-at-all)). What the encoding
+([F1](../../decoding-method/rules.md#f1)). What the encoding
 loses for good (names, lexical scopes, register reuse) is listed under
 [Reversibility](#reversibility-by-encoder-step).
 
@@ -348,7 +348,7 @@ What the chart does not show:
   stage reading an encoder-written address resolves it through the composed map
   ([`origin-addresses`](../vm/jsconfuser-vm/wordcode/origin-addresses.md)).
 - **Suspects.** An addition whose deciding fact only a later stage can read stays in place as a
-  suspect ([P3](../../encoder-decoder-method.md#p3-each-decoder-removes-only-its-own-additions-by-its-own-encoders-facts)).
+  suspect ([P5](../../decoding-method/with-encoder.md#p5)).
   PATCH fillers undecided while a dispatcher hides labels are settled once a later stage has
   recovered those labels; a shared string helper's entry is remapped by the dispatcher and CFF
   and removed by `recover-strings`.
@@ -508,7 +508,7 @@ encoder steps it undoes (removes what the step added) and those it reads (needs 
 interpret the program), numbered as in the encoder's
 [Compiler order](../../js-confuser-vm/js-confuser-vm.md#compiler-order). The recovery stages undo
 the encoder's steps in reverse order
-([P1](../../encoder-decoder-method.md#p1-work-in-reverse-encoder-stage-order-each-stage-placed-by-its-last-write)).
+([P3](../../decoding-method/with-encoder.md#p3)).
 The frontend reads the lowering (step 2) and lowers it onto typed operations; the backend undoes it
 in part, rebuilding statements and expressions from those operations. Nothing undoes register
 resolution (11): the output keeps registers. Step 24's

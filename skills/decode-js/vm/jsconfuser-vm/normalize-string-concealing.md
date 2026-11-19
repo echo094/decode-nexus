@@ -25,7 +25,7 @@ units; units are restored as they are.
 The transform reads the canonical stream with its references. It executes nothing and knows one
 cipher, the pinned encoder's, which it recognizes by the two helper bodies. The bank and all its
 users are one unit: every site is restored or the input is left as it is
-([F2](../../../encoder-decoder-method.md#f2-resolve-completely-or-not-at-all)). The input
+([F1](../../../decoding-method/rules.md#f1)). The input
 container is never changed.
 
 ## 2. Algorithm
@@ -386,7 +386,7 @@ Any other exception is `string-concealing-error`.
 | A functions record with the decode entry as a shared-parent suspect | [`partition-functions`](wordcode/partition-functions.md#shared-parent-suspects) | not an argument: the transform partitions its own output |
 
 The transform runs last of the recoveries because the encoder conceals strings first
-([P1](../../../encoder-decoder-method.md#p1-work-in-reverse-encoder-stage-order-each-stage-placed-by-its-last-write)):
+([P3](../../../decoding-method/with-encoder.md#p3)):
 every later encoder step treats the helpers and the sites as ordinary code, and each must be
 undone before the pinned bodies show again. The driver calls it when the stream's first three
 instructions in layout order are a one-parameter `MAKE_CLOSURE`, a `LOAD_CONST` and a `CALL`

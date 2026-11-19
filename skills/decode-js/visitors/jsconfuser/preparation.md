@@ -50,8 +50,8 @@ what put it on a worklist once, and measuring it is what took it back off.
 
 **If it were ever reversed it could only run last, which is a structural constraint rather
 than a preference.** Rewriting the spelling earlier changes what those matchers key on
-— [P1](../../../encoder-decoder-method.md#p1-work-in-reverse-encoder-stage-order-each-stage-placed-by-its-last-write)/[F2](../../../encoder-decoder-method.md#f2-resolve-completely-or-not-at-all) with one of our own
-passes as the agent, which is exactly the failure mode [F2](../../../encoder-decoder-method.md#f2-resolve-completely-or-not-at-all) describes. A terminal pass over
+— [P3](../../../decoding-method/with-encoder.md#p3)/[F1](../../../decoding-method/rules.md#f1) with one of our own
+passes as the agent, which is exactly the failure mode [F1](../../../decoding-method/rules.md#f1) describes. A terminal pass over
 finished output cannot affect any of them, and equally cannot unblock anything: nothing in
 this pipeline waits on this shape.
 
@@ -79,7 +79,7 @@ in every decoded file that contains the construct.
   it is unmeasured is the instrument, not the decoder: the corpus contains **zero** of either
   construct in its `.src.js` sources, so both read zero in decoded output for want of
   input, not for want of residue
-  ([M3](../../../encoder-decoder-method.md#m3-freeze-the-corpus) — verify the denominator
+  ([M4](../../../decoding-method/with-encoder.md#m4) — verify the denominator
   before reading a zero). Getting a number needs the corpus re-frozen, which voids every
   baseline figure measured against the current one. **That trade was declined:** the byte cost
   of a construct nobody is blocked on does not buy back a whole set of A/B baselines. Anyone
@@ -93,7 +93,7 @@ in every decoded file that contains the construct.
 
 **A gap being genuine is not an argument that it blocks anything.** Which of these gets done,
 and when, is a priority decision rather than something to assume in either direction
-([P1](../../../encoder-decoder-method.md#p1-work-in-reverse-encoder-stage-order-each-stage-placed-by-its-last-write)). The member-access
+([P3](../../../decoding-method/with-encoder.md#p3)). The member-access
 residue (item 4) is the worked example: real, measured, attributable
 entirely to the encoder, and still not worth doing — recording that judgement is what lets it
 be made once rather than re-litigated from a fresh site count.

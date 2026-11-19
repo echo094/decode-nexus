@@ -37,8 +37,8 @@ generated code with `new Function`, and calling it** — not just a structural c
 At the plugin level, every helper this transform's own output depends on (the sum/slice/
 xor functions, the packed sequence/strings blobs) is resolved from its own use site,
 never from a Program-level name-keyed pre-pass — see Implementation for why, and
-`encoder-decoder-method.md`'s
-[P1](../../../encoder-decoder-method.md#p1-work-in-reverse-encoder-stage-order-each-stage-placed-by-its-last-write)
+`decoding-method/with-encoder.md`'s
+[P3](../../../decoding-method/with-encoder.md#p3)
 for the general form. An outlined nested function is recognized as a re-entrant call into
 the *same* shared switch/case table (not a separate function to decode independently) and
 decoded by the identical recursive process. A dispatcher-nested inline interpreter (see
@@ -212,7 +212,7 @@ reachable, which it has to be: it **fails closed as a whole**, not per anchor, b
 bare reference to the holder (the object escapes, so its property set is observable) and an
 unreadable key both make *every* key's liveness unknown rather than one key's.
 
-**`scopeName` is a string, so identity has to come from the binding — this is [F1](../../../encoder-decoder-method.md#f1-select-what-the-program-cannot-run-without) applied
+**`scopeName` is a string, so identity has to come from the binding — this is [F4](../../../decoding-method/rules.md#f4) applied
 twice over, and both halves were paid for.** An occurrence is only the holder's when it is
 (1) a *reference*, not a binding site, and (2) resolves to the holder's own binding. Without
 the first, a `var <name>` declarator, a `function <name>(…)` name, and a nested function's
@@ -426,8 +426,8 @@ state (plenty of applications entangle no strings) and therefore silent:
 
 - no entangled key can be resolved, so `matchScopeMemberChain` declines those chains;
 - `flattenScopeMembersInGraph` rewrites the chains it *can* read and leaves the rest, so one
-  scope slot ends up addressed two ways — [encoder-decoder-method.md](../../../encoder-decoder-method.md)'s
-  **[F2](../../../encoder-decoder-method.md#f2-resolve-completely-or-not-at-all)** exactly;
+  scope slot ends up addressed two ways — [decoding-method/with-encoder.md](../../../decoding-method/with-encoder.md)'s
+  **[F1](../../../decoding-method/rules.md#f1)** exactly;
 - the body is then relocated out of the function binding the scope object, and the surviving
   reference either dangles (`ReferenceError`) or binds to an unrelated same-named identifier
   in the destination (`TypeError`, or silently wrong output — one such sample produced output
@@ -595,7 +595,7 @@ no special case. A narrow collapse of the single non-memoized shape was once bui
 well; it matched nothing on the corpus and nothing on its own fixture, because the
 dispatcher pass had already taken every application before it ran, and it has been removed.
 The general lesson is
-[D1](../../../encoder-decoder-method.md#d1-read-the-tree-and-its-docs-before-you-probe-or-propose)'s first in-tree check:
+[D1](../../../decoding-method/rules.md#d1)'s first in-tree check:
 **a second identification path for an entity some other pass already resolves is the thing
 to look for before building one**, and a fail-closed duplicate is invisible precisely
 because declining costs nothing.
@@ -686,9 +686,9 @@ removed by reference count, and the dispatcher template is routinely the last th
 that count above zero — its entry bodies are what the `_cff_slice` entry vectors were built
 for. The sweep scheduled inside this decode therefore *correctly* declines on those helpers,
 and only the sweep after the dispatcher decode (`deCffHelperCleanupInit`) can reach them.
-This is the [M2](../../../encoder-decoder-method.md#m2-measure-residue-what-an-encoder-stage-added-and-the-decode-left) leftover-helper caveat in its exact form: an undeleted helper here is a symptom of a layer
+This is the [M2](../../../decoding-method/rules.md#m2) leftover-helper caveat in its exact form: an undeleted helper here is a symptom of a layer
 still undecoded, never a defect in the reference-count gate
-([M2](../../../encoder-decoder-method.md#m2-measure-residue-what-an-encoder-stage-added-and-the-decode-left), "chase the residue
+([M2](../../../decoding-method/rules.md#m2), "chase the residue
 holding it alive"). Deleting the second sweep's slot on the grounds that the first one exists
 would leave every CFF+Dispatcher sample carrying all four helpers.
 

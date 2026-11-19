@@ -19,7 +19,7 @@ The transform reads the payload only: the pool and the key operands. The cipher 
 fixed one, so the interpreter's constant reader is not read. Nothing is executed. Instruction
 widths, PCs and pool indexes do not change, so no address moves and no PC map is published. The
 input container is never changed; a result exists only when every referenced entry is restored
-([F2](../../../encoder-decoder-method.md#f2-resolve-completely-or-not-at-all)).
+([F1](../../../decoding-method/rules.md#f1)).
 
 ## 2. Algorithm
 

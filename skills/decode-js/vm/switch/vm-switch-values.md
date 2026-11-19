@@ -313,7 +313,7 @@ An unfolded slot before the tree may read a captured register the tree's call re
 folded use then reads the variable before the call, where the VM read it after. That is the
 source's order: a register is the compiler's variable, and its handler reads an operand only when
 it runs ([known quirks](../../../js-confuser-vm/instruction-set.md#5-known-quirks)), so
-[F8](../../../encoder-decoder-method.md#f8-keep-the-shared-behaviour-what-the-encoding-changed-is-free)
+[F8](../../../decoding-method/with-encoder.md#f8)
 frees it and no rule keeps the tree out.
 
 ```text

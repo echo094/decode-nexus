@@ -27,7 +27,7 @@ This doc owns three things:
   are origin PCs that only the expansion's map can resolve.
 
 A result exists only when the whole route ends in canonical wordcode
-([F2](../../../encoder-decoder-method.md#f2-resolve-completely-or-not-at-all)); the input
+([F1](../../../decoding-method/rules.md#f1)); the input
 container is never changed. Proving which handler is specialized and with which operands is the
 [`observe`](observe.md) module's; the expansion and its address rules are
 [`origin-addresses`](wordcode/origin-addresses.md)'s.

@@ -246,14 +246,14 @@ combine (`control-flow-flattening-minify`, `duplicate-literal-string-concealing`
 `rename-variables/*`, …). Both are needed and neither substitutes for the other: a
 per-visitor case exercises a matcher in isolation and never the plugin's entry-point wiring,
 which is where the combination bugs live —
-[encoder-decoder-method.md](../encoder-decoder-method.md)'s "unit to combo".
+[decoding-method/with-encoder.md](../decoding-method/with-encoder.md#p6)'s "unit to combo".
 
 **Fixtures come in triples, not pairs.** Alongside `<name>.js` (obfuscated input) and
 `<name>.fix.js` (expected output), a jsconfuser fixture keeps `<name>.src.js`: the
 pre-obfuscation source it was generated from. `helper.js` does not read it — it is what
 makes a fixture reviewable for decode *quality* (is the output readable, or merely
 self-consistent?) rather than only for equality, and it is what keeps
-[M2](../encoder-decoder-method.md#m2-measure-residue-what-an-encoder-stage-added-and-the-decode-left) size ratio computable later.
+[M5](../decoding-method/with-encoder.md#m5) size ratio computable later.
 A fixture frozen while its gap is still open certifies a passthrough as expected output, so
 freeze only once size and structural counts show the decode actually fired.
 
@@ -480,8 +480,8 @@ spreads it over its workers and no single test carries every stage cell under th
 #### Readability
 
 Readability is checked by form indicators, never by golden outputs or a size or count recorded from
-an earlier decoder ([M1](../encoder-decoder-method.md#m1-judge-an-output-by-how-it-reads-against-its-source),
-[M2](../encoder-decoder-method.md#m2-measure-residue-what-an-encoder-stage-added-and-the-decode-left)).
+an earlier decoder ([M1](../decoding-method/rules.md#m1),
+[M2](../decoding-method/rules.md#m2)).
 `support/form-indicators.js` (`formIndicators(code)`) counts, in one program:
 
 | Indicator | What it counts |
@@ -682,7 +682,7 @@ live one, and it is worth running directly whenever a decode is in question:
 1. **Encode with the real encoder** — `encoder/js-confuser`'s built `dist/index.js`
    `obfuscate`, or its CLI. Its output is randomized per run and many transforms are
    probability-gated, so repeat any verdict you intend to act on
-   ([M3](../encoder-decoder-method.md#m3-freeze-the-corpus)).
+   ([M4](../decoding-method/with-encoder.md#m4)).
 2. **Decode with the plugin** — `PluginJsconfuser` imported directly, or `node src/main.js
    -t jsconfuser`.
 3. **Run the decoded output and compare its runtime result to the original source's.**

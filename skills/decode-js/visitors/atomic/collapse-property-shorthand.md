@@ -70,5 +70,5 @@ population is empty.
 
 **The pass is kept because the atomic layer is plugin-agnostic**: an encoder that does not rename,
 or renames symmetrically, leaves the shape intact. Judging it on this corpus alone is exactly what
-[F7](../../../encoder-decoder-method.md#f7-a-shared-pass-needs-off-path-cases) warns against — one encoder's output is a narrow slice, and its regularities are invisible
+[F6](../../../decoding-method/rules.md#f6) warns against — one encoder's output is a narrow slice, and its regularities are invisible
 from inside.

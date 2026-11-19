@@ -136,7 +136,7 @@ meet, as a native `try` statement completes:
 
 1. Follow each pop of this try through the jump steps only its own route enters, to the block it
    leads to. A jump step several routes enter is where they meet, a location
-   ([F1](../../../encoder-decoder-method.md#f1-select-what-the-program-cannot-run-without)): a try
+   ([F4](../../../decoding-method/rules.md#f4)): a try
    nested in a catch ends at the jump its own pops and its catch share, not at the outer try's end
    behind it.
 2. Keep the blocks the catch's own normal walk reaches. The walk never passes the setup again, so a
@@ -224,7 +224,7 @@ trailing run is a `continue`, never a later end.
 A labeled source statement gets no block where a statement's own rules hold. The block's name is
 never the source's, and its placement need not be: `L: if (x) { ... }` and `L: { if (x) { ... } }` are
 one graph, and only behaviour is the oracle
-([M1](../../../encoder-decoder-method.md#m1-judge-an-output-by-how-it-reads-against-its-source)).
+([M1](../../../decoding-method/rules.md#m1)).
 
 ### Trailing run and continue target
 
@@ -770,7 +770,7 @@ here: a loop without an end, a try without one, a test without a merge are publi
 - A catch that never completes normally, laid out with the code after the try right behind the pop
   and its jump dropped, declines: "pop, then jump" and "pop, falling through" are the same edge, and
   a pop that falls into code is also how a `return` crosses the try, so it ends nothing
-  ([F1](../../../encoder-decoder-method.md#f1-select-what-the-program-cannot-run-without)). The
+  ([F4](../../../decoding-method/rules.md#f4)). The
   compiler emits that jump, and the CFF frontend keeps every transition it cannot prove a
   fallthrough as a jump, so no frontend hands over the dropped jump.
 - The linear row and the opaque row have no case of their own: every cell decodes the same without

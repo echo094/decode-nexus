@@ -111,7 +111,7 @@ un-masking removes both. A declaration left standing ahead of the switch would m
 in the pass that emits the deadness ([variable-masking.md](variable-masking.md) item 4),
 not a relaxation here — this matcher is one of several consumers of that declarator, and
 teaching each of them to look past it is the same fix re-paid per consumer
-([D4](../../../encoder-decoder-method.md#d4-fix-the-producer-not-the-consumer)).
+([D4](../../../decoding-method/rules.md#d4)).
 
 **The holder the switch function arrives in is the CFF decode's own spelling, not the
 encoder's.** `globalConcealing.ts` emits a `FunctionDeclaration`; ControlFlowFlattening then
@@ -140,7 +140,7 @@ already binding-resolved, succeeded. **The failure mode is what makes this worth
 it is not a declined match.** The switch function and `globalVar` came out, the layer decoded,
 every correctness and interpreter signal read clean, and what was left behind was a sizeable
 helper at **zero references** — indistinguishable from an encoder-emitted dead helper
-([M2](../../../encoder-decoder-method.md#m2-measure-residue-what-an-encoder-stage-added-and-the-decode-left)'s leftover-helper caveat) unless
+([M2](../../../decoding-method/rules.md#m2)'s leftover-helper caveat) unless
 someone asks whether it was live in the *input*. It was, on a large share of the corpus and a
 substantial share of all decoded bytes — and **no census found it**: three separate ones had
 reported the pass clean. It was found instead by ranking decoded output by residue size and
@@ -156,7 +156,7 @@ changed a session apart here, and the gap between them cost the larger of the tw
 
 **"The input exists after the CFF decode" and "the input is matchable after it" are different
 claims**, and only the first follows from the interpreter being unwound — the timing form of
-[D3](../../../encoder-decoder-method.md#d3-instrument-one-real-failure)'s pair. A matcher reading
+[D3](../../../decoding-method/rules.md#d3)'s pair. A matcher reading
 several independent properties of a shape needs every one restored, and different passes restore
 them at different points, which is what forced this pass's second slot as late as it sits.
 

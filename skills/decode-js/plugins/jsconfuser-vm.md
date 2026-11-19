@@ -12,7 +12,7 @@ CLI's handling of it.
 Given the encoder's output, return the compiled program as fresh JavaScript together with the
 decode's result; given anything the decoder refuses, return the input string unchanged together
 with the diagnostic. The caller always gets one frozen record and never a partial program
-([F2](../../encoder-decoder-method.md#f2-resolve-completely-or-not-at-all)).
+([F1](../../decoding-method/rules.md#f1)).
 
 The entry differs from every other decode-js plugin, which returns a string or `null`: its
 record carries the result or the diagnostic, so the CLI writes a JSON sidecar beside the output.

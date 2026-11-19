@@ -150,7 +150,7 @@ label loads, so its targets are the continuation loads and are visible. The disp
   complete and the matched entries are **fillers**.
 - Otherwise the matched entries are **suspects**: kept as code and published with their runs,
   read past by every stage until one recovers the labels
-  ([P3](../../../encoder-decoder-method.md#p3-each-decoder-removes-only-its-own-additions-by-its-own-encoders-facts)).
+  ([P5](../../../decoding-method/with-encoder.md#p5)).
 
 Control flow flattening emits no `JUMP_REG`, so it hides no label from this transform. Anti
 instrumentation never fuses a `JUMP_REG`, so its synthetic instructions are not opened.

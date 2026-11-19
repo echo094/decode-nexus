@@ -22,7 +22,8 @@ Break none of these. Each one cost real work when it was missing.
    - A review, an architect's acceptance or an earlier "go" is not the user's decision. A subagent
      escalates to Main; Main escalates to the user.
 2. **Read budget.** This file stays within 1,500 words, and the must-read (bootloader, this file,
-   `checkpoint.md`) within 5,000. The decoding rules table stays here, so every agent sees it.
+   `checkpoint.md`) within 5,000. The general decoding rules table stays
+   here, so every agent sees it; the rules that need an encoder are listed in `with-encoder.md`.
    The binding limit is the smallest compaction point among agents that read it (Codex logs
    `auto_compact_scope_limit` per model), and rules lost to compaction stop being followed.
 3. **Re-read after compaction.** After a compaction or handoff, re-read this file and
@@ -65,37 +66,58 @@ Break none of these. Each one cost real work when it was missing.
   | write `checkpoint.md` | [checkpoint-format.md](skills/checkpoint-format.md) |
   | delegate to a subagent | [orchestration.md](skills/orchestration.md) |
   | commit or move a pin | [git-workflow.md](skills/git-workflow.md) |
-  | apply a decoding rule below | its section in [encoder-decoder-method.md](skills/encoder-decoder-method.md) |
-  | question or extend a decoding rule | [encoder-decoder-incidents.md](skills/encoder-decoder-incidents.md) |
-  | study an encoder/decoder pair new here | [encoder-decoder-newpair.md](skills/encoder-decoder-newpair.md) |
+  | apply a decoding rule below | its section in [rules.md](skills/decoding-method/rules.md) |
+  | question or extend a decoding rule | [incidents.md](skills/decoding-method/incidents.md) |
+  | decode with an encoder you can run | the rules table of [with-encoder.md](skills/decoding-method/with-encoder.md) |
+  | study an encoder/decoder pair new here | [P7](skills/decoding-method/with-encoder.md#p7) |
+  | decode a target with no encoder available | [without-encoder.md](skills/decoding-method/without-encoder.md) |
+  | accept a transform doc | [doc-conventions.md](skills/doc-conventions.md#transform-doc-acceptance) |
 
 ## Decoding rules
 
-Apply these to every change to a decoder or its docs. **P**lan, **D**iagnose, **F**ix, **M**easure.
+Apply these to every change to a decoder or its docs; with an encoder you can run, add
+[with-encoder.md](skills/decoding-method/with-encoder.md)'s. **P**lan, **D**iagnose, **F**ix,
+**M**easure.
 
-| Label | Rule |
-|---|---|
-| [P1](skills/encoder-decoder-method.md#p1-work-in-reverse-encoder-stage-order-each-stage-placed-by-its-last-write) | Work in reverse encoder stage order, each stage placed by its last write: fix the last stage first and peel the outermost first; a later stage silently breaks earlier matchers. |
-| [P2](skills/encoder-decoder-method.md#p2-attribute-era-boundaries-outward-from-a-closed-version) | Attribute era boundaries outward from one fully closed version, nearest boundary first. |
-| [P3](skills/encoder-decoder-method.md#p3-each-decoder-removes-only-its-own-additions-by-its-own-encoders-facts) | Each decoder removes only what its own layer or stage added, using only what that encoder used; an addition whose deciding fact only a later decoder can read stays in place as a suspect, read past by every decoder in between and settled by the owner's own rule once that decoder has run. |
-| [P4](skills/encoder-decoder-method.md#p4-every-work-item-names-its-output-measure) | Every work item names the decoded-output measure it should move. |
-| [D1](skills/encoder-decoder-method.md#d1-read-the-tree-and-its-docs-before-you-probe-or-propose) | Read the tree, its owning docs and the encoder stage that added the shape before you probe or propose; what already works or is already decided beats any experiment. |
-| [D2](skills/encoder-decoder-method.md#d2-verify-claims-before-acting-on-them) | A comment, doc, status or spec is a claim; verify it before you act on it. |
-| [D3](skills/encoder-decoder-method.md#d3-instrument-one-real-failure) | Instrument one real failure; never root-cause from reading alone. |
-| [D4](skills/encoder-decoder-method.md#d4-fix-the-producer-not-the-consumer) | Fix the operation that produced the bad shape, not the consumer that tripped on it. |
-| [D5](skills/encoder-decoder-method.md#d5-use-what-earlier-steps-established) | Use what earlier steps established: a proved fact narrows and serves as reference for every later step; never re-derive it from defaults or spelling. |
-| [F1](skills/encoder-decoder-method.md#f1-select-what-the-program-cannot-run-without) | Select what the program cannot run without, never how it is spelled: names, declarators, layout, statement shape, distances and allocated values are spelling; a location is identity to whatever jumps to it. |
-| [F2](skills/encoder-decoder-method.md#f2-resolve-completely-or-not-at-all) | Resolve a matched structure completely or leave it untouched. |
-| [F3](skills/encoder-decoder-method.md#f3-keep-tree-and-derived-state-consistent) | After a pass, derived state must equal what a fresh parse of its output gives. |
-| [F4](skills/encoder-decoder-method.md#f4-keep-a-guard-only-where-a-real-case-needs-it) | In code built for one encoder, keep a refusal guard or fallback only where that encoder's output reaches it. |
-| [F5](skills/encoder-decoder-method.md#f5-one-fix-is-never-the-whole-fix) | Grep for the defect's shape everywhere, and turn the audit into a harness assertion. |
-| [F6](skills/encoder-decoder-method.md#f6-revise-the-owning-rule-never-patch-beside-it) | Revise the rule that owns the behaviour; a special case beside it is a patch the next variant pays again. |
-| [F7](skills/encoder-decoder-method.md#f7-a-shared-pass-needs-off-path-cases) | A pass shared by several decoders needs hand-built cases off every encoder's path, each one its producer could hand it from real encoded input, and its normal form must reach both sides of every comparison. |
-| [F8](skills/encoder-decoder-method.md#f8-keep-the-shared-behaviour-what-the-encoding-changed-is-free) | Keep the behaviour the source and the encoded program share; where the encoding changed behaviour, either side is correct, so write the input's semantics in their native form. |
-| [M1](skills/encoder-decoder-method.md#m1-judge-an-output-by-how-it-reads-against-its-source) | Judge an output by how it reads against its source: a passing run proves nothing, and neither does a changed output, or a count of them, until it is read. |
-| [M2](skills/encoder-decoder-method.md#m2-measure-residue-what-an-encoder-stage-added-and-the-decode-left) | Measure residue, what an encoder stage added, a decoder can tell apart and the decode left: size ratios, characteristic construct counts, leftover helpers; an addition no decoder can tell from earlier-stage code, and that changes nothing the program does, is spelling. |
-| [M3](skills/encoder-decoder-method.md#m3-freeze-the-corpus) | Freeze the corpus before comparing; encoder output is random. |
-| [M4](skills/encoder-decoder-method.md#m4-a-control-must-reach-its-mechanism) | A control proves something only if it reaches the mechanism it names. |
+- [P1](skills/decoding-method/rules.md#p1) Before a work item starts, name the decoded-output
+  measure it should move and the samples it is read on.
+- [P2](skills/decoding-method/rules.md#p2) When you budget a unit, count the questions it must
+  answer, not the code it should produce; a unit can close with no new code.
+- [D1](skills/decoding-method/rules.md#d1) Read the decoder's code and its owning docs before you
+  probe or propose; what already works or is already decided beats any experiment.
+- [D2](skills/decoding-method/rules.md#d2) A comment, doc, status or spec is a claim; verify it
+  before you act on it.
+- [D3](skills/decoding-method/rules.md#d3) When you look for the cause of a failure, instrument one
+  real failure; never root-cause from reading alone.
+- [D4](skills/decoding-method/rules.md#d4) When a pass cannot read the shape it receives, find our
+  own operation that produced that shape and fix it there, not in the consumer.
+- [D5](skills/decoding-method/rules.md#d5) When a later step needs a fact an earlier step proved,
+  use the proved fact; never re-derive it from a default or from how the code is written (names,
+  layout, statement shape).
+- [F1](skills/decoding-method/rules.md#f1) When a pass matches a structure, resolve it completely or
+  leave it untouched.
+- [F2](skills/decoding-method/rules.md#f2) When you fix a defect, grep for its shape everywhere, and
+  turn the audit into a harness assertion.
+- [F3](skills/decoding-method/rules.md#f3) After a pass rewrites the syntax tree, its derived state
+  (cached paths, scope bindings, reference sets) must equal what a fresh parse of its output gives.
+- [F4](skills/decoding-method/rules.md#f4) When a matcher picks out a role or structure, select it
+  by what the program cannot run without, never by how the code is written (names, declarations,
+  layout, statement shape, distances, allocated values); a location is identity to whatever jumps to
+  it.
+- [F5](skills/decoding-method/rules.md#f5) When a defect shows our decoder deciding wrongly, revise
+  the code that owns that decision; a special case beside it is a patch the next variant pays again.
+- [F6](skills/decoding-method/rules.md#f6) When a pass is shared by several decoders, test it on
+  hand-built cases off every decoder's input path, each a shape its producer could hand it from real
+  input; its normal form must reach both sides of every comparison.
+- [M1](skills/decoding-method/rules.md#m1) When you judge a decode or a design change, read the
+  outputs: a passing run proves nothing, and neither does a changed output, or a count of them,
+  until it is read.
+- [M2](skills/decoding-method/rules.md#m2) When you measure what a decode removed, count what the
+  obfuscation left that a decoder can tell apart (characteristic constructs, leftover helpers) and
+  compare decoded size with the input's; what no decoder can tell apart and what changes nothing the
+  program does is how the code is written, not residue.
+- [M3](skills/decoding-method/rules.md#m3) When you build a control or check, make sure it reaches
+  the mechanism it names; one that misses still reads as expected.
 
 ## Skill directory
 

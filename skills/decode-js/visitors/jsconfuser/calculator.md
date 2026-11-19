@@ -97,7 +97,7 @@ every case test as a concatenation (`"X6lQ1n" + "\x74"`) and the matcher require
 down, which is the same before/after sandwich the early slot has.
 
 **This pass had both failures at once**, which is the case
-[D3](../../../encoder-decoder-method.md#d3-instrument-one-real-failure) records: "no candidates here"
+[D3](../../../decoding-method/rules.md#d3) records: "no candidates here"
 and "cannot match what is here" look identical, neither is visible in output, and a fix for one
 reads as a fix that did nothing.
 

@@ -25,7 +25,7 @@ backend's decision.
 
 The decode closure is never run. Its arithmetic is interpreted over a closed list of operations
 on a private register frame; anything else refuses. All matched functions are recovered or none
-is ([F2](../../../encoder-decoder-method.md#f2-resolve-completely-or-not-at-all)).
+is ([F1](../../../decoding-method/rules.md#f1)).
 
 ## 2. Algorithm
 

@@ -15,7 +15,7 @@ JavaScript. The outer decode removes the outer layer, the VM entry decodes what 
 post-stage of two shared visitors folds the literal expressions in the result.
 
 A decode is all or nothing over the whole chain
-([F2](../../encoder-decoder-method.md#f2-resolve-completely-or-not-at-all)): if either decoder
+([F1](../../decoding-method/rules.md#f1)): if either decoder
 declines, the output is the source as given, never the outer decode's intermediate text. The
 caller always gets one deeply frozen record that says which step declined.
 

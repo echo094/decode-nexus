@@ -32,7 +32,7 @@ It removes nothing else, and it restores no other order:
 
 The transform is static: it reads the encoder's own state-loop grammar and executes nothing. All
 flattened functions are recovered or none is
-([F2](../../../encoder-decoder-method.md#f2-resolve-completely-or-not-at-all)). Behaviour alone
+([F1](../../../decoding-method/rules.md#f1)). Behaviour alone
 cannot show recovery: left in place, the state loop is a valid loop over a variable, and the
 program runs the same.
 

@@ -116,7 +116,7 @@ were run only after a fix had been built and had to be reverted:
   corpus-wide against a `.src.js` baseline of zero, and does. Every one of those declines is
   on an *intermediate* shape that no longer exists by the time output is generated — the
   tally measures the pipeline's interior, not its result
-  ([D3](../../../encoder-decoder-method.md#d3-instrument-one-real-failure)).
+  ([D3](../../../decoding-method/rules.md#d3)).
 - **Accepting it breaks the decode wholesale.** Adding a `RestElement` branch to
   `readFoldedElement` (with the position and non-simple-parameter-list guards it needs)
   inflates decoded size by more than an order of magnitude, takes samples from
@@ -182,7 +182,7 @@ the pattern slot by slot, **recursing through nested `ArrayPattern` elements** �
 parameter list like `(a, [b, c])` masks to a pattern of patterns — and any single element it
 cannot resolve aborts the whole assignment rather than resolving the readable half, which
 would split one slot into two spellings
-([F2](../../../encoder-decoder-method.md#f2-resolve-completely-or-not-at-all)). Three conditions
+([F1](../../../decoding-method/rules.md#f1)). Three conditions
 reject an element: a non-`stackName[key]` member, a key already marked invalid, and a key in
 the leading `0..len-1` range, which is an original **parameter** — promoting one to a fresh
 local silently changes the function's signature, a case a flat unpack line can never present
@@ -206,7 +206,7 @@ the references that would otherwise be left addressing a stack nothing populates
 Feeding the return value into the loop's `changed` flag is the other half: an iteration
 whose only change was this rewrite would otherwise end the loop. Neither is visible from
 reading the pass — both were found by diffing one decoded sample before and after, the
-instrument [D3](../../../encoder-decoder-method.md#d3-instrument-one-real-failure) prescribes
+instrument [D3](../../../decoding-method/rules.md#d3) prescribes
 for a pass that succeeds and emits wrong code.
 
 **`unmaskDestructuredRest(func)`** runs first in the `RestElement` entry point and returns
@@ -278,7 +278,7 @@ are why this pass runs three times rather than once.
   4's emitted-shape table). Neither shape exists in encoder output, and reading
   the residue alone gets this backwards — the population was filed under the encoder's own
   no-length case and blamed on a masking quirk before it was measured
-  ([P1](../../../encoder-decoder-method.md#p1-work-in-reverse-encoder-stage-order-each-stage-placed-by-its-last-write)). The check that
+  ([P3](../../../decoding-method/with-encoder.md#p3)). The check that
   settles it is one count: absent in the `.obf.js`, present in the `.dec.js`, so it is ours.
 - **The stack copied into a separate local**, `var stk; [...stk] = rest;`, has the same
   source and is why stack resolution follows a copy rather than reading `params[0]`. The

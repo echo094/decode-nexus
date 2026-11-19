@@ -21,7 +21,7 @@ The result is a shorter canonical stream: `read-wordcode` reads it, where it had
 input with `unknown-opcode`. Where the stream also holds a dispatcher, the transform undoes it
 too before publishing, because the dispatcher's encoded targets need the map this transform
 builds. A result exists only when every step succeeded
-([F2](../../../encoder-decoder-method.md#f2-resolve-completely-or-not-at-all)); the input
+([F1](../../../decoding-method/rules.md#f1)); the input
 container is never changed, and nothing is executed.
 
 Which handlers are anti's, their steps and their stored operand order are the

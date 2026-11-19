@@ -103,7 +103,7 @@ Why the policies differ:
   the public code names that builder, since that is the shape that refused.
 - **Strings come last** because the encoder conceals strings first: the string inverse reads the
   program its own encoder step saw
-  ([P1](../../../encoder-decoder-method.md#p1-work-in-reverse-encoder-stage-order-each-stage-placed-by-its-last-write)).
+  ([P3](../../../decoding-method/with-encoder.md#p3)).
 - **Each recovery runs once.** Nothing loops back.
 
 What each recovery is handed: the routes get `(source, container, options)`, where `options` is
@@ -127,7 +127,7 @@ PATCH removal also publishes `originContinuationLoads` and `suspectRuns`, which 
 ### Settling suspects
 
 A PATCH filler that cannot be decided while a dispatcher hides labels stays in the stream as a
-suspect ([P3](../../../encoder-decoder-method.md#p3-each-decoder-removes-only-its-own-additions-by-its-own-encoders-facts);
+suspect ([P5](../../../decoding-method/with-encoder.md#p5);
 the rule is [normalize-self-modifying-wordcode's](normalize-self-modifying-wordcode.md#settling-suspects)).
 The driver's part is when to ask again:
 

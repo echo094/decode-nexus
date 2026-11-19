@@ -1,8 +1,8 @@
 # Doc Conventions
 
 Read this before writing or editing any skill doc. It says what a package contains (boundaries,
-layout, eras), what a doc contains (the three layouts and their sections), and how docs are
-written and kept (where facts live, references, revising). `SKILL.md` holds the one-line forms of
+layout, eras), what a doc contains (the three layouts and their sections), how a transform doc is
+accepted, and how docs are written and kept (where facts live, references, revising). `SKILL.md` holds the one-line forms of
 these rules; this file holds their detail.
 
 ## Project Boundaries
@@ -171,7 +171,7 @@ and links the map for the rest, a transform doc from its first line:
 9. **Doc index.** Doc | Owns, one row per doc of the target.
 
 Each mapping and verdict is derived from the encoder source and the decoder's docs and code
-([D2](encoder-decoder-method.md#d2-verify-claims-before-acting-on-them)), never copied from a
+([D2](decoding-method/rules.md#d2)), never copied from a
 doc's claim. Which populations have been shown to recover is evidence, kept in the suites; the map
 states only what each step permits.
 
@@ -188,7 +188,8 @@ A doc stands on its own, without the implementation at hand. It is:
 - **Behaviourally complete.** It gives the result and the refusal for every documented input form,
   including state effects.
 - **Sufficient for reconstruction.** It states every consequential decision, though not source
-  text or helper layout. An omitted equation that changes the result is a defect; missing
+  text or helper layout; for a transform doc, the cold reader of
+  [Transform Doc Acceptance](#transform-doc-acceptance) is the test. An omitted equation that changes the result is a defect; missing
   knowledge is stated explicitly, never left blank or filled with an invented mechanism.
 
 State the reader's prerequisites, link the package's shared parser/AST and scope foundations
@@ -249,12 +250,12 @@ it unnamed. Name AST forms to aid verification. Era differences here are tagged 
   state" is not enough when different formulas give different programs. Explain each restriction.
   Tabulate supported and rejected input forms with AST spellings, eras, reasons and behaviour. Never
   infer broad option or version coverage from one success.
-- **Atomicity.** A matched unit recovers completely or stays untouched ([F2](encoder-decoder-method.md#f2-resolve-completely-or-not-at-all)). State when retry is
+- **Atomicity.** A matched unit recovers completely or stays untouched ([F1](decoding-method/rules.md#f1)). State when retry is
   possible and how intermediate mutations are avoided or rolled back; define any partial boundary.
   Distinguish no candidate, recognized-but-unsupported, and recovered where a caller acts on the
   difference; uncertain recognition stays a hypothesis.
 - **Output, state and cleanup.** Define the emitted output and the derived state later components
-  read, which operation updates it and the invariant restored ([F3](encoder-decoder-method.md#f3-keep-tree-and-derived-state-consistent)); which consumed helpers are
+  read, which operation updates it and the invariant restored ([F3](decoding-method/rules.md#f3)); which consumed helpers are
   removed, what survives, and when cleanup is safe.
 
 ### Dependencies
@@ -269,7 +270,7 @@ doc says what it receives that it did not make.
 
 - **Encoder, Later Stages:** what later encoder stages do to this transform's output (a minifier
   moving a store this transform wrote, say), derived from the stage order per era
-  ([P1](encoder-decoder-method.md#p1-work-in-reverse-encoder-stage-order-each-stage-placed-by-its-last-write)).
+  ([P3](decoding-method/with-encoder.md#p3)).
   Record interactions as rows.
 - **Decoder, Input Shapes:** every shape in this pass's input that the pass did not make: what
   encoder stages left there (and what later encoder stages made of it), and what our earlier passes
@@ -282,7 +283,7 @@ doc says what it receives that it did not make.
   Write the row when the branch is written. Example:
   [decode-js/visitors/jsconfuser/dispatcher.md](decode-js/visitors/jsconfuser/dispatcher.md).
 - **Remedy is a separate decision.** An encoder's effects can only be accommodated. For a shape our
-  own pass emits, prefer fixing the producer ([D4](encoder-decoder-method.md#d4-fix-the-producer-not-the-consumer)).
+  own pass emits, prefer fixing the producer ([D4](decoding-method/rules.md#d4)).
 
 ### Known Quirks (encoder) / Known Gaps (decoder)
 
@@ -308,7 +309,7 @@ which claim has no evidence; with no fixtures at all, say so and why.
   controls, atomicity, cleanup and derived state.
 - **What counts.** A decoder recovery assertion must fail for passthrough. A negative control must
   reach the decision it claims to test
-  ([M4](encoder-decoder-method.md#m4-a-control-must-reach-its-mechanism)). Synthetic examples test
+  ([M3](decoding-method/rules.md#m3)). Synthetic examples test
   the mechanism and real encoder output qualifies admission; neither stands in for the other.
 - **A pinned decline is a boundary, not coverage.** A test that expects a valid encoder-produced
   form to decline passes for as long as the decoder fails. Name it in the owning doc's Known Gaps
@@ -316,6 +317,106 @@ which claim has no evidence; with no fixtures at all, say so and why.
   fails before the fix. Damage controls and inputs outside the encoder's grammar keep declining.
 - **Before adding a fixture,** search the Fixtures tables and the test tree for one targeting the
   same input and decision, and extend it instead of adding a second.
+
+## Transform Doc Acceptance
+
+**A transform page is
+a reconstruction contract, not a source-location receipt:** a reader without the implementation open
+must recover the mechanism's decisions, then use the citations to verify them.
+
+### Engineer: analyze before writing
+
+Do not start by expanding existing prose or assigning one page per source file. Read the
+implementation to derive algorithm boundaries and information dependencies first. For each
+candidate transform, build a working record before deciding it has a page:
+
+| Field | Question the source must answer |
+| --- | --- |
+| Target and discriminator | What exact input shape is recognized, and which invariant separates it from a near-neighbour or a safe decline? |
+| Input and output | What AST shape, state or representation enters, and what leaves? |
+| Ordered algorithm | Which phases run, where do they branch or repeat, what crosses each boundary? |
+| State and invariants | Which values evolve, which facts must hold, what terminates a loop or fixpoint? |
+| Implementation ownership | Which functions, tables, structures, mutations and generated helpers own each phase? |
+| Source ownership | Which spans implement this transform, which coordinate several, which are helpers owned elsewhere? |
+| Dependencies | What an earlier pass establishes, why this pass cannot run first, what the next pass consumes |
+| Failure and safety | Which conditions decline, throw, fall back, execute recovered code, touch host state, or rely on a sample-specific role? |
+| Evidence boundary | Which claims come from source inspection, a committed example, transfer or another named empirical cell? |
+
+Trace from the entry point through every callee that changes those fields, following the success
+path and every material exit, catch, fallback, recursion guard and work bound. Connect each symbol to
+the decision it implements; a symbol list is not a result. A parameter variation stays in item 3; a
+different solution-level algorithm gets its own page.
+
+Classify each cited span as **owned algorithm** (accounts for every material branch), **shared
+coordinator** (accounts here only for the decisions that schedule or gate this transform) or
+**delegated helper** (names the page that explains it, or an explicit gap). Without these labels two
+reviewers can disagree about what the reverse source check covers.
+
+Before writing prose, order the transforms by information dependency and reconcile the records at
+their edges: every consumed output has one producer, and every required input names its producer or
+is an explicit external assumption. Unowned state, a diagram edge with no source operation, or two
+pages claiming one mutation is an analysis defect.
+
+### Engineer: write the reconstruction contract
+
+A page is complete when a cold reader can:
+
+1. identify the accepted input shape, the output representation, and the invariants that separate
+   the target from a near-neighbour;
+2. replay the algorithm in order, including loops, branches, fixpoints, fallbacks and carried state;
+3. map phases to functions, structures, AST shapes, mutations and ownership boundaries;
+4. explain why each pipeline dependency exists, what an earlier pass supplies and what a later one
+   may assume; and
+5. locate every fail-closed condition, execution or side-effect boundary, sample-specific
+   assumption, evidence label and generality limit.
+
+| Relationship | Smallest useful form |
+| --- | --- |
+| A linear sequence whose order matters | Numbered steps |
+| Repeated fields, variants, phase-to-symbol ownership, schemas | Table, one row per case |
+| Three or more dependent transforms, a branch, a fixpoint or non-trivial state flow | Mermaid diagram, every edge traceable to source |
+| One invariant, trade-off or caveat | Prose beside the step it constrains |
+
+A plugin of three or more transforms carries one end-to-end Mermaid dependency diagram at its root;
+a transform page adds one only for non-linear internal flow. No decorative charts or duplicated
+sequences. Cite closely enough that a reviewer can check each non-obvious phase, edge, invariant and
+failure boundary; a broad line range does not make a claim traceable. Line count is a diagnostic,
+never the gate: judge depth by distinct decisions, representations and failure paths. A
+`source-inspection only` label narrows the evidence claim, not the detail owed.
+
+Before handoff, the engineer performs both halves of the review below and reports any claim that
+could not be made traceable, naming the pages, records covered, checks run, and what was not
+inspected or executed.
+
+### Main: evaluate and decide acceptance
+
+Main owns the verdict even when a reviewer runs a pass. Evaluate in order; an earlier failure stops
+acceptance.
+
+1. **Contract and boundary.** Numbered layout, `## Source`, `## Fixtures`, evidence label, project
+   boundary, ownership. Reject a page that widens source inspection into execution, transfer or
+   production coverage.
+2. **Cold reconstruction.** Without source open, derive the pseudocode, schemas, evolving state,
+   dependency order, result and every decline, fallback or execution edge. Record the first point
+   that needs guessing; a material guess rejects the page. Write this reconstruction down before
+   opening source; a reviewer who already opened it cannot produce the cold half afterwards.
+3. **Source fidelity.** Open the pinned source and trace every non-obvious step, edge, row, invariant
+   and failure boundary, and the reverse: every material branch in the owned range appears in the
+   page or is delegated.
+4. **Package integration.** Reconcile the plugin diagram, transform order, cross-page edges, source
+   map, navigation, labels and safety boundaries. Run the link, language, layout and source-coverage
+   checks, recording each command, its success condition and its result. An unavailable check is
+   stated, and blocks acceptance if the contract depends on it.
+
+| Verdict | Meaning |
+| --- | --- |
+| `rejected` | Not reconstructable; a wrong boundary or dependency; a missing source path; an invented edge; a widened or hidden evidence or safety boundary |
+| `accepted with required corrections` | Survives cold and source review; localized citation, naming, navigation or metadata defects must be fixed and rechecked |
+| `accepted` | Complete cold reconstruction, every relationship and owned branch accounted, package checks pass. Only this unlocks a dependent task |
+
+Length, diagram count, file count and the engineer's confidence are never acceptance evidence.
+Main records the reconstruction and source checks it performed and their exclusions; `completed`
+in the task graph means those checks passed, not that a draft arrived.
 
 ## Where Facts Live
 

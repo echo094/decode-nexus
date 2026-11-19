@@ -205,7 +205,7 @@ kind from the sentinel the container carries. The count itself is dropped.
   ([scalar operations](../../../js-confuser-vm/instruction-set.md#loads-stores-scalar-operations-and-coercion)),
   which rejects a BigInt where `**` does not. The compiler emits `EXP` for the source's `**`, so
   where the two differ the encoding changed the behaviour and the decode writes the source's form
-  ([F8](../../../encoder-decoder-method.md#f8-keep-the-shared-behaviour-what-the-encoding-changed-is-free)).
+  ([F8](../../../decoding-method/with-encoder.md#f8)).
 - **`VOID` reads nothing.** Its result is `undefined` whatever its source register holds, so the
   operation names no source.
 - **The hint is one-sided.** `layoutEnd` is absent, not null, where the pair is not found. It is

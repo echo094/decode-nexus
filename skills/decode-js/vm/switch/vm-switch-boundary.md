@@ -59,7 +59,7 @@ frontend reuses it.
 | Concern | Needs encoder knowledge | Owner |
 |---|---|---|
 | Container, wordcode, opcode meaning, operands, constants | yes | frontend |
-| Code the encoder injected (CFF fake transitions, self-modifying decoys and junk) | yes, to recognize it | frontend, removed before the model by the injecting transform's own placement facts, never by reachability ([P3](../../../encoder-decoder-method.md#p3-each-decoder-removes-only-its-own-additions-by-its-own-encoders-facts)) |
+| Code the encoder injected (CFF fake transitions, self-modifying decoys and junk) | yes, to recognize it | frontend, removed before the model by the injecting transform's own placement facts, never by reachability ([P5](../../../decoding-method/with-encoder.md#p5)) |
 | The encoder's exception and finally mechanism | yes | frontend, lowered onto `catch-setup`, `finally-setup` (continuation, payload, throw pad), `handler-pop` and the `indirect-jump` resume |
 | The encoder's for-in protocol | yes | frontend, lowered onto `for-in-setup` and `for-in-next` |
 | Reachability, handler-state flow, which operation can throw where, finite indirect targets | no | backend ([control solver](vm-switch-control.md)) |
@@ -79,10 +79,10 @@ true before the generalized backend sees it; the backend reads it as given and n
 re-checks it. In the frontend a check earns its place only where encoder output can differ from
 what its reader assumes: a value the encoder's own construction fixes and never varies deliberately
 (a function's register count and the register indexes one allocation pass assigns, say) is read,
-not checked ([F4](../../../encoder-decoder-method.md#f4-keep-a-guard-only-where-a-real-case-needs-it)).
+not checked ([F7](../../../decoding-method/with-encoder.md#f7)).
 The backend is shared: its producer is the frontend, the origin is still real encoded code, and a
 backend check or test earns its place only where a model a frontend hands over from real encoded
-input reaches it ([F7](../../../encoder-decoder-method.md#f7-a-shared-pass-needs-off-path-cases)).
+input reaches it ([F6](../../../decoding-method/rules.md#f6)).
 
 ### The source program, not the interpreter
 
@@ -221,7 +221,7 @@ that capture `i` names ([frames](vm-switch-emit.md#frames-captures-and-setup-liv
 explanatory notation, not executable helpers. The program is sloppy and each operation is written in
 its [native form](vm-switch-emit.md#native-forms): the encoder carries sloppy semantics only, so where a
 handler departs from native JavaScript either side is correct
-([F8](../../../encoder-decoder-method.md#f8-keep-the-shared-behaviour-what-the-encoding-changed-is-free)).
+([F8](../../../decoding-method/with-encoder.md#f8)).
 A destination nothing reads is not written: the operation is dropped when it cannot throw and
 written as its expression statement when it can.
 Global names are strings; literal values may be undefined, null, Boolean, string, number or

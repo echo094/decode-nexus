@@ -135,7 +135,7 @@ That is why this visitor is scheduled as late as it is rather than beside the ot
 literal-key matchers: it needs both of those passes behind it. The dependency is on our own
 schedule, so a decline here would read as a defect in `isPropertyAccess` or the index check
 while the actual cause sat two passes upstream — the case
-[D4](../../../encoder-decoder-method.md#d4-fix-the-producer-not-the-consumer) exists for.
+[D4](../../../decoding-method/rules.md#d4) exists for.
 
 ## 5. Known Gaps
 

@@ -22,7 +22,7 @@ MovedDeclarations) already get handled; nobody tries to recover the original dev
 name for those either.
 
 **The real decode-relevant surface of this transform is everyone else's, not its own.**
-See [P1](../../../encoder-decoder-method.md#p1-work-in-reverse-encoder-stage-order-each-stage-placed-by-its-last-write) — "names are
+See [P3](../../../decoding-method/with-encoder.md#p3) — "names are
 unreliable by design, not by convention" — whose anchor case *is* this transform breaking
 a name-keyed ControlFlowFlattening matcher completely, silently, on every application at
 once. A project-wide audit closed this out transform-by-transform; each affected
@@ -49,7 +49,7 @@ is structural, not a gap in this file: any *future* jsconfuser matcher added any
 this codebase that identifies encoder-emitted structure by variable/function name text,
 rather than by AST shape or a captured binding, is a latent `RenameVariables` bug waiting
 to be found — see
-[F1](../../../encoder-decoder-method.md#f1-select-what-the-program-cannot-run-without) for the rule and its audit form (a grep, not a review).
+[F4](../../../decoding-method/rules.md#f4) for the rule and its audit form (a grep, not a review).
 
 ## Source
 

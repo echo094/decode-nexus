@@ -1,7 +1,7 @@
-# Encoder/Decoder Incidents — the evidence behind each rule
+# Decoding Rule Incidents — the evidence behind each rule
 
-Companion to [encoder-decoder-method.md](encoder-decoder-method.md). Every rule there was paid for
-by a real bug or a wrong plan; this file holds those payments so the rules stay short. **Nothing
+Companion to [rules.md](rules.md), [with-encoder.md](with-encoder.md) and
+[without-encoder.md](without-encoder.md). Every rule there was paid for by a real bug or a wrong plan; this file holds those payments so the rules stay short. **Nothing
 here is a rule.** If a fact decides something, it belongs in the method's own text.
 
 **Read this file when a rule is questioned, re-argued or extended.** The incident is what makes a
@@ -9,12 +9,20 @@ rule survive a plausible argument against it. Sections use the method's labels, 
 Identifier names in the narratives are historical, not a live API reference.
 
 A new incident sharpens or replaces an existing entry rather than appending a near-duplicate
-([Revise by Evolution](doc-conventions.md#revising-a-doc)). An entry whose rule is settled can be dropped; an entry that has
+([Revise by Evolution](../doc-conventions.md#revising-a-doc)). An entry whose rule is settled can be dropped; an entry that has
 twice stopped a wrong plan cannot.
 
 ---
 
-## P1 — work in reverse encoder stage order, each stage placed by its last write
+## P1
+
+**Four phases of work left the decoded output unchanged.** A plan defined "done" as source proofs,
+refusal controls and qualification runs on fresh populations. It named no decoded-output measure.
+Across four phases the decoder gained a real capability once and otherwise gained guards, censuses
+and a native-execution harness of several thousand lines, while its output for a three-line program
+stayed register-level code. Nothing in the plan could show that, because nothing measured the output.
+
+## P3
 
 **A late renaming stage** (order 30, over flattening at 24). The flattening decoder identified the
 obfuscator's own runtime helpers by literal name suffix; renaming reassigns every identifier,
@@ -88,7 +96,9 @@ flattening refusal as optional, as it does when no flattening is present, so the
 stream went on and the backend declined a loop with no continuation. The refusal surfaced in the
 backend as a structuring defect, and four diagnosis steps passed before it was traced back.
 
-## P2 — attribute era boundaries outward
+**An incumbent's pass order was borrowed.** A unit list taken from an incumbent's order, then citing that incumbent as corroboration, had to be re-derived from the encoder's stage order and gained a missing unit.
+
+## P4
 
 **A ten-version sweep was attributed from the wrong end.** A sabotage ladder split the versions into
 three dependency profiles against the spine, at three boundaries. Work started at the boundary with
@@ -119,7 +129,11 @@ moved alone, and measuring there eliminated it. Two one-option siblings of the m
 attributed half the differing cells and left half explained by neither, which is "confounded", not a
 finding.
 
-## P3 — each decoder removes only its own additions, by its own encoder's facts
+**An incumbent's claimed range set the starting era once.** The javascript-obfuscator study opened at
+`2.19.0` while the pin was `5.5.0`, because it audited an incumbent decoder's claimed range and
+`2.19.0` was the newest release inside it. It is the exception, not the pattern.
+
+## P5
 
 **The inner decoder was taught the outer decoder's leftovers.** A VM wrapped by an outer obfuscator
 failed at the VM recognizer after the outer decode, because the outer decode left control-flow
@@ -148,43 +162,41 @@ proposed first and withdrawn, since it bent a correct inner stage to serve an ou
 rebuilt decoder sweeps linearly, removes its headers, decoys and decoy fillers by the encoder's
 placement facts, and hands inner stages their addresses through a PC map.
 
-## P4 — every work item names its output measure
+## P6
 
-**Four phases of work left the decoded output unchanged.** A plan defined "done" as source proofs,
-refusal controls and qualification runs on fresh populations. It named no decoded-output measure.
-Across four phases the decoder gained a real capability once and otherwise gained guards, censuses
-and a native-execution harness of several thousand lines, while its output for a three-line program
-stayed register-level code. Nothing in the plan could show that, because nothing measured the output.
+**This project's closed bugs are almost all combo bugs** no single-transform fixture could catch: a
+renaming stage invalidating a name-keyed matcher, a hoisting stage splitting a harness from its entry
+point, a statement-merging stage dissolving a partition a downstream matcher expected.
 
-## D1 — read the tree and its docs before you probe or propose
+## P7
+
+**The worked example of the process** is the `js-confuser` package
+([js-confuser.md](../js-confuser/js-confuser.md)), studied end to end before the method was written.
+
+**An existing encoder was mistaken for an existing pair.** A new read-only decoder corpus targeted
+encoders whose packages already existed, so the work looked like an extension of those studies. The
+relationship had never been studied, and treating component identity as pair identity would have
+skipped the new-pair workflow exactly where it was needed.
+
+## D1
 
 **Reading and probing found different kinds of thing on one plan.** Reading turned up a missed
 matcher site and a hidden inter-pass dependency; a fifteen-minute probe turned up a semantic gap
-neither had, the dead-helper case under [M2](encoder-decoder-method.md#m2-measure-residue-what-an-encoder-stage-added-and-the-decode-left).
+neither had, the dead-helper case under [M2](rules.md#m2).
 
 **A kept probe inventory drifted into fiction.** Entries described scripts that no longer existed
 while scripts on disk were described nowhere. A recipe for rebuilding a probe stays true; a preserved
 script silently stops matching the current code.
 
 **Both apparent probe failures were oracle artifacts.** One had a denominator problem: obfuscation
-is shape-gated and several samples never exercised the feature ([M3](encoder-decoder-method.md#m3-freeze-the-corpus)). The other measured presence
+is shape-gated and several samples never exercised the feature ([M4](with-encoder.md#m4)). The other measured presence
 where it needed liveness: a helper can be present yet transitively dead, and resolving it to nothing
 is correct.
 
 **Two items closed with no work once a census ran inside the pass.** The reversal was already in
 production in a sibling pass, and the pass under investigation had no candidates.
 
-**The encoder's own doc already held the deciding fact.** A residue axis was carried for several
-sessions as "the emitter is unidentified, start by reading the encoder", while the package's own
-transform doc named the emitter, called it ungated and quoted its character class. Later, a handler
-locator kept a decoy parameter alive because minify had reused it as a local after class
-obfuscation stored it into a fake field. Three remedies were proposed from general data-flow
-analysis (source order, dominance, SSA versions) after reading only the decoder. The encoder's
-transform doc already said the fake fields are never read; with that, the remedy was to remove the
-stage's store first and let the existing dead-parameter rules decide, and the decoder's
-spelling-based decoy rule turned out to accept real stores as decoys.
-
-## D2 — verify claims before acting on them
+## D2
 
 **A guard comment laundered into a documented limit.** One session copied "an `UpdateExpression`
 slot is marked invalid by design" from a source comment into a skill doc and defended it. The marking
@@ -209,7 +221,16 @@ decoder's behaviour as evidence against them. The user caught the inversion: mis
 is not a negative result, and a decoder result cannot settle an encoder mechanism while our own
 defect could explain it. The pages were called unqualified, not rejected.
 
-## D3 — instrument one real failure
+**Qualification-first documentation nearly discarded useful VM prior art.** Experiment folders held
+source-backed algorithms, some incomplete, unrunnable here, or without a qualified transfer. One
+`unqualified/uncovered` label for all three kept the material out of mechanism docs. The user reversed
+that: preserve source and deductions once provenance and limits are clear, recording documentation,
+transfer qualification and reproduction separately. The first graduation then showed the opposite
+failure: pages met every structural contract while compressing algorithms into summaries no reader
+could rebuild. Provenance says where a claim came from; it does not teach the mechanism. The
+acceptance test now requires cold reconstruction before source citations are opened.
+
+## D3
 
 **A residual interpreter shape was attributed to an unbuilt in-place decoder** by matching it to the
 nearest known-unbuilt feature: a wrong diagnosis, a wrong priority order and a nearly-started
@@ -246,19 +267,12 @@ reuses across non-overlapping scopes.
 **A fully breadcrumbed pass reported matches and no rejected site** while every match died in a
 caught exception. The failures became countable only once the warnings were tallied.
 
-**A combo cause needed a second transform present to reproduce at all**, so a matrix varying one
-transform at a time could not reach it.
-
-**A truth oracle for optimized output.** Identifications of minified handlers were checked by
-re-encoding each case with the same seed and options minus the final optimizer: allocations match,
-and the encoder's own handler comments name every case. All 160 checkable identifications agreed.
-
-## D4 — fix the producer, not the consumer
+## D4
 
 **A handoff failure was answered with qualification instead of diagnosis.** A layer handoff declined,
 and the write-up recorded that the decline "does not establish that the producing decoder is wrong".
 Each later step built verification and harness work around the consumer while the producer was never
-diagnosed. The producer, our own outer decode, was the cause ([P3](encoder-decoder-method.md#p3-each-decoder-removes-only-its-own-additions-by-its-own-encoders-facts)).
+diagnosed. The producer, our own outer decode, was the cause ([P5](with-encoder.md#p5)).
 
 **Auditing the consumers of one half-reversed shape turned up dozens of candidate sites**, of which
 two were ever live, and none needed changing once the producing pass stopped emitting the shape.
@@ -268,10 +282,6 @@ a truncation statement that one transform's entries never carry. Three callers n
 and drive the reversal directly: the pass's own entry from the truncation statement, a function-length
 pass from an unwrapped `fnLength(fn, length)` argument, and a dispatcher pass from the template's
 zero declared params.
-
-**Case 4's one right answer.** An obfuscator emits its helpers by re-running itself over each helper
-template with a few forwarded options, so exactly those options bound how a helper can be re-spelled.
-A matcher folding arithmetic and flattening sequences was complete against that set.
 
 **An unresolvable slot documented as an inherent limit.** A fail-closed guard was built in the
 consumer; the resolving routine existed all along and was simply unreachable.
@@ -288,7 +298,7 @@ other plugins and untested. At the four operations the output was byte-identical
 became correct for every consumer, and the composition-level patch was deleted as redundant. Opening
 the file first would have settled the level in one screen.
 
-## D5 — use what earlier steps established
+## D5
 
 **A proved table that never reached its consumers.** One stage identified the VM's opcode meanings
 by handler behaviour, but the readers of added opcodes partitioned handlers by the default
@@ -296,7 +306,72 @@ canonical values and failed once values were randomized. Identifying every canon
 then using them both to exclude (what is left is added) and as references, identified every added
 handler across twelve encoder profiles.
 
-## F1 — select what the program cannot run without
+## D6
+
+**The encoder's own doc already held the deciding fact.** A residue axis was carried for several
+sessions as "the emitter is unidentified, start by reading the encoder", while the package's own
+transform doc named the emitter, called it ungated and quoted its character class. Later, a handler
+locator kept a decoy parameter alive because minify had reused it as a local after class
+obfuscation stored it into a fake field. Three remedies were proposed from general data-flow
+analysis (source order, dominance, SSA versions) after reading only the decoder. The encoder's
+transform doc already said the fake fields are never read; with that, the remedy was to remove the
+stage's store first and let the existing dead-parameter rules decide, and the decoder's
+spelling-based decoy rule turned out to accept real stores as decoys.
+
+## D7
+
+**A combo cause needed a second transform present to reproduce at all**, so a matrix varying one
+transform at a time could not reach it.
+
+**A truth oracle for optimized output.** Identifications of minified handlers were checked by
+re-encoding each case with the same seed and options minus the final optimizer: allocations match,
+and the encoder's own handler comments name every case. All 160 checkable identifications agreed.
+
+## D8
+
+**Case 4's one right answer.** An obfuscator emits its helpers by re-running itself over each helper
+template with a few forwarded options, so exactly those options bound how a helper can be re-spelled.
+A matcher folding arithmetic and flattening sequences was complete against that set.
+
+## F1
+
+**Half-resolution manufactured two entities from one.** Resolving only the readable share of a
+literal array left one slot written as `slot[-1]` at some sites and `slot[-literals[1]]` at others.
+The masking decoder read two slots and split one object in two. Output was silently wrong on a
+minority of samples, on a change where every size metric improved.
+
+## F2
+
+**The detector came 26 minutes after the fix.** The reachability walk that made [F3](rules.md#f3)'s incident
+provable, asserting no binding holds a reference to a node outside the tree, was written after the
+fix it validated, so it could only ratify a repair already chosen, at the wrong level. Placed in the
+shared test helper, it then audited every existing case for free, which is how the seventh case in
+[F6](rules.md#f6) was found to fail in one line.
+
+## F3
+
+**The incident that produced the rule.** A pass stripping anti-tamper helpers declined on every
+sample combining debug protection with control-flow flattening, emitting code that threw. It had
+been certified through a staged probe chain that re-parsed each stage's output; rebuilt on one AST
+per cell, runtime equivalence fell from the whole corpus to a fraction of it. The reparse had silently
+repaired the state the real pipeline carries.
+
+**Fixed at the wrong end first.** A `traverse.cache.clear()` at the failing pass's entry restored the
+corpus. Clearing between the pass's two phases did not, so the position was recorded as "measured, do
+not tidy". There was nothing to explain: the repair was at a consumer, compensating for something
+upstream.
+
+**The producer had declared the defect in a comment.** The pass that detached the references said
+`The code must be reloaded to update the references`, read as a contract its callers accepted. Of four
+consuming plugins, three answered it with a full re-parse and the fourth did not answer it at all.
+
+**The argument that nearly kept it there** was "three plugins already reload, so fixing the producer
+makes them pay twice", which reads N workarounds as evidence the workaround belongs at the consumers.
+A user objection, twice, overturned it. The fix was one `scope.crawl()` on the producer's
+`Program.exit`, gated on having detached anything; the consumer's cache clear was then removed with
+output byte-identical across all 597 cells.
+
+## F4
 
 **Declarator spelling was taken for identity.** The container stage (`extract-container`) read every
 container role from `var NAME = init`. The outer encoder's moved declarations split each into a
@@ -338,37 +413,33 @@ moved it to the next one, and a loop lost its first statement while every check 
 encoder's address as each instruction's identity and giving removed locations no entry turned the
 silent miscompile into a refusal.
 
-## F2 — resolve completely or not at all
+## F5
 
-**Half-resolution manufactured two entities from one.** Resolving only the readable share of a
-literal array left one slot written as `slot[-1]` at some sites and `slot[-literals[1]]` at others.
-The masking decoder read two slots and split one object in two. Output was silently wrong on a
-minority of samples, on a change where every size metric improved.
+**Three open issues, one address.** A rename-reliance failure, an unhandled member-chain state
+accessor and a residual harness never cleaned up all came from storing identity as a name string in a
+context object rather than as a binding or a NodePath. A string cannot represent `scope.a.b`, survive
+renaming, or be revisited to clean up what it named. Each patch was cheap, so the shared cause stayed
+unpriced.
 
-## F3 — keep tree and derived state consistent
+## F6
 
-**The incident that produced the rule.** A pass stripping anti-tamper helpers declined on every
-sample combining debug protection with control-flow flattening, emitting code that threw. It had
-been certified through a staged probe chain that re-parsed each stage's output; rebuilt on one AST
-per cell, runtime equivalence fell from the whole corpus to a fraction of it. The reparse had silently
-repaired the state the real pipeline carries.
+**A corpus that could not test a shared visitor.** A control-flow pass used by three decoders reversed
+every live block of one encoder's whole frozen corpus with the residue census at zero, and its
+keep-or-fork call was about to rest on that. A field report said otherwise, and hand-built cases
+confirmed three behaviours worse than declining: an ordinary `while (!done)` loop **deleted**, a case
+without a terminator **duplicated**, a discriminant without `++` **threw**. All three are unreachable
+from that encoder, so the corpus was no evidence about them.
 
-**Fixed at the wrong end first.** A `traverse.cache.clear()` at the failing pass's entry restored the
-corpus. Clearing between the pass's two phases did not, so the position was recorded as "measured, do
-not tidy". There was nothing to explain: the repair was at a consumer, compensating for something
-upstream.
+**Cases that existed and still could not see it.** A shared visitor had six passing cases, all built
+from one encoder's dead-code shape. A seventh, three lines with a dead branch referencing a binding
+declared outside it, failed at once on an assertion the six had run all along.
 
-**The producer had declared the defect in a comment.** The pass that detached the references said
-`The code must be reloaded to update the references`, read as a contract its callers accepted. Of four
-consuming plugins, three answered it with a full re-parse and the fourth did not answer it at all.
+**A normal form on one side only.** Inlining single-use locals was added to a lowering shared by
+several readers, to make two handler bodies compare equal. Five decodes that had worked failed:
+matcher templates and a reader's own substituted body were never inlined, so only one side of each
+comparison changed.
 
-**The argument that nearly kept it there** was "three plugins already reload, so fixing the producer
-makes them pay twice", which reads N workarounds as evidence the workaround belongs at the consumers.
-A user objection, twice, overturned it. The fix was one `scope.crawl()` on the producer's
-`Program.exit`, gated on having detached anything; the consumer's cache clear was then removed with
-output byte-identical across all 597 cells.
-
-## F4 — keep a guard only where a real case needs it
+## F7
 
 **One guard cluster, the same wrong inference, years apart.** Guards existed to make substituting a
 *value* safe (rejecting nested scopes, `++` updates, reassigned aliases) and silently also blocked a
@@ -393,41 +464,7 @@ operands) is the original; an identity-order alias behaves identically and share
 run with them disabled on a scratch copy showed two routes decided nothing on any input and a third
 decided exactly four fixtures, which became the work to cover first.
 
-## F5 — one fix is never the whole fix
-
-**The detector came 26 minutes after the fix.** The reachability walk that made [F3](encoder-decoder-method.md#f3-keep-tree-and-derived-state-consistent)'s incident
-provable, asserting no binding holds a reference to a node outside the tree, was written after the
-fix it validated, so it could only ratify a repair already chosen, at the wrong level. Placed in the
-shared test helper, it then audited every existing case for free, which is how the seventh case in
-[F7](encoder-decoder-method.md#f7-a-shared-pass-needs-off-path-cases) was found to fail in one line.
-
-## F6 — revise the owning rule, never patch beside it
-
-**Three open issues, one address.** A rename-reliance failure, an unhandled member-chain state
-accessor and a residual harness never cleaned up all came from storing identity as a name string in a
-context object rather than as a binding or a NodePath. A string cannot represent `scope.a.b`, survive
-renaming, or be revisited to clean up what it named. Each patch was cheap, so the shared cause stayed
-unpriced.
-
-## F7 — a shared pass needs off-path cases
-
-**A corpus that could not test a shared visitor.** A control-flow pass used by three decoders reversed
-every live block of one encoder's whole frozen corpus with the residue census at zero, and its
-keep-or-fork call was about to rest on that. A field report said otherwise, and hand-built cases
-confirmed three behaviours worse than declining: an ordinary `while (!done)` loop **deleted**, a case
-without a terminator **duplicated**, a discriminant without `++` **threw**. All three are unreachable
-from that encoder, so the corpus was no evidence about them.
-
-**Cases that existed and still could not see it.** A shared visitor had six passing cases, all built
-from one encoder's dead-code shape. A seventh, three lines with a dead branch referencing a binding
-declared outside it, failed at once on an assertion the six had run all along.
-
-**A normal form on one side only.** Inlining single-use locals was added to a lowering shared by
-several readers, to make two handler bodies compare equal. Five decodes that had worked failed:
-matcher templates and a reader's own substituted body were never inlined, so only one side of each
-comparison changed.
-
-## F8 — keep the shared behaviour; what the encoding changed is free
+## F8
 
 **A strict wrapper around a sloppy program.** A VM decoder reproduced the VM's handlers inside a
 strict IIFE: every property write as `Reflect.set`, every global read behind an `in globalThis`
@@ -437,7 +474,7 @@ source sloppy (a frozen write, an undeclared assignment and a plain call's `this
 The wrapping kept nothing the source had, made `NaN = 1` throw where both source and encoded
 program were silent, and filled a benchmark's output with wrappers no source held.
 
-## M1 — judge an output by how it reads against its source
+## M1
 
 **Two candidate rules ranked by a regression count.** A VM decoder needed a rule for where a function
 ends. One candidate (every return or uncaught throw ends it) broke eight fixtures, another (prefer a
@@ -451,7 +488,7 @@ question nobody had asked.
 changed many fixture outputs, every one an improvement; a byte-identity check would have flagged
 them all.
 
-## M2 — measure residue: what an encoder stage added and the decode left
+## M2
 
 **The calibration pair.** A `high`-preset decode came out hundreds of times larger than its source
 and was mostly raw scaffolding; a complete decode of a dispatcher-wrapped function collapsed to about
@@ -487,18 +524,7 @@ plain remap byte for byte, because the string decoder already knew from its own 
 runs are straight-line. Nothing could tell the cut from a compiler jump, and it changed nothing the
 program did: it was never residue.
 
-## M3 — freeze the corpus
-
-**An isolation grid that could not bound what it was asked to.** Several matrix cells were partial
-while the same combos read clean in isolation, and "no transform is individually implicated" was
-recorded. The cause was one transform's random per-run template selection, reachable from a
-two-transform combo at a rate the grid's short runs could not bound.
-
-**Cases that were never frozen.** Reproducers for a control-flow rule were re-encoded inside one-off
-commands on every comparison and never saved. The encoder drew no randomness, but nothing recorded
-that, so none of the figures read from them could be reproduced.
-
-## M4 — a control must reach its mechanism
+## M3
 
 **Three controls that read as expected and proved nothing.** A case deleting a rotator used array
 items that were all valid identifiers, so the wrong strings were plausible and the identifier check
@@ -527,29 +553,13 @@ statement merging had fused away. Output parsed, ran and drove every residue axi
 rotator missing, most decoded strings in computed-member-key position were not valid identifiers;
 with it present, none.
 
-## Studying a new encoder/decoder pair
+## M4
 
-**The worked example of the process** is the `js-confuser` package
-([js-confuser.md](js-confuser/js-confuser.md)), studied end to end before the method was written.
+**An isolation grid that could not bound what it was asked to.** Several matrix cells were partial
+while the same combos read clean in isolation, and "no transform is individually implicated" was
+recorded. The cause was one transform's random per-run template selection, reachable from a
+two-transform combo at a rate the grid's short runs could not bound.
 
-**An incumbent's claimed range set the starting era once.** The javascript-obfuscator study opened at
-`2.19.0` while the pin was `5.5.0`, because it audited an incumbent decoder's claimed range and
-`2.19.0` was the newest release inside it. It is the exception, not the pattern.
-
-**An existing encoder was mistaken for an existing pair.** A new read-only decoder corpus targeted
-encoders whose packages already existed, so the work looked like an extension of those studies. The
-relationship had never been studied, and treating component identity as pair identity would have
-skipped the new-pair workflow exactly where it was needed.
-
-**Qualification-first documentation nearly discarded useful VM prior art.** Experiment folders held
-source-backed algorithms, some incomplete, unrunnable here, or without a qualified transfer. One
-`unqualified/uncovered` label for all three kept the material out of mechanism docs. The user reversed
-that: preserve source and deductions once provenance and limits are clear, recording documentation,
-transfer qualification and reproduction separately. The first graduation then showed the opposite
-failure: pages met every structural contract while compressing algorithms into summaries no reader
-could rebuild. Provenance says where a claim came from; it does not teach the mechanism. The
-acceptance test now requires cold reconstruction before source citations are opened.
-
-**This project's closed bugs are almost all combo bugs** no single-transform fixture could catch: a
-renaming stage invalidating a name-keyed matcher, a hoisting stage splitting a harness from its entry
-point, a statement-merging stage dissolving a partition a downstream matcher expected.
+**Cases that were never frozen.** Reproducers for a control-flow rule were re-encoded inside one-off
+commands on every comparison and never saved. The encoder drew no randomness, but nothing recorded
+that, so none of the figures read from them could be reproduced.

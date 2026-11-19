@@ -11,7 +11,7 @@ of the chain does is its own doc's.
 Given the prepared source of a compiled program, return a record holding the program as fresh
 JavaScript; given anything a step refuses, return a record holding one diagnostic. The record is
 deeply frozen, and no partial output exists: the result is built only after the last check
-([F2](../../../encoder-decoder-method.md#f2-resolve-completely-or-not-at-all)).
+([F1](../../../decoding-method/rules.md#f1)).
 
 The decode is static. It parses and builds; it never evaluates the input, the interpreter or the
 program it wrote. The output is a decompilation: it shares the input's behaviour and keeps

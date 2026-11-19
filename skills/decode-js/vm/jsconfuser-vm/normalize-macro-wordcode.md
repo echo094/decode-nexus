@@ -19,7 +19,7 @@ On a stream whose added opcodes are macros, alone or with specialized and anti o
 the outermost step of a chain: it expands the macros (and the specialized opcodes with them) and
 hands the stream to the next transform, whose result it publishes. A result exists only when the
 whole chain ends in canonical wordcode
-([F2](../../../encoder-decoder-method.md#f2-resolve-completely-or-not-at-all)); the input
+([F1](../../../decoding-method/rules.md#f1)); the input
 container is never changed.
 
 Proving which handler is a macro and of which steps is the [`observe`](observe.md) module's;
